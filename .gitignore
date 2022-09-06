@@ -1,0 +1,11 @@
+.idea/*
+.angular
+build
+dist
+node_modules
+src/**.js
+coverage
+*.log
+/tsconfig.tsbuildinfo
+/tsconfig.dev.tsbuildinfo
+/bundle/
