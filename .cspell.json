@@ -1,0 +1,27 @@
+{
+    "version": "0.1",
+    "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/master/cspell.schema.json",
+    "language": "en",
+    "words": [
+      
+    ],
+    "flagWords": [],
+    "ignorePaths": [
+      "package.json",
+      "package-lock.json",
+      "yarn.lock",
+      "tsconfig.json",
+      "node_modules/**",
+      "build",
+      "gen",
+      "proto",
+      "*.spec.ts"
+    ],
+    "patterns": [
+      {
+        "name": "import",
+        "pattern": "/import .*/"
+      }
+    ],
+    "ignoreRegExpList": ["import"]
+  }
