@@ -10,13 +10,6 @@
       "import": "./dist/index.js"
     }
   },
-  "typesVersions": {
-    "*": {
-      "lib/*": [
-        "dist/lib/*"
-      ]
-    }
-  },
   "type": "module",
   "repository": "https://github.com/waku-org/js-rln",
   "license": "MIT OR Apache-2.0",
@@ -56,9 +49,10 @@
     "node": ">=16"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-wasm": "^5.2.0",
     "@size-limit/preset-big-lib": "^8.0.0",
     "@types/app-root-path": "^1.2.4",
     "@types/chai": "^4.2.15",
@@ -95,7 +89,9 @@
     "p-timeout": "^4.1.0",
     "prettier": "^2.1.1",
     "process": "^0.11.10",
+    "puppeteer": "^13.0.1",
     "rollup": "^2.75.0",
+    "rollup-plugin-copy": "^3.4.0",
     "size-limit": "^8.0.0",
     "tail": "^2.2.0",
     "ts-loader": "^9.3.1",
