@@ -40,7 +40,7 @@
     "test": "run-s test:*",
     "test:lint": "eslint src --ext .ts",
     "test:prettier": "prettier \"src/**/*.ts\" \"./*.json\" \"*.*js\" \".github/**/*.yml\" --list-different",
-    "test:spelling": "cspell \"{README.md,.github/*.md,guides/*.md,src/**/*.ts}\"",
+    "test:spelling": "cspell \"{*.md,.github/*.md,src/**/*.ts}\"",
     "test:tsc": "tsc -p tsconfig.dev.json",
     "test:node": "TS_NODE_PROJECT=./tsconfig.dev.json mocha",
     "test:browser": "karma start karma.conf.cjs",
@@ -119,7 +119,7 @@
     "*.ts": [
       "eslint --fix"
     ],
-    "*.{ts,json,conf*.*js}": [
+    "*.{ts,md,json,conf*.*js}": [
       "prettier --write"
     ]
   }

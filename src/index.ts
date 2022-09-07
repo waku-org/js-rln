@@ -1,5 +1,5 @@
 export class RLN {
-    constructor() {
-        alert("Hello world");
-    }
+  constructor() {
+    alert("Hello world");
+  }
 }
