@@ -1,6 +1,6 @@
 {
-    "extends": "./tsconfig.dev",
-    "compilerOptions": {
-        "noEmit": false
-    }
+  "extends": "./tsconfig.dev",
+  "compilerOptions": {
+    "noEmit": false
+  }
 }
