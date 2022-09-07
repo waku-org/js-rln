@@ -18,7 +18,7 @@
     }
   },
   "type": "module",
-  "repository": "https://github.com/status-im/js-rln",
+  "repository": "https://github.com/waku-org/js-rln",
   "license": "MIT OR Apache-2.0",
   "keywords": [
     "waku",
