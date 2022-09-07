@@ -1,5 +1,5 @@
 {
-  "name": "js-rln",
+  "name": "@waku/rln",
   "version": "0.0.1",
   "description": "Rate Limit Nullifier for js-waku",
   "types": "./dist/index.d.ts",
