@@ -12,6 +12,21 @@ npm install @waku/rln
 yarn add @waku/rln
 ```
 
+### Running example app
+```
+git clone https://github.com/waku-org/js-rln
+
+cd js-rln/example
+
+npm install  # or yarn
+
+npm start
+
+```
+
+Browse http://localhost:8080 and open the dev tools console to see the proof being generated and its verification
+
+
 ### Usage
 
 #### Initializing the library
@@ -59,7 +74,8 @@ try {
 
 ### Updating circuit, verification key and zkey
 The RLN specs defines the defaults. These values are fixed and should not
-change. If they do, this file needs to be updated in `resources.ts` which 
+change. Currently, these [resources](https://github.com/vacp2p/zerokit/tree/master/rln/resources/tree_height_20) are being used.
+If they change, this file needs to be updated in `resources.ts` which 
 contains these values encoded in base64 in this format:
 
 ```
@@ -69,7 +85,7 @@ const zkey = "...";
 export {verification_key, circuit, zkey};
 ```
 
-A tool like GNU's `base64` could be used to encode this data
+A tool like GNU's `base64` could be used to encode this data. 
 
 ### Updating zerokit
 1. Make sure you have nodejs installed and a C compiler
