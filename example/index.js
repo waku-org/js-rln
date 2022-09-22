@@ -22,8 +22,8 @@ rln.create().then(async rlnInstance => {
     // prepare the message
     const uint8Msg = Uint8Array.from("Hello World".split("").map(x => x.charCodeAt()));
 
-    // setting up the epoch (With 0s for the test)
-    const epoch = new Uint8Array(32);
+    // setting up the epoch
+    const epoch = new Date();
 
     console.log("Generating proof...");
     console.time("proof_gen_timer");

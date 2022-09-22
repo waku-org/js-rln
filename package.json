@@ -1,6 +1,6 @@
 {
   "name": "@waku/rln",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Rate Limit Nullifier for js-waku",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
@@ -47,6 +47,10 @@
   },
   "engines": {
     "node": ">=16"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.2",

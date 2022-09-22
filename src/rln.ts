@@ -63,14 +63,103 @@ export class MembershipKey {
   }
 }
 
-export class RLNInstance {
-  zkRLN: number;
-  witnessCalculator: any;
+// Adapted from https://github.com/feross/buffer
 
-  constructor(zkRLN: number, wc: any) {
-    this.zkRLN = zkRLN;
-    this.witnessCalculator = wc;
+function checkInt(
+  buf: Uint8Array,
+  value: number,
+  offset: number,
+  ext: number,
+  max: number,
+  min: number
+): void {
+  if (value > max || value < min)
+    throw new RangeError('"value" argument is out of bounds');
+  if (offset + ext > buf.length) throw new RangeError("Index out of range");
+}
+
+const writeUIntLE = function writeUIntLE(
+  buf: Uint8Array,
+  value: number,
+  offset: number,
+  byteLength: number,
+  noAssert?: boolean
+): Uint8Array {
+  value = +value;
+  offset = offset >>> 0;
+  byteLength = byteLength >>> 0;
+  if (!noAssert) {
+    const maxBytes = Math.pow(2, 8 * byteLength) - 1;
+    checkInt(buf, value, offset, byteLength, maxBytes, 0);
   }
+
+  let mul = 1;
+  let i = 0;
+  buf[offset] = value & 0xff;
+  while (++i < byteLength && (mul *= 0x100)) {
+    buf[offset + i] = (value / mul) & 0xff;
+  }
+
+  return buf;
+};
+
+const DefaultEpochUnitSeconds = 10; // the rln-relay epoch length in seconds
+
+export function toEpoch(
+  timestamp: Date,
+  epochUnitSeconds: number = DefaultEpochUnitSeconds
+): Uint8Array {
+  const unix = Math.floor(timestamp.getTime() / 1000 / epochUnitSeconds);
+  return writeUIntLE(new Uint8Array(32), unix, 0, 8);
+}
+
+const proofOffset = 128;
+const rootOffset = proofOffset + 32;
+const epochOffset = rootOffset + 32;
+const shareXOffset = epochOffset + 32;
+const shareYOffset = shareXOffset + 32;
+const nullifierOffset = shareYOffset + 32;
+const rlnIdentifierOffset = nullifierOffset + 32;
+
+export class RateLimitProof {
+  readonly proof: Uint8Array;
+  readonly merkleRoot: Uint8Array;
+  readonly epoch: Uint8Array;
+  readonly shareX: Uint8Array;
+  readonly shareY: Uint8Array;
+  readonly nullifier: Uint8Array;
+  readonly rlnIdentifier: Uint8Array;
+
+  constructor(proofBytes: Uint8Array) {
+    if (proofBytes.length < rlnIdentifierOffset) throw "invalid proof";
+    // parse the proof as proof<128> | share_y<32> | nullifier<32> | root<32> | epoch<32> | share_x<32> | rln_identifier<32>
+    this.proof = proofBytes.subarray(0, proofOffset);
+    this.merkleRoot = proofBytes.subarray(proofOffset, rootOffset);
+    this.epoch = proofBytes.subarray(rootOffset, epochOffset);
+    this.shareX = proofBytes.subarray(epochOffset, shareXOffset);
+    this.shareY = proofBytes.subarray(shareXOffset, shareYOffset);
+    this.nullifier = proofBytes.subarray(shareYOffset, nullifierOffset);
+    this.rlnIdentifier = proofBytes.subarray(
+      nullifierOffset,
+      rlnIdentifierOffset
+    );
+  }
+
+  toBytes(): Uint8Array {
+    return concatenate(
+      this.proof,
+      this.merkleRoot,
+      this.epoch,
+      this.shareX,
+      this.shareY,
+      this.nullifier,
+      this.rlnIdentifier
+    );
+  }
+}
+
+export class RLNInstance {
+  constructor(private zkRLN: number, private witnessCalculator: any) {}
 
   generateMembershipKey(): MembershipKey {
     const memKeys = zerokitRLN.generateMembershipKey(this.zkRLN);
@@ -87,16 +176,11 @@ export class RLNInstance {
     epoch: Uint8Array,
     idKey: Uint8Array
   ): Uint8Array {
-    if (epoch.length != 32) throw "invalid epoch";
-    if (idKey.length != 32) throw "invalid id key";
-
     // calculate message length
-    const msgLen = Buffer.allocUnsafe(8);
-    msgLen.writeUIntLE(uint8Msg.length, 0, 8);
+    const msgLen = writeUIntLE(new Uint8Array(8), uint8Msg.length, 0, 8);
 
     // Converting index to LE bytes
-    const memIndexBytes = Buffer.allocUnsafe(8);
-    memIndexBytes.writeUIntLE(memIndex, 0, 8);
+    const memIndexBytes = writeUIntLE(new Uint8Array(8), memIndex, 0, 8);
 
     // [ id_key<32> | id_index<8> | epoch<32> | signal_len<8> | signal<var> ]
     return concatenate(idKey, memIndexBytes, epoch, msgLen, uint8Msg);
@@ -105,9 +189,15 @@ export class RLNInstance {
   async generateProof(
     msg: Uint8Array,
     index: number,
-    epoch: Uint8Array,
+    epoch: Uint8Array | Date | undefined,
     idKey: Uint8Array
-  ): Promise<Uint8Array> {
+  ): Promise<RateLimitProof> {
+    if (epoch == undefined) {
+      epoch = toEpoch(new Date());
+    } else if (epoch instanceof Date) {
+      epoch = toEpoch(epoch);
+    }
+
     if (epoch.length != 32) throw "invalid epoch";
     if (idKey.length != 32) throw "invalid id key";
     if (index < 0) throw "index must be >= 0";
@@ -123,14 +213,19 @@ export class RLNInstance {
       false
     ); // no sanity check being used in zerokit
 
-    return zerokitRLN.generate_rln_proof_with_witness(
+    const proofBytes = zerokitRLN.generate_rln_proof_with_witness(
       this.zkRLN,
       calculatedWitness,
       rlnWitness
     );
+
+    return new RateLimitProof(proofBytes);
   }
 
-  verifyProof(proof: Uint8Array): boolean {
+  verifyProof(proof: RateLimitProof | Uint8Array): boolean {
+    if (proof instanceof RateLimitProof) {
+      proof = proof.toBytes();
+    }
     return zerokitRLN.verifyProof(this.zkRLN, proof);
   }
 }
