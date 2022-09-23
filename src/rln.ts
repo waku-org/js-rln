@@ -1,6 +1,6 @@
-import * as resources from "./resources";
-import * as wc from "./witness_calculator";
-import * as zerokitRLN from "./zerokit/rln_wasm";
+import * as resources from "./resources.js";
+import * as wc from "./witness_calculator.js";
+import * as zerokitRLN from "./zerokit/rln_wasm.js";
 
 /**
  * Convert a base64 string into uint8Array
