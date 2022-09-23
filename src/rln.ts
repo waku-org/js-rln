@@ -1,6 +1,7 @@
+import init, * as zerokitRLN from "@waku/zerokit-rln-wasm";
+
 import * as resources from "./resources.js";
 import * as wc from "./witness_calculator.js";
-import * as zerokitRLN from "./zerokit/rln_wasm.js";
 
 /**
  * Convert a base64 string into uint8Array
@@ -41,13 +42,14 @@ const VERIFICATION_KEY = base64ToUint8Array(resources.verification_key);
 const ZKEY = base64ToUint8Array(resources.zkey);
 const CIRCUIT = base64ToUint8Array(resources.circuit);
 
-zerokitRLN.init_panic_hook();
-
 /**
  * Create an instance of RLN
  * @returns RLNInstance
  */
 export async function create(): Promise<RLNInstance> {
+  await init();
+  zerokitRLN.init_panic_hook();
+
   const witnessCalculator = await wc.builder(CIRCUIT, false);
   const zkRLN = zerokitRLN.newRLN(DEPTH, ZKEY, VERIFICATION_KEY);
   return new RLNInstance(zkRLN, witnessCalculator);
