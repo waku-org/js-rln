@@ -1,6 +1,6 @@
 {
   "name": "@waku/rln",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Rate Limit Nullifier for js-waku",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
@@ -106,9 +106,8 @@
   "files": [
     "dist",
     "bundle",
-    "src/*.ts",
-    "src/lib/**/*.ts",
-    "src/proto/**/*.ts",
+    "src/**.ts",
+    "src/**.js",
     "!**/*.spec.*",
     "!**/*.json",
     "CHANGELOG.md",
