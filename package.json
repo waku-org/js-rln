@@ -1,6 +1,6 @@
 {
   "name": "@waku/rln",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Rate Limit Nullifier for js-waku",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
@@ -121,5 +121,8 @@
     "*.{ts,md,json,conf*.*js}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@waku/zerokit-rln-wasm": "^0.0.1"
   }
 }
