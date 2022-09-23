@@ -106,9 +106,8 @@
   "files": [
     "dist",
     "bundle",
-    "src/*.ts",
-    "src/lib/**/*.ts",
-    "src/proto/**/*.ts",
+    "src/**.ts",
+    "src/**.js",
     "!**/*.spec.*",
     "!**/*.json",
     "CHANGELOG.md",
