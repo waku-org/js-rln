@@ -1,13 +1,32 @@
 process.env.CHROME_BIN = require("puppeteer").executablePath();
-const webpack = require("webpack");
+
+const os = require("os");
+const path = require("path");
+const ResolveTypeScriptPlugin = require("resolve-typescript-plugin");
+
+const output = {
+  path:
+    path.join(os.tmpdir(), "_karma_webpack_") +
+    Math.floor(Math.random() * 1000000),
+};
 
 module.exports = function (config) {
   config.set({
     frameworks: ["webpack", "mocha"],
-    files: ["src/**/!(node).spec.ts"],
     preprocessors: {
-      "src/**/!(node).spec.ts": ["webpack"],
+      "**/*.ts": ["webpack"],
     },
+
+    files: [
+      "src/**/*.spec.ts",
+      "src/**/*.ts",
+      {
+        pattern: `${output.path}/**/*`,
+        watched: false,
+        included: false,
+        served: true,
+      },
+    ],
     envPreprocessor: ["CI"],
     reporters: ["progress"],
     browsers: ["ChromeHeadless"],
@@ -19,37 +38,30 @@ module.exports = function (config) {
     },
     webpack: {
       mode: "production",
+      resolve: {
+        // Add `.ts` and `.tsx` as a resolvable extension.
+        extensions: [".ts", ".tsx", ".js"],
+        plugins: [new ResolveTypeScriptPlugin()],
+      },
       module: {
         rules: [
           {
-            test: /\.(js|tsx?)$/,
-            use: [
-              {
-                loader: "ts-loader",
-                options: { configFile: "tsconfig.karma.json" },
-              },
-            ],
-            exclude: /(node_modules)|(node\.spec\.ts)/,
+            test: /\.wasm$/,
+            type: "asset/resource",
           },
           {
-            test: /node\.spec\.ts$/,
-            use: "ignore-loader",
+            test: /\.(js|tsx?)$/,
+            loader: "ts-loader",
+            exclude: /node_modules|\.d\.ts$/,
+            options: { configFile: "tsconfig.karma.json" },
+          },
+          {
+            test: /\.d\.ts$/,
+            loader: "ignore-loader",
           },
         ],
       },
-      plugins: [
-        new webpack.DefinePlugin({
-          "process.env.CI": process.env.CI || false,
-        }),
-        new webpack.ProvidePlugin({
-          process: "process/browser.js",
-        }),
-      ],
-      resolve: {
-        extensions: [".ts", ".js"],
-      },
-      stats: { warnings: false },
-      devtool: "inline-source-map",
+      output,
     },
   });
 };

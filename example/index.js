@@ -10,11 +10,11 @@ rln.create().then(async rlnInstance => {
     for (let i = 0; i < 10; i++) {
         if (i == index) {
             // insert the current peer's pk
-            rlnInstance.inserMember(memKeys.IDCommitment);
+            rlnInstance.insertMember(memKeys.IDCommitment);
         } else {
             // create a new key pair
             let memKeys = rlnInstance.generateMembershipKey(); // TODO: handle error
-            rlnInstance.inserMember(memKeys.IDCommitment);
+            rlnInstance.insertMember(memKeys.IDCommitment);
 
         }
     }

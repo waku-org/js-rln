@@ -44,7 +44,7 @@ let memKeys = rlnInstance.generateMembershipKey();
 
 #### Adding membership keys into merkle tree
 ```js
-rlnInstance.inserMember(memKeys.IDCommitment);
+rlnInstance.insertMember(memKeys.IDCommitment);
 ```
 
 #### Generating a proof
@@ -63,8 +63,8 @@ const proof = await rlnInstance.generateProof(uint8Msg, index, epoch, memKeys.ID
 ```js
 try {
     // verify the proof
-    const verifResult = rlnInstance.verifyProof(proof);
-    console.log("Is proof verified?", verifResult ? "yes" : "no");
+    const verificationResult = rlnInstance.verifyProof(proof);
+    console.log("Is proof verified?", verificationResult ? "yes" : "no");
 } catch (err) {
     console.log("Invalid proof")
 }
