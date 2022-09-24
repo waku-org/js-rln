@@ -2,7 +2,7 @@
   "version": "0.1",
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/master/cspell.schema.json",
   "language": "en",
-  "words": ["Waku", "keypair", "merkle", "zkey", "circom", "zerokit"],
+  "words": ["Waku", "keypair", "merkle", "vkey", "zkey", "circom", "zerokit"],
   "flagWords": [],
   "ignorePaths": [
     "package.json",

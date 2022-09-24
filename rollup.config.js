@@ -3,7 +3,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import { wasm } from "@rollup/plugin-wasm";
 import copy from "rollup-plugin-copy";
-
+import { importMetaAssets } from "@web/rollup-plugin-import-meta-assets";
 export default {
   input: {
     index: "dist/index.js",
@@ -15,7 +15,10 @@ export default {
   plugins: [
     copy({
       hook: "buildStart",
-      targets: [{ src: "src/zerokit/rln_wasm_bg.wasm", dest: "dist/zerokit" }],
+      targets: [
+        { src: "src/resources/rln.wasm", dest: "dist/resources" },
+        { src: "src/resources/rln_final.zkey", dest: "dist/resources" },
+      ],
     }),
     commonjs(),
     json(),
@@ -27,5 +30,6 @@ export default {
       preferBuiltins: false,
       extensions: [".js", ".ts", ".wasm"],
     }),
+    importMetaAssets(),
   ],
 };
