@@ -1,6 +1,6 @@
 {
   "name": "@waku/rln",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Rate Limit Nullifier for js-waku",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
@@ -66,6 +66,7 @@
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^5.8.1",
     "@typescript-eslint/parser": "^5.8.1",
+    "@web/rollup-plugin-import-meta-assets": "^1.0.7",
     "app-root-path": "^3.0.0",
     "chai": "^4.3.4",
     "cspell": "^5.14.0",

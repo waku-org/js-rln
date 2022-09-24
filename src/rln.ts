@@ -1,22 +1,7 @@
 import init, * as zerokitRLN from "@waku/zerokit-rln-wasm";
 
-import * as resources from "./resources.js";
+import verificationKey from "./resources/verification_key.json";
 import * as wc from "./witness_calculator.js";
-
-/**
- * Convert a base64 string into uint8Array
- * @param base64
- * @returns Uint8Array
- */
-function base64ToUint8Array(base64: string): Uint8Array {
-  const binary_string = window.atob(base64);
-  const len = binary_string.length;
-  const bytes = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binary_string.charCodeAt(i);
-  }
-  return bytes;
-}
 
 /**
  * Concatenate Uint8Arrays
@@ -37,10 +22,21 @@ function concatenate(...input: Uint8Array[]): Uint8Array {
   return result;
 }
 
+const stringEncoder = new TextEncoder();
+
 const DEPTH = 20;
-const VERIFICATION_KEY = base64ToUint8Array(resources.verification_key);
-const ZKEY = base64ToUint8Array(resources.zkey);
-const CIRCUIT = base64ToUint8Array(resources.circuit);
+
+async function loadWitnessCalculator(): Promise<any> {
+  const url = new URL("./resources/rln.wasm", import.meta.url);
+  const response = await fetch(url);
+  return await wc.builder(new Uint8Array(await response.arrayBuffer()), false);
+}
+
+async function loadZkey(): Promise<Uint8Array> {
+  const url = new URL("./resources/rln_final.zkey", import.meta.url);
+  const response = await fetch(url);
+  return new Uint8Array(await response.arrayBuffer());
+}
 
 /**
  * Create an instance of RLN
@@ -49,9 +45,10 @@ const CIRCUIT = base64ToUint8Array(resources.circuit);
 export async function create(): Promise<RLNInstance> {
   await init();
   zerokitRLN.init_panic_hook();
-
-  const witnessCalculator = await wc.builder(CIRCUIT, false);
-  const zkRLN = zerokitRLN.newRLN(DEPTH, ZKEY, VERIFICATION_KEY);
+  const witnessCalculator = await loadWitnessCalculator();
+  const zkey = await loadZkey();
+  const vkey = stringEncoder.encode(JSON.stringify(verificationKey));
+  const zkRLN = zerokitRLN.newRLN(DEPTH, zkey, vkey);
   return new RLNInstance(zkRLN, witnessCalculator);
 }
 
