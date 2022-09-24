@@ -38,15 +38,4 @@ rln.create().then(async rlnInstance => {
     } catch (err) {
         console.log("Invalid proof")
     }
-
-    try {
-        // Modifying the proof so it's invalid
-        proof[7] = 7;
-        // verify the proof
-        let verifResult = rlnInstance.verifyProof(proof);
-        console.log("Is proof verified?", verifResult ? "yes" : "no");
-    } catch (err) {
-        console.log("Invalid proof")
-    }
-
 });
