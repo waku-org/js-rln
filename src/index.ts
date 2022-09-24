@@ -6,7 +6,6 @@ export async function create(): Promise<RLNInstance> {
   // asynchronously. This file does the single async import, so
   // that no one else needs to worry about it again.
   const rlnModule = await import("./rln.js");
-
   return await rlnModule.create();
 }
 

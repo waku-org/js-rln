@@ -168,7 +168,7 @@ export class RLNInstance {
     return new MembershipKey(memKeys);
   }
 
-  inserMember(idCommitment: Uint8Array): void {
+  insertMember(idCommitment: Uint8Array): void {
     zerokitRLN.insertMember(this.zkRLN, idCommitment);
   }
 
