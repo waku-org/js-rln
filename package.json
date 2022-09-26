@@ -1,6 +1,6 @@
 {
   "name": "@waku/rln",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Rate Limit Nullifier for js-waku",
   "types": "./dist/index.d.ts",
   "module": "./dist/index.js",
@@ -81,7 +81,7 @@
     "husky": "^7.0.4",
     "ignore-loader": "^0.1.2",
     "isomorphic-fetch": "^3.0.0",
-    "js-waku": "file:../js-waku/",
+    "js-waku": "^0.29.0-5bab85f",
     "jsdom": "^19.0.0",
     "jsdom-global": "^3.0.2",
     "karma": "^6.3.12",

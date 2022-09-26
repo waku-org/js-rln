@@ -51,7 +51,9 @@ describe("js-rln", () => {
     try {
       // Modifying the proof so it's invalid
       const proofBytes = proof.toBytes();
-      proofBytes[7] = Math.floor(Math.random() * 256) % 255;
+      proofBytes[7] = 1;
+      proofBytes[8] = 2;
+      proofBytes[9] = 3;
 
       // verify the proof
       const verifResult = rlnInstance.verifyProof(proofBytes);

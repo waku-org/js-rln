@@ -1,24 +1,35 @@
-import { Encoder, Message, ProtoMessage } from "js-waku/lib/interfaces";
+import debug from "debug";
 import { proto_message } from "js-waku";
+import {
+  Decoder,
+  Encoder,
+  Message,
+  ProtoMessage,
+} from "js-waku/lib/interfaces";
 
-import { RLNInstance } from "./rln.js";
+import { MembershipKey, RLNInstance } from "./rln.js";
+
+const log = debug("waku:message:rln-encoder");
 
 export class RLNEncoder implements Encoder {
+  public contentTopic: string;
+
+  private idKey: Uint8Array;
+
   constructor(
-    public contentTopic: string,
     private encoder: Encoder,
     private rlnInstance: RLNInstance,
     private index: number,
-    private idKey: Uint8Array
+    membershipKey: MembershipKey
   ) {
-    if (idKey.length != 32) throw "invalid id key"; // TODO: use proper err message
     if (index < 0) throw "invalid membership index";
+    this.idKey = membershipKey.IDKey;
+    this.contentTopic = encoder.contentTopic;
   }
 
   async encode(message: Message): Promise<Uint8Array | undefined> {
     const protoMessage = await this.encodeProto(message);
     if (!protoMessage) return;
-
     return proto_message.WakuMessage.encode(protoMessage);
   }
 
@@ -48,5 +59,28 @@ export class RLNEncoder implements Encoder {
     protoMessage.rateLimitProof = proof;
 
     return protoMessage;
+  }
+}
+
+export class RLNDecoder implements Decoder<Message> {
+  public contentTopic: string;
+
+  constructor(private decoder: Decoder<Message>) {
+    this.contentTopic = decoder.contentTopic;
+  }
+
+  decodeProto(bytes: Uint8Array): Promise<ProtoMessage | undefined> {
+    const protoMessage = proto_message.WakuMessage.decode(bytes);
+    log("Message decoded", protoMessage);
+    return Promise.resolve(protoMessage);
+  }
+
+  async decode(proto: ProtoMessage): Promise<Message | undefined> {
+    // https://github.com/status-im/js-waku/issues/921
+    if (proto.version === undefined) {
+      proto.version = 0;
+    }
+
+    return this.decoder.decode(proto);
   }
 }
