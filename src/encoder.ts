@@ -76,11 +76,10 @@ export class RLNDecoder implements Decoder<Message> {
   }
 
   async decode(proto: ProtoMessage): Promise<Message | undefined> {
-    // https://github.com/status-im/js-waku/issues/921
-    if (proto.version === undefined) {
-      proto.version = 0;
+    const msg = await this.decoder.decode(proto);
+    if (msg) {
+      msg.rateLimitProof = proto.rateLimitProof;
     }
-
-    return this.decoder.decode(proto);
+    return msg;
   }
 }

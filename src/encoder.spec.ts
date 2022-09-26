@@ -1,9 +1,13 @@
 import { expect } from "chai";
-
-import {DecoderV0, EncoderV0, MessageV0} from "js-waku/lib/waku_message/version_0";
+import {
+  DecoderV0,
+  EncoderV0,
+  MessageV0,
+} from "js-waku/lib/waku_message/version_0";
 
 import { RLNDecoder, RLNEncoder } from "./encoder.js";
-import * as rln from "./index";
+
+import * as rln from "./index.js";
 
 const TestContentTopic = "/test/1/waku-message/utf8";
 
@@ -27,11 +31,16 @@ describe("js-rln: encoder", () => {
     const bytes = await rlnEncoder.encode({ payload });
     const protoResult = await rlnDecoder.decodeProto(bytes!);
 
-    const result = (await rlnDecoder.decode(protoResult!)) as MessageV0;
+    const msg = (await rlnDecoder.decode(protoResult!))!;
 
-    expect(result.contentTopic).to.eq(TestContentTopic);
-    expect(result.version).to.eq(0);
-    expect(result.payload).to.deep.eq(payload);
-    expect(result.timestamp).to.not.be.undefined;
+    // Validate proof
+    const verifResult = rlnInstance.verifyProof(msg.rateLimitProof!);
+    expect(verifResult).to.be.true;
+
+    const msgV0 = msg as MessageV0;
+    expect(msgV0.contentTopic).to.eq(TestContentTopic);
+    expect(msgV0.version).to.eq(0);
+    expect(msgV0.payload).to.deep.eq(payload);
+    expect(msgV0.timestamp).to.not.be.undefined;
   });
 });

@@ -1,4 +1,5 @@
 import init, * as zerokitRLN from "@waku/zerokit-rln-wasm";
+import { RateLimitProof } from "js-waku/lib/interfaces";
 
 import verificationKey from "./resources/verification_key.json";
 import * as wc from "./witness_calculator.js";
@@ -120,7 +121,7 @@ const shareYOffset = shareXOffset + 32;
 const nullifierOffset = shareYOffset + 32;
 const rlnIdentifierOffset = nullifierOffset + 32;
 
-export class RateLimitProof {
+export class Proof implements RateLimitProof {
   readonly proof: Uint8Array;
   readonly merkleRoot: Uint8Array;
   readonly epoch: Uint8Array;
@@ -143,18 +144,18 @@ export class RateLimitProof {
       rlnIdentifierOffset
     );
   }
+}
 
-  toBytes(): Uint8Array {
-    return concatenate(
-      this.proof,
-      this.merkleRoot,
-      this.epoch,
-      this.shareX,
-      this.shareY,
-      this.nullifier,
-      this.rlnIdentifier
-    );
-  }
+function proofToBytes(p: RateLimitProof): Uint8Array {
+  return concatenate(
+    p.proof,
+    p.merkleRoot,
+    p.epoch,
+    p.shareX,
+    p.shareY,
+    p.nullifier,
+    p.rlnIdentifier
+  );
 }
 
 export class RLNInstance {
@@ -218,13 +219,16 @@ export class RLNInstance {
       rlnWitness
     );
 
-    return new RateLimitProof(proofBytes);
+    return new Proof(proofBytes);
   }
 
   verifyProof(proof: RateLimitProof | Uint8Array): boolean {
-    if (proof instanceof RateLimitProof) {
-      proof = proof.toBytes();
+    let pBytes: Uint8Array;
+    if (proof instanceof Uint8Array) {
+      pBytes = proof;
+    } else {
+      pBytes = proofToBytes(proof);
     }
-    return zerokitRLN.verifyProof(this.zkRLN, proof);
+    return zerokitRLN.verifyProof(this.zkRLN, pBytes);
   }
 }
