@@ -1,6 +1,6 @@
 import init, * as zerokitRLN from "@waku/zerokit-rln-wasm";
 
-import verificationKey from "./resources/verification_key.json";
+import verificationKey from "./resources/verification_key.js";
 import * as wc from "./witness_calculator.js";
 
 /**
