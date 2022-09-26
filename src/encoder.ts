@@ -1,5 +1,5 @@
 import { Encoder, Message, ProtoMessage } from "js-waku/lib/interfaces";
-import * as proto from "js-waku/src/proto/message";
+import { proto_message } from "js-waku";
 
 import { RLNInstance } from "./rln.js";
 
@@ -19,7 +19,7 @@ export class RLNEncoder implements Encoder {
     const protoMessage = await this.encodeProto(message);
     if (!protoMessage) return;
 
-    return proto.WakuMessage.encode(protoMessage);
+    return proto_message.WakuMessage.encode(protoMessage);
   }
 
   toRLNSignal(msg: Message): Uint8Array {
