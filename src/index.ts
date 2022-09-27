@@ -1,4 +1,4 @@
-import type { MembershipKey, RateLimitProof, RLNInstance } from "./rln.js";
+import type { MembershipKey, Proof, RLNInstance } from "./rln.js";
 
 // reexport the create function, dynamically imported from rln.ts
 export async function create(): Promise<RLNInstance> {
@@ -9,4 +9,4 @@ export async function create(): Promise<RLNInstance> {
   return await rlnModule.create();
 }
 
-export { RLNInstance, MembershipKey, RateLimitProof };
+export { RLNInstance, MembershipKey, Proof };

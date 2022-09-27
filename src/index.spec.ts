@@ -1,6 +1,6 @@
 import { assert, expect } from "chai";
 
-import * as rln from "./index";
+import * as rln from "./index.js";
 
 describe("js-rln", () => {
   it("should verify a proof", async function () {
@@ -50,11 +50,13 @@ describe("js-rln", () => {
 
     try {
       // Modifying the proof so it's invalid
-      const proofBytes = proof.toBytes();
-      proofBytes[7] = Math.floor(Math.random() * 256) % 255;
+      proof.proof[0] = 0;
+      proof.proof[1] = 1;
+      proof.proof[2] = 2;
+      proof.proof[3] = 3;
 
       // verify the proof
-      const verifResult = rlnInstance.verifyProof(proofBytes);
+      const verifResult = rlnInstance.verifyProof(proof);
       expect(verifResult).to.be.false;
     } catch (err) {
       //
