@@ -54,12 +54,15 @@ export async function create(): Promise<RLNInstance> {
 }
 
 export class MembershipKey {
-  readonly IDKey: Uint8Array;
-  readonly IDCommitment: Uint8Array;
+  constructor(
+    public readonly IDKey: Uint8Array,
+    public readonly IDCommitment: Uint8Array
+  ) {}
 
-  constructor(memKeys: Uint8Array) {
-    this.IDKey = memKeys.subarray(0, 32);
-    this.IDCommitment = memKeys.subarray(32);
+  static fromBytes(memKeys: Uint8Array): MembershipKey {
+    const idKey = memKeys.subarray(0, 32);
+    const idCommitment = memKeys.subarray(32);
+    return new MembershipKey(idKey, idCommitment);
   }
 }
 
@@ -163,7 +166,7 @@ export class RLNInstance {
 
   generateMembershipKey(): MembershipKey {
     const memKeys = zerokitRLN.generateMembershipKey(this.zkRLN);
-    return new MembershipKey(memKeys);
+    return MembershipKey.fromBytes(memKeys);
   }
 
   insertMember(idCommitment: Uint8Array): void {
