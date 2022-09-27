@@ -1,5 +1,5 @@
 import debug from "debug";
-import {proto_message, utils} from "js-waku";
+import { proto_message, utils } from "js-waku";
 import {
   Decoder,
   Encoder,
@@ -76,6 +76,6 @@ export class RLNDecoder implements Decoder<Message> {
 }
 
 function toRLNSignal(msg: Message): Uint8Array {
-  const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "")
+  const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "");
   return new Uint8Array([...(msg.payload ?? []), ...contentTopicBytes]);
 }
