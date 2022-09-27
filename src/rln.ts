@@ -3,6 +3,7 @@ import { RateLimitProof } from "js-waku/lib/interfaces";
 
 import verificationKey from "./resources/verification_key.js";
 import * as wc from "./witness_calculator.js";
+import { WitnessCalculator } from "./witness_calculator.js";
 
 /**
  * Concatenate Uint8Arrays
@@ -27,7 +28,7 @@ const stringEncoder = new TextEncoder();
 
 const DEPTH = 20;
 
-async function loadWitnessCalculator(): Promise<any> {
+async function loadWitnessCalculator(): Promise<WitnessCalculator> {
   const url = new URL("./resources/rln.wasm", import.meta.url);
   const response = await fetch(url);
   return await wc.builder(new Uint8Array(await response.arrayBuffer()), false);
@@ -162,7 +163,10 @@ function proofToBytes(p: RateLimitProof): Uint8Array {
 }
 
 export class RLNInstance {
-  constructor(private zkRLN: number, private witnessCalculator: any) {}
+  constructor(
+    private zkRLN: number,
+    private witnessCalculator: WitnessCalculator
+  ) {}
 
   generateMembershipKey(): MembershipKey {
     const memKeys = zerokitRLN.generateMembershipKey(this.zkRLN);
