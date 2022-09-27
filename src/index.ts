@@ -1,3 +1,4 @@
+import { RLNDecoder, RLNEncoder } from "./encoder.js";
 import type { Proof, RLNInstance } from "./rln.js";
 import { MembershipKey } from "./rln.js";
 
@@ -10,4 +11,4 @@ export async function create(): Promise<RLNInstance> {
   return await rlnModule.create();
 }
 
-export { RLNInstance, MembershipKey, Proof };
+export { RLNInstance, MembershipKey, Proof, RLNEncoder, RLNDecoder };
