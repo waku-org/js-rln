@@ -1,5 +1,5 @@
 import debug from "debug";
-import { proto_message } from "js-waku";
+import {proto_message, utils} from "js-waku";
 import {
   Decoder,
   Encoder,
@@ -13,8 +13,7 @@ const log = debug("waku:message:rln-encoder");
 
 export class RLNEncoder implements Encoder {
   public contentTopic: string;
-
-  private idKey: Uint8Array;
+  private readonly idKey: Uint8Array;
 
   constructor(
     private encoder: Encoder,
@@ -33,19 +32,11 @@ export class RLNEncoder implements Encoder {
     return proto_message.WakuMessage.encode(protoMessage);
   }
 
-  toRLNSignal(msg: Message): Uint8Array {
-    const contentTopic = msg.contentTopic ?? "";
-    const contentTopicBytes = Uint8Array.from(
-      contentTopic.split("").map((x: string) => x.charCodeAt(0))
-    );
-    return new Uint8Array([...(msg.payload ?? []), ...contentTopicBytes]);
-  }
-
   async encodeProto(message: Message): Promise<ProtoMessage | undefined> {
     const protoMessage = await this.encoder.encodeProto(message);
     if (!protoMessage) return;
 
-    const signal = this.toRLNSignal(message);
+    const signal = toRLNSignal(message);
 
     console.time("proof_gen_timer");
     const proof = await this.rlnInstance.generateProof(
@@ -82,4 +73,9 @@ export class RLNDecoder implements Decoder<Message> {
     }
     return msg;
   }
+}
+
+function toRLNSignal(msg: Message): Uint8Array {
+  const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "")
+  return new Uint8Array([...(msg.payload ?? []), ...contentTopicBytes]);
 }
