@@ -2,7 +2,7 @@ import init, * as zerokitRLN from "@waku/zerokit-rln-wasm";
 import { RateLimitProof } from "js-waku/lib/interfaces";
 
 import { writeUIntLE } from "./byte_utils.js";
-import { dateToEpoch } from "./epoch.js";
+import { dateToEpoch, epochIntToBytes } from "./epoch.js";
 import verificationKey from "./resources/verification_key.js";
 import * as wc from "./witness_calculator.js";
 import { WitnessCalculator } from "./witness_calculator.js";
@@ -152,9 +152,9 @@ export class RLNInstance {
     idKey: Uint8Array
   ): Promise<RateLimitProof> {
     if (epoch == undefined) {
-      epoch = dateToEpoch(new Date());
+      epoch = epochIntToBytes(dateToEpoch(new Date()));
     } else if (epoch instanceof Date) {
-      epoch = dateToEpoch(epoch);
+      epoch = epochIntToBytes(dateToEpoch(epoch));
     }
 
     if (epoch.length != 32) throw "invalid epoch";
