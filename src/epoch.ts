@@ -1,5 +1,3 @@
-import { writeUIntLE } from "./byte_utils.js";
-
 const DefaultEpochUnitSeconds = 10; // the rln-relay epoch length in seconds
 
 export function dateToEpoch(
@@ -11,7 +9,10 @@ export function dateToEpoch(
 }
 
 export function epochIntToBytes(epoch: number): Uint8Array {
-  return writeUIntLE(new Uint8Array(32), epoch, 0, 8);
+  const bytes = new Uint8Array(32);
+  const db = new DataView(bytes.buffer);
+  db.setUint32(0, epoch, true);
+  return bytes;
 }
 
 export function epochBytesToInt(bytes: Uint8Array): number {
