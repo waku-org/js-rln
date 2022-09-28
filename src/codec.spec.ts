@@ -5,7 +5,7 @@ import {
   MessageV0,
 } from "js-waku/lib/waku_message/version_0";
 
-import { RLNDecoder, RLNEncoder } from "./encoder.js";
+import { RLNDecoder, RLNEncoder } from "./codec.js";
 
 import * as rln from "./index.js";
 
