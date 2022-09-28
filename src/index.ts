@@ -1,4 +1,4 @@
-import { RLNDecoder, RLNEncoder } from "./encoder.js";
+import { RLNDecoder, RLNEncoder } from "./codec.js";
 import type { Proof, RLNInstance } from "./rln.js";
 import { MembershipKey } from "./rln.js";
 

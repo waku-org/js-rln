@@ -1,11 +1,7 @@
 import { expect } from "chai";
-import {
-  DecoderV0,
-  EncoderV0,
-  MessageV0,
-} from "js-waku/lib/waku_message/version_0";
+import { DecoderV0, EncoderV0 } from "js-waku/lib/waku_message/version_0";
 
-import { RLNDecoder, RLNEncoder } from "./encoder.js";
+import { RLNDecoder, RLNEncoder } from "./codec.js";
 
 import * as rln from "./index.js";
 
@@ -26,7 +22,10 @@ describe("js-rln: encoder", () => {
       index,
       memKeys
     );
-    const rlnDecoder = new RLNDecoder(new DecoderV0(TestContentTopic));
+    const rlnDecoder = new RLNDecoder(
+      rlnInstance,
+      new DecoderV0(TestContentTopic)
+    );
 
     const bytes = await rlnEncoder.encode({ payload });
     const protoResult = await rlnDecoder.decodeProto(bytes!);
@@ -34,13 +33,11 @@ describe("js-rln: encoder", () => {
     const msg = (await rlnDecoder.decode(protoResult!))!;
 
     // Validate proof
-    const verifResult = rlnInstance.verifyProof(msg.rateLimitProof!);
-    expect(verifResult).to.be.true;
+    expect(msg.verify()).to.be.true;
 
-    const msgV0 = msg as MessageV0;
-    expect(msgV0.contentTopic).to.eq(TestContentTopic);
-    expect(msgV0.version).to.eq(0);
-    expect(msgV0.payload).to.deep.eq(payload);
-    expect(msgV0.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).to.eq(TestContentTopic);
+    expect(msg.msg.version).to.eq(0);
+    expect(msg.payload).to.deep.eq(payload);
+    expect(msg.timestamp).to.not.be.undefined;
   });
 });

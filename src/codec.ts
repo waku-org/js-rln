@@ -7,6 +7,7 @@ import {
   ProtoMessage,
 } from "js-waku/lib/interfaces";
 
+import { RlnMessage } from "./message.js";
 import { MembershipKey, RLNInstance } from "./rln.js";
 
 const log = debug("waku:message:rln-encoder");
@@ -53,11 +54,11 @@ export class RLNEncoder implements Encoder {
   }
 }
 
-export class RLNDecoder implements Decoder<Message> {
-  public contentTopic: string;
+export class RLNDecoder<T extends Message> implements Decoder<RlnMessage<T>> {
+  constructor(private rlnInstance: RLNInstance, private decoder: Decoder<T>) {}
 
-  constructor(private decoder: Decoder<Message>) {
-    this.contentTopic = decoder.contentTopic;
+  get contentTopic(): string {
+    return this.decoder.contentTopic;
   }
 
   decodeProto(bytes: Uint8Array): Promise<ProtoMessage | undefined> {
@@ -66,12 +67,10 @@ export class RLNDecoder implements Decoder<Message> {
     return Promise.resolve(protoMessage);
   }
 
-  async decode(proto: ProtoMessage): Promise<Message | undefined> {
-    const msg = await this.decoder.decode(proto);
-    if (msg) {
-      msg.rateLimitProof = proto.rateLimitProof;
-    }
-    return msg;
+  async decode(proto: ProtoMessage): Promise<RlnMessage<T> | undefined> {
+    const msg: T | undefined = await this.decoder.decode(proto);
+    if (!msg) return;
+    return new RlnMessage(this.rlnInstance, msg, proto.rateLimitProof);
   }
 }
 
