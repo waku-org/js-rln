@@ -1,10 +1,11 @@
 import debug from "debug";
-import { proto_message, utils } from "js-waku";
+import { utils } from "js-waku";
 import {
   Decoder,
   Encoder,
   Message,
   ProtoMessage,
+  RateLimitProof,
 } from "js-waku/lib/interfaces";
 
 import { RlnMessage } from "./message.js";
@@ -27,16 +28,26 @@ export class RLNEncoder implements Encoder {
     this.contentTopic = encoder.contentTopic;
   }
 
-  async encode(message: Message): Promise<Uint8Array | undefined> {
-    const protoMessage = await this.encodeProto(message);
-    if (!protoMessage) return;
-    return proto_message.WakuMessage.encode(protoMessage);
+  async toWire(message: Partial<Message>): Promise<Uint8Array | undefined> {
+    message.rateLimitProof = await this.generateProof(message);
+
+    return this.encoder.toWire(message);
   }
 
-  async encodeProto(message: Message): Promise<ProtoMessage | undefined> {
-    const protoMessage = await this.encoder.encodeProto(message);
+  async toProtoObj(
+    message: Partial<Message>
+  ): Promise<ProtoMessage | undefined> {
+    const protoMessage = await this.encoder.toProtoObj(message);
     if (!protoMessage) return;
 
+    protoMessage.rateLimitProof = await this.generateProof(message);
+
+    return protoMessage;
+  }
+
+  private async generateProof(
+    message: Partial<Message>
+  ): Promise<RateLimitProof> {
     const signal = toRLNSignal(message);
 
     console.time("proof_gen_timer");
@@ -47,10 +58,7 @@ export class RLNEncoder implements Encoder {
       this.idKey
     );
     console.timeEnd("proof_gen_timer");
-
-    protoMessage.rateLimitProof = proof;
-
-    return protoMessage;
+    return proof;
   }
 }
 
@@ -61,20 +69,20 @@ export class RLNDecoder<T extends Message> implements Decoder<RlnMessage<T>> {
     return this.decoder.contentTopic;
   }
 
-  decodeProto(bytes: Uint8Array): Promise<ProtoMessage | undefined> {
-    const protoMessage = proto_message.WakuMessage.decode(bytes);
+  fromWireToProtoObj(bytes: Uint8Array): Promise<ProtoMessage | undefined> {
+    const protoMessage = this.decoder.fromWireToProtoObj(bytes);
     log("Message decoded", protoMessage);
     return Promise.resolve(protoMessage);
   }
 
-  async decode(proto: ProtoMessage): Promise<RlnMessage<T> | undefined> {
-    const msg: T | undefined = await this.decoder.decode(proto);
+  async fromProtoObj(proto: ProtoMessage): Promise<RlnMessage<T> | undefined> {
+    const msg: T | undefined = await this.decoder.fromProtoObj(proto);
     if (!msg) return;
     return new RlnMessage(this.rlnInstance, msg, proto.rateLimitProof);
   }
 }
 
-function toRLNSignal(msg: Message): Uint8Array {
+function toRLNSignal(msg: Partial<Message>): Uint8Array {
   const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "");
   return new Uint8Array([...(msg.payload ?? []), ...contentTopicBytes]);
 }
