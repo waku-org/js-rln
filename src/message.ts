@@ -7,7 +7,7 @@ export class RlnMessage<T extends Message> implements Message {
   constructor(
     public rlnInstance: RLNInstance,
     public msg: T,
-    public rateLimitProof?: RateLimitProof
+    public rateLimitProof: RateLimitProof | undefined
   ) {}
 
   public verify(): boolean | undefined {
