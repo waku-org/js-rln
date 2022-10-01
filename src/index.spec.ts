@@ -33,7 +33,7 @@ describe("js-rln", () => {
     const epoch = new Date();
 
     // generating proof
-    const proof = await rlnInstance.generateProof(
+    const proof = await rlnInstance.generateRLNProof(
       uint8Msg,
       index,
       epoch,
@@ -42,24 +42,20 @@ describe("js-rln", () => {
 
     try {
       // verify the proof
-      const verifResult = rlnInstance.verifyProof(proof);
+      const verifResult = rlnInstance.verifyRLNProof(proof, uint8Msg);
       expect(verifResult).to.be.true;
     } catch (err) {
       assert.fail(0, 1, "should not have failed proof verification");
     }
 
     try {
-      // Modifying the proof so it's invalid
-      proof.proof[0] = 0;
-      proof.proof[1] = 1;
-      proof.proof[2] = 2;
-      proof.proof[3] = 3;
-
+      // Modifying the signal so it's invalid
+      uint8Msg[4] = 4;
       // verify the proof
-      const verifResult = rlnInstance.verifyProof(proof);
+      const verifResult = rlnInstance.verifyRLNProof(proof, uint8Msg);
       expect(verifResult).to.be.false;
     } catch (err) {
-      //
+      console.log(err);
     }
   });
 });

@@ -1,5 +1,4 @@
 import debug from "debug";
-import { utils } from "js-waku";
 import {
   Decoder,
   Encoder,
@@ -8,7 +7,7 @@ import {
   RateLimitProof,
 } from "js-waku/lib/interfaces";
 
-import { RlnMessage } from "./message.js";
+import { RlnMessage, toRLNSignal } from "./message.js";
 import { MembershipKey, RLNInstance } from "./rln.js";
 
 const log = debug("waku:message:rln-encoder");
@@ -29,6 +28,7 @@ export class RLNEncoder implements Encoder {
   }
 
   async toWire(message: Partial<Message>): Promise<Uint8Array | undefined> {
+    message.contentTopic = this.contentTopic;
     message.rateLimitProof = await this.generateProof(message);
 
     return this.encoder.toWire(message);
@@ -37,6 +37,7 @@ export class RLNEncoder implements Encoder {
   async toProtoObj(
     message: Partial<Message>
   ): Promise<ProtoMessage | undefined> {
+    message.contentTopic = this.contentTopic;
     const protoMessage = await this.encoder.toProtoObj(message);
     if (!protoMessage) return;
 
@@ -51,7 +52,7 @@ export class RLNEncoder implements Encoder {
     const signal = toRLNSignal(message);
 
     console.time("proof_gen_timer");
-    const proof = await this.rlnInstance.generateProof(
+    const proof = await this.rlnInstance.generateRLNProof(
       signal,
       this.index,
       message.timestamp,
@@ -80,9 +81,4 @@ export class RLNDecoder<T extends Message> implements Decoder<RlnMessage<T>> {
     if (!msg) return;
     return new RlnMessage(this.rlnInstance, msg, proto.rateLimitProof);
   }
-}
-
-function toRLNSignal(msg: Partial<Message>): Uint8Array {
-  const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "");
-  return new Uint8Array([...(msg.payload ?? []), ...contentTopicBytes]);
 }

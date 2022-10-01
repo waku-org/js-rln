@@ -1,7 +1,13 @@
+import { utils } from "js-waku";
 import { Message, RateLimitProof } from "js-waku/lib/interfaces";
 
 import { epochBytesToInt } from "./epoch.js";
 import { RLNInstance } from "./rln.js";
+
+export function toRLNSignal(msg: Partial<Message>): Uint8Array {
+  const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "");
+  return new Uint8Array([...(msg.payload ?? []), ...contentTopicBytes]);
+}
 
 export class RlnMessage<T extends Message> implements Message {
   constructor(
@@ -12,7 +18,7 @@ export class RlnMessage<T extends Message> implements Message {
 
   public verify(): boolean | undefined {
     return this.rateLimitProof
-      ? this.rlnInstance.verifyProof(this.rateLimitProof)
+      ? this.rlnInstance.verifyRLNProof(this.rateLimitProof, toRLNSignal(this))
       : undefined;
   }
 
