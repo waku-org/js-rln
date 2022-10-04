@@ -27,13 +27,13 @@ rln.create().then(async rlnInstance => {
 
     console.log("Generating proof...");
     console.time("proof_gen_timer");
-    let proof = await rlnInstance.generateProof(uint8Msg, index, epoch, memKeys.IDKey)
+    let proof = await rlnInstance.generateRLNProof(uint8Msg, index, epoch, memKeys.IDKey)
     console.timeEnd("proof_gen_timer");
     console.log("Proof", proof)
 
     try {
         // verify the proof
-        let verifResult = rlnInstance.verifyProof(proof);
+        let verifResult = rlnInstance.verifyRLNProof(proof, uint8Msg);
         console.log("Is proof verified?", verifResult ? "yes" : "no");
     } catch (err) {
         console.log("Invalid proof")
