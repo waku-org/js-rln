@@ -125,6 +125,6 @@
     ]
   },
   "dependencies": {
-    "@waku/zerokit-rln-wasm": "^0.0.3"
+    "@waku/zerokit-rln-wasm": "^0.0.4"
   }
 }
