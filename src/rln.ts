@@ -129,6 +129,10 @@ export class RLNInstance {
     zerokitRLN.insertMember(this.zkRLN, idCommitment);
   }
 
+  getMerkleRoot(): Uint8Array {
+    return zerokitRLN.getRoot(this.zkRLN);
+  }
+
   serializeMessage(
     uint8Msg: Uint8Array,
     memIndex: number,
@@ -195,6 +199,30 @@ export class RLNInstance {
     return zerokitRLN.verifyRLNProof(
       this.zkRLN,
       concatenate(pBytes, msgLen, msg)
+    );
+  }
+
+  verifyWithRoots(
+    proof: RateLimitProof | Uint8Array,
+    msg: Uint8Array
+  ): boolean {
+    let pBytes: Uint8Array;
+    if (proof instanceof Uint8Array) {
+      pBytes = proof;
+    } else {
+      pBytes = proofToBytes(proof);
+    }
+
+    // calculate message length
+    const msgLen = writeUIntLE(new Uint8Array(8), msg.length, 0, 8);
+
+    // obtain root
+    const root = zerokitRLN.getRoot(this.zkRLN);
+
+    return zerokitRLN.verifyWithRoots(
+      this.zkRLN,
+      concatenate(pBytes, msgLen, msg),
+      root
     );
   }
 }

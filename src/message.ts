@@ -18,7 +18,7 @@ export class RlnMessage<T extends Message> implements Message {
 
   public verify(): boolean | undefined {
     return this.rateLimitProof
-      ? this.rlnInstance.verifyRLNProof(this.rateLimitProof, toRLNSignal(this))
+      ? this.rlnInstance.verifyWithRoots(this.rateLimitProof, toRLNSignal(this)) // this.rlnInstance.verifyRLNProof once issue status-im/nwaku#1248 is fixed
       : undefined;
   }
 
