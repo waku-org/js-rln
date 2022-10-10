@@ -225,4 +225,25 @@ export class RLNInstance {
       root
     );
   }
+
+  verifyWithNoRoot(
+    proof: RateLimitProof | Uint8Array,
+    msg: Uint8Array
+  ): boolean {
+    let pBytes: Uint8Array;
+    if (proof instanceof Uint8Array) {
+      pBytes = proof;
+    } else {
+      pBytes = proofToBytes(proof);
+    }
+
+    // calculate message length
+    const msgLen = writeUIntLE(new Uint8Array(8), msg.length, 0, 8);
+
+    return zerokitRLN.verifyWithRoots(
+      this.zkRLN,
+      concatenate(pBytes, msgLen, msg),
+      new Uint8Array()
+    );
+  }
 }
