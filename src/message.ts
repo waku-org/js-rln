@@ -22,6 +22,15 @@ export class RlnMessage<T extends Message> implements Message {
       : undefined;
   }
 
+  public verifyNoRoot(): boolean | undefined {
+    return this.rateLimitProof
+      ? this.rlnInstance.verifyWithNoRoot(
+          this.rateLimitProof,
+          toRLNSignal(this)
+        ) // this.rlnInstance.verifyRLNProof once issue status-im/nwaku#1248 is fixed
+      : undefined;
+  }
+
   get payload(): Uint8Array | undefined {
     return this.msg.payload;
   }
