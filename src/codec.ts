@@ -42,7 +42,7 @@ export class RLNEncoder implements Encoder {
     if (!protoMessage) return;
 
     protoMessage.rateLimitProof = await this.generateProof(message);
-    log("Proof generated", message.rateLimitProof);
+    log("Proof generated", protoMessage.rateLimitProof);
     return protoMessage;
   }
 
