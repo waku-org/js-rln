@@ -23,7 +23,7 @@ export function epochIntToBytes(epoch: number): Uint8Array {
 }
 
 export function epochBytesToInt(bytes: Uint8Array): number {
-  const dv = new DataView(bytes.buffer);
+  const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const epoch = dv.getUint32(0, true);
   log("decoded epoch", epoch, bytes);
   return epoch;
