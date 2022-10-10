@@ -30,7 +30,7 @@ export class RLNEncoder implements Encoder {
   async toWire(message: Partial<Message>): Promise<Uint8Array | undefined> {
     message.contentTopic = this.contentTopic;
     message.rateLimitProof = await this.generateProof(message);
-
+    log("Proof generated", message.rateLimitProof);
     return this.encoder.toWire(message);
   }
 
@@ -42,7 +42,7 @@ export class RLNEncoder implements Encoder {
     if (!protoMessage) return;
 
     protoMessage.rateLimitProof = await this.generateProof(message);
-
+    log("Proof generated", message.rateLimitProof);
     return protoMessage;
   }
 
