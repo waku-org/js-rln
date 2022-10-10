@@ -10,7 +10,7 @@ import {
 import { RlnMessage, toRLNSignal } from "./message.js";
 import { MembershipKey, RLNInstance } from "./rln.js";
 
-const log = debug("waku:message:rln-encoder");
+const log = debug("waku:rln:encoder");
 
 export class RLNEncoder implements Encoder {
   public contentTopic: string;
