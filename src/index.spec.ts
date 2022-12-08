@@ -116,10 +116,14 @@ describe("js-rln", () => {
   it("should generate the same membership key if the same seed is provided", async function () {
     const rlnInstance = await rln.create();
     const seed = "This is a test seed";
-    const memKeys = rlnInstance.generateSeededMembershipKey(seed);
+    const memKeys1 = rlnInstance.generateSeededMembershipKey(seed);
     const memKeys2 = rlnInstance.generateSeededMembershipKey(seed);
 
-    expect(memKeys.IDCommitment).to.equal(memKeys2.IDCommitment);
-    expect(memKeys.IDKey).to.equal(memKeys2.IDKey);
+    memKeys1.IDCommitment.forEach((element, index) => {
+      expect(element).to.equal(memKeys2.IDCommitment[index]);
+    });
+    memKeys1.IDKey.forEach((element, index) => {
+      expect(element).to.equal(memKeys2.IDKey[index]);
+    });
   });
 });
