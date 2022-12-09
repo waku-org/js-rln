@@ -125,6 +125,15 @@ export class RLNInstance {
     return MembershipKey.fromBytes(memKeys);
   }
 
+  generateSeededMembershipKey(seed: string): MembershipKey {
+    const seedBytes = stringEncoder.encode(seed);
+    const memKeys = zerokitRLN.generateSeededMembershipKey(
+      this.zkRLN,
+      seedBytes
+    );
+    return MembershipKey.fromBytes(memKeys);
+  }
+
   insertMember(idCommitment: Uint8Array): void {
     zerokitRLN.insertMember(this.zkRLN, idCommitment);
   }
