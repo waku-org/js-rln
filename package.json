@@ -37,7 +37,7 @@
     "test:tsc": "tsc -p tsconfig.dev.json",
     "test:browser": "karma start karma.conf.cjs",
     "watch:build": "tsc -p tsconfig.json -w",
-    "watch:test": "mocha --watch",
+    "watch:test": "mocha -g \"RLN Contract abstraction\"",
     "prepublish": "npm run build",
     "reset-hard": "git clean -dfx && git reset --hard && npm i && npm run build"
   },
@@ -59,6 +59,7 @@
     "@size-limit/preset-big-lib": "^8.0.0",
     "@types/app-root-path": "^1.2.4",
     "@types/chai": "^4.2.15",
+    "@types/chai-spies": "^1.0.3",
     "@types/debug": "^4.1.7",
     "@types/mocha": "^9.1.0",
     "@types/node": "^17.0.6",
@@ -69,6 +70,7 @@
     "@web/rollup-plugin-import-meta-assets": "^1.0.7",
     "app-root-path": "^3.0.0",
     "chai": "^4.3.4",
+    "chai-spies": "^1.0.0",
     "cspell": "^5.14.0",
     "eslint": "^8.6.0",
     "eslint-config-prettier": "^8.3.0",
@@ -125,6 +127,7 @@
     ]
   },
   "dependencies": {
-    "@waku/zerokit-rln-wasm": "^0.0.5"
+    "@waku/zerokit-rln-wasm": "^0.0.5",
+    "ethers": "^5.7.2"
   }
 }
