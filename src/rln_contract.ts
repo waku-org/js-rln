@@ -8,16 +8,30 @@ type Member = {
   index: number;
 };
 
+type ContractOptions = {
+  address: string;
+  provider: ethers.Signer | ethers.providers.Provider;
+};
+
 export class RLNContract {
   private _contract: ethers.Contract;
   private membersFilter: ethers.EventFilter;
 
-  private members: Member[] = [];
+  private _members: Member[] = [];
 
-  constructor(
-    address: string,
-    provider: ethers.Signer | ethers.providers.Provider
-  ) {
+  public static async init(
+    rlnInstance: RLNInstance,
+    options: ContractOptions
+  ): Promise<RLNContract> {
+    const rlnContract = new RLNContract(options);
+
+    await rlnContract.fetchMembers(rlnInstance);
+    rlnContract.subscribeToMembers(rlnInstance);
+
+    return rlnContract;
+  }
+
+  constructor({ address, provider }: ContractOptions) {
     this._contract = new ethers.Contract(address, RLN_ABI, provider);
     this.membersFilter = this.contract.filters.MemberRegistered();
   }
@@ -26,8 +40,8 @@ export class RLNContract {
     return this._contract;
   }
 
-  public getMembers(): Member[] {
-    return this.members;
+  public get members(): Member[] {
+    return this._members;
   }
 
   public async fetchMembers(
