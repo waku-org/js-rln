@@ -9,7 +9,7 @@ type Member = {
 };
 
 export class RLNContract {
-  private contract: ethers.Contract;
+  private _contract: ethers.Contract;
   private membersFilter: ethers.EventFilter;
 
   private members: Member[] = [];
@@ -18,12 +18,12 @@ export class RLNContract {
     address: string,
     provider: ethers.Signer | ethers.providers.Provider
   ) {
-    this.contract = new ethers.Contract(address, RLN_ABI, provider);
+    this._contract = new ethers.Contract(address, RLN_ABI, provider);
     this.membersFilter = this.contract.filters.MemberRegistered();
   }
 
-  public getContract(): ethers.Contract {
-    return this.contract;
+  public get contract(): ethers.Contract {
+    return this._contract;
   }
 
   public getMembers(): Member[] {

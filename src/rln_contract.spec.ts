@@ -56,5 +56,5 @@ function mockEvent(): ethers.Event {
         "C4qAaeoqKlLv4Df910gnyuCfKLk7uhIhLZgcQfOMncYJpfZqW+Pdlv3ie6hm4WkGLaS5UIO2QPbyhN4EGx73c8vkTqjv5gK49w/pGIDi+ILMjYqYKexSwJPmPOMn0XM0FDbQ5wwXmZ4SIauYiQM8faZLDk8ltkAsIX/TKA6Dgw0=",
       index: 1,
     },
-  } as any as ethers.Event;
+  } as unknown as ethers.Event;
 }

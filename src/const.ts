@@ -6,7 +6,7 @@ export const RLN_ABI = [
   "event MemberWithdrawn(uint256 pubkey, uint256 index)",
 ];
 
-export const DEV_CONTRACT = {
+export const GOERLI_CONTRACT = {
   chainId: 5,
   startBlock: 7109391,
   address: "0x4252105670fe33d2947e8ead304969849e64f2a6",

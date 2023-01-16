@@ -48,7 +48,7 @@ rln.create().then(async rlnInstance => {
     const signature = await signer.signMessage(rln.DEFAULT_SIGNATURE_MESSAGE);
     console.log(`Got signature: ${signature}`);
 
-    const contract = new rln.RLNContract(rln.DEV_CONTRACT.address, signer);
+    const contract = new rln.RLNContract(rln.GOERLI_CONTRACT.address, signer);
 
     console.log("Fetching members from Contract");
     await contract.fetchMembers(rlnInstance, 8261478);
