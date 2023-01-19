@@ -1,9 +1,5 @@
 import { RLNDecoder, RLNEncoder } from "./codec.js";
-import {
-  DEFAULT_SIGNATURE_MESSAGE,
-  GOERLI_CONTRACT,
-  RLN_ABI,
-} from "./const.js";
+import { GOERLI_CONTRACT, RLN_ABI } from "./const.js";
 import { Proof, RLNInstance } from "./rln.js";
 import { MembershipKey } from "./rln.js";
 import { RLNContract } from "./rln_contract.js";
@@ -26,5 +22,4 @@ export {
   RLNContract,
   RLN_ABI,
   GOERLI_CONTRACT,
-  DEFAULT_SIGNATURE_MESSAGE,
 };

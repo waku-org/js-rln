@@ -44,8 +44,11 @@ rln.create().then(async rlnInstance => {
         "any"
     );
 
+    const DEFAULT_SIGNATURE_MESSAGE =
+        "The signature of this message will be used to generate your RLN credentials. Anyone accessing it may send messages on your behalf, please only share with the RLN dApp";  
+
     const signer = provider.getSigner();
-    const signature = await signer.signMessage(rln.DEFAULT_SIGNATURE_MESSAGE);
+    const signature = await signer.signMessage(DEFAULT_SIGNATURE_MESSAGE);
     console.log(`Got signature: ${signature}`);
 
     const contract = await rln.RLNContract.init(rlnInstance, {address: rln.GOERLI_CONTRACT.address, provider: signer });

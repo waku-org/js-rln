@@ -12,6 +12,3 @@ export const GOERLI_CONTRACT = {
   address: "0x4252105670fe33d2947e8ead304969849e64f2a6",
   abi: RLN_ABI,
 };
-
-export const DEFAULT_SIGNATURE_MESSAGE =
-  "The signature of this message will be used to generate your RLN credentials. Anyone accessing it may send messages on your behalf, please only share with the RLN dApp";
