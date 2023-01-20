@@ -1,6 +1,6 @@
 import chai from "chai";
 import spies from "chai-spies";
-import ethers from "ethers";
+import ethers from "ethers/lib/index.js";
 
 import * as rln from "./index.js";
 
