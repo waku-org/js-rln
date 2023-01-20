@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { RLN_ABI } from "./const.js";
+import { RLN_ABI } from "./constants.js";
 import { RLNInstance } from "./rln.js";
 
 type Member = {

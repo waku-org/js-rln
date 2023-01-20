@@ -1,5 +1,5 @@
 import { RLNDecoder, RLNEncoder } from "./codec.js";
-import { GOERLI_CONTRACT, RLN_ABI } from "./const.js";
+import { GOERLI_CONTRACT, RLN_ABI } from "./constants.js";
 import { Proof, RLNInstance } from "./rln.js";
 import { MembershipKey } from "./rln.js";
 import { RLNContract } from "./rln_contract.js";
