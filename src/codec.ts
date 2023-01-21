@@ -7,8 +7,8 @@ import {
   RateLimitProof,
 } from "js-waku/lib/interfaces";
 
-import { RlnMessage, toRLNSignal } from "./message.js";
-import { MembershipKey, RLNInstance } from "./rln.js";
+import { RlnMessage, toRLNSignal } from "./message";
+import { MembershipKey, RLNInstance } from "./rln";
 
 const log = debug("waku:rln:encoder");
 

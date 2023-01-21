@@ -1,6 +1,4 @@
-import { assert, expect } from "chai";
-
-import * as rln from "./index.js";
+import * as rln from "./index";
 
 describe("js-rln", () => {
   it("should verify a proof", async function () {
@@ -43,9 +41,9 @@ describe("js-rln", () => {
     try {
       // verify the proof
       const verifResult = rlnInstance.verifyRLNProof(proof, uint8Msg);
-      expect(verifResult).to.be.true;
+      expect(verifResult).toBe(true);
     } catch (err) {
-      assert.fail(0, 1, "should not have failed proof verification");
+      throw Error("should not have failed proof verification");
     }
 
     try {
@@ -53,7 +51,7 @@ describe("js-rln", () => {
       uint8Msg[4] = 4;
       // verify the proof
       const verifResult = rlnInstance.verifyRLNProof(proof, uint8Msg);
-      expect(verifResult).to.be.false;
+      expect(verifResult).toBe(false);
     } catch (err) {
       console.log(err);
     }
@@ -98,9 +96,9 @@ describe("js-rln", () => {
     try {
       // verify the proof
       const verifResult = rlnInstance.verifyRLNProof(proof, uint8Msg);
-      expect(verifResult).to.be.true;
+      expect(verifResult).toBe(true);
     } catch (err) {
-      assert.fail(0, 1, "should not have failed proof verification");
+      throw Error("should not have failed proof verification");
     }
 
     try {
@@ -108,7 +106,7 @@ describe("js-rln", () => {
       uint8Msg[4] = 4;
       // verify the proof
       const verifResult = rlnInstance.verifyRLNProof(proof, uint8Msg);
-      expect(verifResult).to.be.false;
+      expect(verifResult).toBe(false);
     } catch (err) {
       console.log(err);
     }
@@ -120,10 +118,10 @@ describe("js-rln", () => {
     const memKeys2 = rlnInstance.generateSeededMembershipKey(seed);
 
     memKeys1.IDCommitment.forEach((element, index) => {
-      expect(element).to.equal(memKeys2.IDCommitment[index]);
+      expect(element).toBe(memKeys2.IDCommitment[index]);
     });
     memKeys1.IDKey.forEach((element, index) => {
-      expect(element).to.equal(memKeys2.IDKey[index]);
+      expect(element).toBe(memKeys2.IDKey[index]);
     });
   });
 });

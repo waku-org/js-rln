@@ -1,8 +1,8 @@
 import { utils } from "js-waku";
 import { Message, RateLimitProof } from "js-waku/lib/interfaces";
 
-import { epochBytesToInt } from "./epoch.js";
-import { RLNInstance } from "./rln.js";
+import { epochBytesToInt } from "./epoch";
+import { RLNInstance } from "./rln";
 
 export function toRLNSignal(msg: Partial<Message>): Uint8Array {
   const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "");

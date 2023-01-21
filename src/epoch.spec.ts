@@ -1,7 +1,6 @@
-import { expect } from "chai";
 import fc from "fast-check";
 
-import { epochBytesToInt, epochIntToBytes } from "./epoch.js";
+import { epochBytesToInt, epochIntToBytes } from "./epoch";
 
 describe("epoch serialization", () => {
   it("Round trip", async function () {
@@ -10,7 +9,7 @@ describe("epoch serialization", () => {
         const bytes = epochIntToBytes(date);
         const _date = epochBytesToInt(bytes);
 
-        expect(_date.valueOf()).to.eq(date.valueOf());
+        expect(_date.valueOf()).toBe(date.valueOf());
       })
     );
   });

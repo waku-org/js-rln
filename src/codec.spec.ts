@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import {
   generatePrivateKey,
   generateSymmetricKey,
@@ -16,11 +15,11 @@ import {
   SymEncoder,
 } from "js-waku/lib/waku_message/version_1";
 
-import { RLNDecoder, RLNEncoder } from "./codec.js";
-import { epochBytesToInt } from "./epoch.js";
-import { RlnMessage } from "./message.js";
+import { RLNDecoder, RLNEncoder } from "./codec";
+import { epochBytesToInt } from "./epoch";
+import { RlnMessage } from "./message";
 
-import * as rln from "./index.js";
+import * as rln from "./index";
 
 const TestContentTopic = "/test/1/waku-message/utf8";
 
@@ -46,21 +45,21 @@ describe("RLN codec with version 0", () => {
 
     const bytes = await rlnEncoder.toWire({ payload });
 
-    expect(bytes).to.not.be.undefined;
+    expect(bytes).toBeDefined();
     const protoResult = await rlnDecoder.fromWireToProtoObj(bytes!);
-    expect(protoResult).to.not.be.undefined;
+    expect(protoResult).toBeDefined();
     const msg = (await rlnDecoder.fromProtoObj(protoResult!))!;
 
-    expect(msg.rateLimitProof).to.not.be.undefined;
-    expect(msg.verify()).to.be.true;
-    expect(msg.verifyNoRoot()).to.be.true;
-    expect(msg.epoch).to.not.be.undefined;
-    expect(msg.epoch).to.be.gt(0);
+    expect(msg.rateLimitProof).toBeDefined();
+    expect(msg.verify()).toBe(true);
+    expect(msg.verifyNoRoot()).toBe(true);
+    expect(msg.epoch).toBeDefined();
+    expect(msg.epoch).toBeGreaterThan(0);
 
-    expect(msg.contentTopic).to.eq(TestContentTopic);
-    expect(msg.msg.version).to.eq(0);
-    expect(msg.payload).to.deep.eq(payload);
-    expect(msg.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).toBe(TestContentTopic);
+    expect(msg.msg.version).toBe(0);
+    expect(msg.payload).toEqual(payload);
+    expect(msg.timestamp).toBeDefined();
   });
 
   it("toProtoObj", async function () {
@@ -84,23 +83,23 @@ describe("RLN codec with version 0", () => {
 
     const proto = await rlnEncoder.toProtoObj({ payload });
 
-    expect(proto).to.not.be.undefined;
+    expect(proto).toBeDefined();
     const msg = (await rlnDecoder.fromProtoObj(
       proto!
     )) as RlnMessage<MessageV0>;
 
-    expect(msg).to.not.be.undefined;
-    expect(msg.rateLimitProof).to.not.be.undefined;
+    expect(msg).toBeDefined();
+    expect(msg.rateLimitProof).toBeDefined();
 
-    expect(msg.verify()).to.be.true;
-    expect(msg.verifyNoRoot()).to.be.true;
-    expect(msg.epoch).to.not.be.undefined;
-    expect(msg.epoch).to.be.gt(0);
+    expect(msg.verify()).toBe(true);
+    expect(msg.verifyNoRoot()).toBe(true);
+    expect(msg.epoch).toBeDefined();
+    expect(msg.epoch).toBeGreaterThan(0);
 
-    expect(msg.contentTopic).to.eq(TestContentTopic);
-    expect(msg.msg.version).to.eq(0);
-    expect(msg.payload).to.deep.eq(payload);
-    expect(msg.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).toBe(TestContentTopic);
+    expect(msg.msg.version).toBe(0);
+    expect(msg.payload).toEqual(payload);
+    expect(msg.timestamp).toBeDefined();
   });
 });
 
@@ -128,22 +127,22 @@ describe("RLN codec with version 1", () => {
 
     const bytes = await rlnEncoder.toWire({ payload });
 
-    expect(bytes).to.not.be.undefined;
+    expect(bytes).toBeDefined();
     const protoResult = await rlnDecoder.fromWireToProtoObj(bytes!);
 
-    expect(protoResult).to.not.be.undefined;
+    expect(protoResult).toBeDefined();
     const msg = (await rlnDecoder.fromProtoObj(protoResult!))!;
 
-    expect(msg.rateLimitProof).to.not.be.undefined;
-    expect(msg.verify()).to.be.true;
-    expect(msg.verifyNoRoot()).to.be.true;
-    expect(msg.epoch).to.not.be.undefined;
-    expect(msg.epoch).to.be.gt(0);
+    expect(msg.rateLimitProof).toBeDefined();
+    expect(msg.verify()).toBe(true);
+    expect(msg.verifyNoRoot()).toBe(true);
+    expect(msg.epoch).toBeDefined();
+    expect(msg.epoch).toBeGreaterThan(0);
 
-    expect(msg.contentTopic).to.eq(TestContentTopic);
-    expect(msg.msg.version).to.eq(1);
-    expect(msg.payload).to.deep.eq(payload);
-    expect(msg.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).toBe(TestContentTopic);
+    expect(msg.msg.version).toBe(1);
+    expect(msg.payload).toEqual(payload);
+    expect(msg.timestamp).toBeDefined();
   });
 
   it("Symmetric, toProtoObj", async function () {
@@ -169,23 +168,23 @@ describe("RLN codec with version 1", () => {
 
     const proto = await rlnEncoder.toProtoObj({ payload });
 
-    expect(proto).to.not.be.undefined;
+    expect(proto).toBeDefined();
     const msg = (await rlnDecoder.fromProtoObj(
       proto!
     )) as RlnMessage<MessageV0>;
 
-    expect(msg).to.not.be.undefined;
-    expect(msg.rateLimitProof).to.not.be.undefined;
+    expect(msg).toBeDefined();
+    expect(msg.rateLimitProof).toBeDefined();
 
-    expect(msg.verify()).to.be.true;
-    expect(msg.verifyNoRoot()).to.be.true;
-    expect(msg.epoch).to.not.be.undefined;
-    expect(msg.epoch).to.be.gt(0);
+    expect(msg.verify()).toBe(true);
+    expect(msg.verifyNoRoot()).toBe(true);
+    expect(msg.epoch).toBeDefined();
+    expect(msg.epoch).toBeGreaterThan(0);
 
-    expect(msg.contentTopic).to.eq(TestContentTopic);
-    expect(msg.msg.version).to.eq(1);
-    expect(msg.payload).to.deep.eq(payload);
-    expect(msg.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).toBe(TestContentTopic);
+    expect(msg.msg.version).toBe(1);
+    expect(msg.payload).toEqual(payload);
+    expect(msg.timestamp).toBeDefined();
   });
 
   it("Asymmetric, toWire", async function () {
@@ -212,22 +211,22 @@ describe("RLN codec with version 1", () => {
 
     const bytes = await rlnEncoder.toWire({ payload });
 
-    expect(bytes).to.not.be.undefined;
+    expect(bytes).toBeDefined();
     const protoResult = await rlnDecoder.fromWireToProtoObj(bytes!);
 
-    expect(protoResult).to.not.be.undefined;
+    expect(protoResult).toBeDefined();
     const msg = (await rlnDecoder.fromProtoObj(protoResult!))!;
 
-    expect(msg.rateLimitProof).to.not.be.undefined;
-    expect(msg.verify()).to.be.true;
-    expect(msg.verifyNoRoot()).to.be.true;
-    expect(msg.epoch).to.not.be.undefined;
-    expect(msg.epoch).to.be.gt(0);
+    expect(msg.rateLimitProof).toBeDefined();
+    expect(msg.verify()).toBe(true);
+    expect(msg.verifyNoRoot()).toBe(true);
+    expect(msg.epoch).toBeDefined();
+    expect(msg.epoch).toBeGreaterThan(0);
 
-    expect(msg.contentTopic).to.eq(TestContentTopic);
-    expect(msg.msg.version).to.eq(1);
-    expect(msg.payload).to.deep.eq(payload);
-    expect(msg.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).toBe(TestContentTopic);
+    expect(msg.msg.version).toBe(1);
+    expect(msg.payload).toEqual(payload);
+    expect(msg.timestamp).toBeDefined();
   });
 
   it("Asymmetric, toProtoObj", async function () {
@@ -254,23 +253,23 @@ describe("RLN codec with version 1", () => {
 
     const proto = await rlnEncoder.toProtoObj({ payload });
 
-    expect(proto).to.not.be.undefined;
+    expect(proto).toBeDefined();
     const msg = (await rlnDecoder.fromProtoObj(
       proto!
     )) as RlnMessage<MessageV0>;
 
-    expect(msg).to.not.be.undefined;
-    expect(msg.rateLimitProof).to.not.be.undefined;
+    expect(msg).toBeDefined();
+    expect(msg.rateLimitProof).toBeDefined();
 
-    expect(msg.verify()).to.be.true;
-    expect(msg.verifyNoRoot()).to.be.true;
-    expect(msg.epoch).to.not.be.undefined;
-    expect(msg.epoch).to.be.gt(0);
+    expect(msg.verify()).toBe(true);
+    expect(msg.verifyNoRoot()).toBe(true);
+    expect(msg.epoch).toBeDefined();
+    expect(msg.epoch).toBeGreaterThan(0);
 
-    expect(msg.contentTopic).to.eq(TestContentTopic);
-    expect(msg.msg.version).to.eq(1);
-    expect(msg.payload).to.deep.eq(payload);
-    expect(msg.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).toBe(TestContentTopic);
+    expect(msg.msg.version).toBe(1);
+    expect(msg.payload).toEqual(payload);
+    expect(msg.timestamp).toBeDefined();
   });
 });
 
@@ -296,7 +295,7 @@ describe("RLN Codec - epoch", () => {
 
     const proto = await rlnEncoder.toProtoObj({ payload });
 
-    expect(proto).to.not.be.undefined;
+    expect(proto).toBeDefined();
     const msg = (await rlnDecoder.fromProtoObj(
       proto!
     )) as RlnMessage<MessageV0>;
@@ -304,18 +303,18 @@ describe("RLN Codec - epoch", () => {
     const epochBytes = proto!.rateLimitProof!.epoch;
     const epoch = epochBytesToInt(epochBytes);
 
-    expect(msg).to.not.be.undefined;
-    expect(msg.rateLimitProof).to.not.be.undefined;
+    expect(msg).toBeDefined();
+    expect(msg.rateLimitProof).toBeDefined();
 
-    expect(msg.verify()).to.be.true;
-    expect(msg.verifyNoRoot()).to.be.true;
-    expect(msg.epoch).to.not.be.undefined;
-    expect(msg.epoch!.toString(10).length).to.eq(9);
-    expect(msg.epoch).to.eq(epoch);
+    expect(msg.verify()).toBe(true);
+    expect(msg.verifyNoRoot()).toBe(true);
+    expect(msg.epoch).toBeDefined();
+    expect(msg.epoch!.toString(10).length).toBe(9);
+    expect(msg.epoch).toBe(epoch);
 
-    expect(msg.contentTopic).to.eq(TestContentTopic);
-    expect(msg.msg.version).to.eq(0);
-    expect(msg.payload).to.deep.eq(payload);
-    expect(msg.timestamp).to.not.be.undefined;
+    expect(msg.contentTopic).toBe(TestContentTopic);
+    expect(msg.msg.version).toBe(0);
+    expect(msg.payload).toEqual(payload);
+    expect(msg.timestamp).toBeDefined();
   });
 });
