@@ -22,7 +22,6 @@ describe("RLN Contract abstraction", () => {
     rlnContract["_contract"] = {
       queryFilter: () => Promise.resolve([mockEvent()]),
     } as unknown as ethers.Contract;
-    chai.spy.on(rlnContract, "_contract.queryFilter");
 
     await rlnContract.fetchMembers(rlnInstance);
 
@@ -45,9 +44,7 @@ describe("RLN Contract abstraction", () => {
         Promise.resolve({ wait: () => Promise.resolve(undefined) }),
       MEMBERSHIP_DEPOSIT: () => Promise.resolve(1),
     } as unknown as ethers.Contract;
-    chai.spy.on(rlnContract, "contract.MEMBERSHIP_DEPOSIT");
-
-    const contractSpy = chai.spy.on(rlnContract, "_contract.register");
+    const contractSpy = chai.spy.on(rlnContract["_contract"], "register");
 
     await rlnContract.registerMember(rlnInstance, mockSignature);
 
