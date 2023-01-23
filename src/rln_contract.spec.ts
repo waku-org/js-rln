@@ -22,7 +22,7 @@ describe("RLN Contract abstraction", () => {
     rlnContract["_contract"] = {
       queryFilter: () => Promise.resolve([mockEvent()]),
     } as unknown as ethers.Contract;
-    chai.spy.on(rlnContract, "contract.queryFilter");
+    chai.spy.on(rlnContract, "_contract.queryFilter");
 
     await rlnContract.fetchMembers(rlnInstance);
 
@@ -47,7 +47,7 @@ describe("RLN Contract abstraction", () => {
     } as unknown as ethers.Contract;
     chai.spy.on(rlnContract, "contract.MEMBERSHIP_DEPOSIT");
 
-    const contractSpy = chai.spy.on(rlnContract, "contract.register");
+    const contractSpy = chai.spy.on(rlnContract, "_contract.register");
 
     await rlnContract.registerMember(rlnInstance, mockSignature);
 
@@ -58,8 +58,7 @@ describe("RLN Contract abstraction", () => {
 function mockEvent(): ethers.Event {
   return {
     args: {
-      pubkey:
-        "0x1f8b080000000000040093508b4830450221009a8e0c9f01e0f1c5b2d8c6c5faaed5f6c7b6f5e5e5c6e5f6f5e5c7b6f5e5e5c6e22009a8e0c9f01e0f1c5b2d8c6c5faaed5f6c7b6f5e5e5c6e5f6f5e5c7b6f5e5e5c6e",
+      pubkey: "0x9e7d3f8f8c7a1d2bef96a2e8dbb8e7c1ea9a9ab78d6b3c6c3c",
       index: 1,
     },
   } as unknown as ethers.Event;
