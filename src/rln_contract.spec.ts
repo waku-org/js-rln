@@ -10,7 +10,7 @@ describe("RLN Contract abstraction", () => {
   it("should be able to fetch members from events and store to rln instance", async () => {
     const rlnInstance = await rln.create();
 
-    chai.spy.on(rlnInstance, "insertMember");
+    chai.spy.on(rlnInstance, "insertMember", () => undefined);
 
     const voidSigner = new ethers.VoidSigner(rln.GOERLI_CONTRACT.address);
     const rlnContract = new rln.RLNContract({
@@ -40,6 +40,7 @@ describe("RLN Contract abstraction", () => {
     });
 
     rlnContract["_contract"] = {
+      register: () => Promise.resolve({ wait: Promise.resolve(undefined) }),
       MEMBERSHIP_DEPOSIT: () => Promise.resolve(1),
     } as unknown as ethers.Contract;
     chai.spy.on(rlnContract, "contract.MEMBERSHIP_DEPOSIT");
