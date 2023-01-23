@@ -10,7 +10,8 @@ describe("RLN Contract abstraction", () => {
   it("should be able to fetch members from events and store to rln instance", async () => {
     const rlnInstance = await rln.create();
 
-    chai.spy.on(rlnInstance, "insertMember", () => undefined);
+    rlnInstance.insertMember = () => undefined;
+    const insertMemberSpy = chai.spy.on(rlnInstance, "insertMember");
 
     const voidSigner = new ethers.VoidSigner(rln.GOERLI_CONTRACT.address);
     const rlnContract = new rln.RLNContract({
@@ -25,7 +26,7 @@ describe("RLN Contract abstraction", () => {
 
     await rlnContract.fetchMembers(rlnInstance);
 
-    chai.expect(rlnInstance.insertMember).to.have.been.called();
+    chai.expect(insertMemberSpy).to.have.been.called();
   });
 
   it("should register a member by signature", async () => {
@@ -40,7 +41,8 @@ describe("RLN Contract abstraction", () => {
     });
 
     rlnContract["_contract"] = {
-      register: () => Promise.resolve({ wait: Promise.resolve(undefined) }),
+      register: () =>
+        Promise.resolve({ wait: () => Promise.resolve(undefined) }),
       MEMBERSHIP_DEPOSIT: () => Promise.resolve(1),
     } as unknown as ethers.Contract;
     chai.spy.on(rlnContract, "contract.MEMBERSHIP_DEPOSIT");
@@ -57,7 +59,7 @@ function mockEvent(): ethers.Event {
   return {
     args: {
       pubkey:
-        "C4qAaeoqKlLv4Df910gnyuCfKLk7uhIhLZgcQfOMncYJpfZqW+Pdlv3ie6hm4WkGLaS5UIO2QPbyhN4EGx73c8vkTqjv5gK49w/pGIDi+ILMjYqYKexSwJPmPOMn0XM0FDbQ5wwXmZ4SIauYiQM8faZLDk8ltkAsIX/TKA6Dgw0=",
+        "0x1f8b080000000000040093508b4830450221009a8e0c9f01e0f1c5b2d8c6c5faaed5f6c7b6f5e5e5c6e5f6f5e5c7b6f5e5e5c6e22009a8e0c9f01e0f1c5b2d8c6c5faaed5f6c7b6f5e5e5c6e5f6f5e5c7b6f5e5e5c6e",
       index: 1,
     },
   } as unknown as ethers.Event;
