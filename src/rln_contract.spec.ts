@@ -39,7 +39,7 @@ describe("RLN Contract abstraction", () => {
       provider: voidSigner,
     });
 
-    rlnContract["_contract"] = {
+    rlnContract["_contract" as any] = {
       MEMBERSHIP_DEPOSIT: () => Promise.resolve(1),
     };
     chai.spy.on(rlnContract, "contract.MEMBERSHIP_DEPOSIT");
