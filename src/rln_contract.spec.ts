@@ -18,9 +18,10 @@ describe("RLN Contract abstraction", () => {
       provider: voidSigner,
     });
 
-    chai.spy.on(rlnContract, "contract.queryFilter", () =>
-      Promise.resolve([mockEvent()])
-    );
+    rlnContract["_contract" as any] = {
+      queryFilter: () => Promise.resolve([mockEvent()]),
+    };
+    chai.spy.on(rlnContract, "contract.queryFilter");
 
     await rlnContract.fetchMembers(rlnInstance);
 
@@ -38,9 +39,10 @@ describe("RLN Contract abstraction", () => {
       provider: voidSigner,
     });
 
-    chai.spy.on(rlnContract, "contract.MEMBERSHIP_DEPOSIT", () =>
-      Promise.resolve(1)
-    );
+    rlnContract["_contract"] = {
+      MEMBERSHIP_DEPOSIT: () => Promise.resolve(1),
+    };
+    chai.spy.on(rlnContract, "contract.MEMBERSHIP_DEPOSIT");
 
     const contractSpy = chai.spy.on(rlnContract, "contract.register");
 
