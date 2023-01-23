@@ -35,7 +35,7 @@
     "test:prettier": "prettier \"src/**/*.ts\" \"./*.json\" \"*.*js\" \".github/**/*.yml\" --list-different",
     "test:spelling": "cspell \"{*.md,.github/*.md,src/**/*.ts}\"",
     "test:tsc": "tsc -p tsconfig.dev.json",
-    "test:unit": "jest",
+    "test:browser": "jest",
     "watch:build": "tsc -p tsconfig.json -w",
     "watch:test": "jest --watch",
     "reset-hard": "git clean -dfx && git reset --hard && npm i && npm run build"
