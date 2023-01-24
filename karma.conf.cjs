@@ -5,7 +5,9 @@ const path = require("path");
 const ResolveTypeScriptPlugin = require("resolve-typescript-plugin");
 
 const output = {
-  path: path.resolve(__dirname),
+  path:
+    path.join(os.tmpdir(), "_karma_webpack_") +
+    Math.floor(Math.random() * 1000000),
 };
 
 module.exports = function (config) {
