@@ -36,7 +36,7 @@ function buildBigIntFromUint8Array(array: Uint8Array): bigint {
   // hack for Uint8Array.map that has Uint8Array -> Uint8Array definition that prevents from mapping to other types
   const hexString = (bigEndianArray as unknown as number[])
     .map((b) => b.toString(16).padStart(2, "0"))
-    .join();
+    .join("");
   return BigInt(`0x${hexString}`);
 }
 
