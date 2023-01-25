@@ -91,11 +91,10 @@ export class RLNContract {
     const membershipKey = await rlnInstance.generateSeededMembershipKey(
       signature
     );
-    const pubkey = ethers.BigNumber.from(membershipKey.IDCommitmentBigInt);
     const depositValue = await this.contract.MEMBERSHIP_DEPOSIT();
 
     const txRegisterResponse: ethers.ContractTransaction =
-      await this.contract.register(pubkey, {
+      await this.contract.register(membershipKey.IDCommitmentBigInt, {
         value: depositValue,
       });
     const txRegisterReceipt = await txRegisterResponse.wait();

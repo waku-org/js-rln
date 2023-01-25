@@ -32,12 +32,8 @@ function concatenate(...input: Uint8Array[]): Uint8Array {
  * @returns BigInt
  */
 function buildBigIntFromUint8Array(array: Uint8Array): bigint {
-  const bigEndianArray = array.slice().reverse();
-  // hack for Uint8Array.map that has Uint8Array -> Uint8Array definition that prevents from mapping to other types
-  const hexString = (bigEndianArray as unknown as number[])
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return BigInt(`0x${hexString}`);
+  const dataView = new DataView(array.buffer);
+  return dataView.getBigUint64(0, true);
 }
 
 const stringEncoder = new TextEncoder();
@@ -80,8 +76,8 @@ export class MembershipKey {
   static fromBytes(memKeys: Uint8Array): MembershipKey {
     const idKey = memKeys.subarray(0, 32);
     const idCommitment = memKeys.subarray(32);
-    const idCommitmentBitInt = buildBigIntFromUint8Array(idCommitment);
-    return new MembershipKey(idKey, idCommitment, idCommitmentBitInt);
+    const idCommitmentBigInt = buildBigIntFromUint8Array(idCommitment);
+    return new MembershipKey(idKey, idCommitment, idCommitmentBigInt);
   }
 }
 
