@@ -26,6 +26,16 @@ function concatenate(...input: Uint8Array[]): Uint8Array {
   return result;
 }
 
+/**
+ * Transforms Uint8Array into BigInt
+ * @param array: Uint8Array
+ * @returns BigInt
+ */
+function buildBigIntFromUint8Array(array: Uint8Array): bigint {
+  const dataView = new DataView(array.buffer);
+  return dataView.getBigUint64(0, true);
+}
+
 const stringEncoder = new TextEncoder();
 
 const DEPTH = 20;
@@ -59,13 +69,15 @@ export async function create(): Promise<RLNInstance> {
 export class MembershipKey {
   constructor(
     public readonly IDKey: Uint8Array,
-    public readonly IDCommitment: Uint8Array
+    public readonly IDCommitment: Uint8Array,
+    public readonly IDCommitmentBigInt: bigint
   ) {}
 
   static fromBytes(memKeys: Uint8Array): MembershipKey {
     const idKey = memKeys.subarray(0, 32);
     const idCommitment = memKeys.subarray(32);
-    return new MembershipKey(idKey, idCommitment);
+    const idCommitmentBigInt = buildBigIntFromUint8Array(idCommitment);
+    return new MembershipKey(idKey, idCommitment, idCommitmentBigInt);
   }
 }
 

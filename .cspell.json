@@ -3,14 +3,15 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/master/cspell.schema.json",
   "language": "en",
   "words": [
-    "Waku",
+    "arrayify",
+    "circom",
     "keypair",
     "merkle",
+    "nwaku",
     "vkey",
-    "zkey",
-    "circom",
+    "Waku",
     "zerokit",
-    "nwaku"
+    "zkey"
   ],
   "flagWords": [],
   "ignorePaths": [
