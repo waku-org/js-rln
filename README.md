@@ -1,9 +1,32 @@
-# js-rln
+# `@waku/rln`
 
-Browser library providing the cryptographic functions for Waku RLN Relay
-https://rfc.vac.dev/spec/17/
+This browser library enables the usage of RLN with Waku, as specified in the [Waku v2 RLN Relay RFC](https://rfc.vac.dev/spec/17/).
 
-### Install
+## Purpose
+
+### RLN Cryptography
+
+The RLN cryptographic function are provided by [zerokit](https://github.com/vacp2p/zerokit/).
+This is imported via the `@waku/zerokit-rln-wasm` dependencies which contains a WASM extract of zerokit's RLN functions.
+
+Note that the WASM blob uses browser APIs, **NodeJS is not supported**.
+
+### Waku Interfaces
+
+This library implements the [`IEncoder`](https://github.com/waku-org/js-waku/blob/604ba1a889f1994bd27f5749107c3a5b2ef490d5/packages/interfaces/src/message.ts#L43)
+and [`IDecoder`](https://github.com/waku-org/js-waku/blob/604ba1a889f1994bd27f5749107c3a5b2ef490d5/packages/interfaces/src/message.ts#L58)
+interfaces of [js-waku](https://github.com/waku-org/js-waku).
+
+This enables a seamless usage with js-waku applications, as demonstrated in the [rln-js example](https://github.com/waku-org/js-waku-examples/tree/master/examples/rln-js).
+
+### Comparison to Existing Work
+
+[Rate-Limiting-Nullifier/rlnjs](https://github.com/Rate-Limiting-Nullifier/rlnjs)
+is an existing JavaScript / TypeScript library that already provides RLN cryptographic functionalities for the browser.
+
+The core difference is that `@waku/rln` uses [zerokit](https://github.com/vacp2p/zerokit/) for cryptography and provide opinionated interfaces to use RLN specifically in the context of Waku.
+
+## Install
 
 ```
 npm install @waku/rln
@@ -13,7 +36,15 @@ npm install @waku/rln
 yarn add @waku/rln
 ```
 
-### Running example app
+Or to use ESM import directly from a `<script>` tag:
+
+```html
+<script type="module">
+  import * as rln from "https://unpkg.com/@waku/rln@0.0.13/bundle/index.js";
+</script>
+```
+
+## Running example app
 
 ```
 git clone https://github.com/waku-org/js-rln
@@ -23,40 +54,41 @@ cd js-rln/example
 npm install  # or yarn
 
 npm start
-
 ```
 
 Browse http://localhost:8080 and open the dev tools console to see the proof being generated and its verification
 
-### Usage
+## Usage
 
-#### Initializing the library
+### Initializing the Library
 
 ```js
 import * as rln from "@waku/rln";
 
-const rlnInstance = wait rln.create();
+const rlnInstance = await rln.create();
 ```
 
-#### Generating RLN membership keypair
+### Generating RLN Membership Keypair
 
 ```js
 let memKeys = rlnInstance.generateMembershipKey();
 ```
 
-#### Generating RLN membership keypair using a seed
+### Generating RLN Membership Keypair Using a Seed
+
+This can be used to generate credentials from a signature hash (e.g. signed by an Ethereum account).
 
 ```js
 let memKeys = rlnInstance.generateSeededMembershipKey(seed);
 ```
 
-#### Adding membership keys into merkle tree
+### Adding Membership Keys Into Merkle Tree
 
 ```js
 rlnInstance.insertMember(memKeys.IDCommitment);
 ```
 
-#### Generating a proof
+### Generating a Proof
 
 ```js
 // prepare the message
@@ -76,22 +108,23 @@ const proof = await rlnInstance.generateProof(
 );
 ```
 
-#### Verifying a proof
+### Verifying a Proof
 
 ```js
 try {
   // verify the proof
-  const verificationResult = rlnInstance.verifyProof(proof);
+  const verificationResult = rlnInstance.verifyProof(proof, uint8Msg);
   console.log("Is proof verified?", verificationResult ? "yes" : "no");
 } catch (err) {
   console.log("Invalid proof");
 }
 ```
 
-### Updating circuit, verification key and zkey
+### Updating Circuit, Verification Key and Zkey
 
-The RLN specs defines the defaults. These values are fixed and should not
-change. Currently, these [resources](https://github.com/vacp2p/zerokit/tree/master/rln/resources/tree_height_20) are being used.
+The RLN specs defines the defaults.
+These values are fixed and should not change.
+Currently, these [resources](https://github.com/vacp2p/zerokit/tree/master/rln/resources/tree_height_20) are being used.
 If they change, this file needs to be updated in `resources.ts` which
 contains these values encoded in base64 in this format:
 
@@ -104,9 +137,9 @@ export {verification_key, circuit, zkey};
 
 A tool like GNU's `base64` could be used to encode this data.
 
-### Updating zerokit
+### Updating Zerokit
 
-1. Make sure you have nodejs installed and a C compiler
+1. Make sure you have NodeJS installed and a C compiler
 2. Install wasm-pack
 
 ```
@@ -137,6 +170,6 @@ Licensed and distributed under either of
 
 or
 
-- Apache License, Version 2.0, ([LICENSE-APACHEv2](LICENSE-APACHEv2) or http://www.apache.org/licenses/LICENSE-2.0)
+- Apache License, Version 2.0, ([LICENSE-APACHE-v2](LICENSE-APACHE-v2) or http://www.apache.org/licenses/LICENSE-2.0)
 
 at your option. These files may not be copied, modified, or distributed except according to those terms.
