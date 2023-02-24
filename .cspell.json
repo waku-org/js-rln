@@ -8,6 +8,7 @@
     "keypair",
     "merkle",
     "nwaku",
+    "rlnjs",
     "vkey",
     "Waku",
     "zerokit",
