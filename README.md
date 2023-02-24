@@ -9,6 +9,8 @@ This browser library enables the usage of RLN with Waku, as specified in the [Wa
 The RLN cryptographic function are provided by [zerokit](https://github.com/vacp2p/zerokit/).
 This is imported via the `@waku/zerokit-rln-wasm` dependencies which contains a WASM extract of zerokit's RLN functions.
 
+Note that RLN Credentials generated with `zerokit`, and hence `@waku/rln`, are compatible with semaphore credentials.
+
 Note that the WASM blob uses browser APIs, **NodeJS is not supported**.
 
 ### Waku Interfaces
