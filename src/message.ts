@@ -1,24 +1,34 @@
-import { utils } from "js-waku";
-import { Message, RateLimitProof } from "js-waku/lib/interfaces";
+import type {
+  IDecodedMessage,
+  IMessage,
+  IRateLimitProof,
+} from "@waku/interfaces";
+import utils from "@waku/utils/bytes";
 
 import { epochBytesToInt } from "./epoch.js";
 import { RLNInstance } from "./rln.js";
 
-export function toRLNSignal(msg: Partial<Message>): Uint8Array {
-  const contentTopicBytes = utils.utf8ToBytes(msg.contentTopic ?? "");
+export function toRLNSignal(contentTopic: string, msg: IMessage): Uint8Array {
+  const contentTopicBytes = utils.utf8ToBytes(contentTopic ?? "");
   return new Uint8Array([...(msg.payload ?? []), ...contentTopicBytes]);
 }
 
-export class RlnMessage<T extends Message> implements Message {
+export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
+  public pubSubTopic = "";
+  public ephemeral = false;
+
   constructor(
     public rlnInstance: RLNInstance,
     public msg: T,
-    public rateLimitProof: RateLimitProof | undefined
+    public rateLimitProof: IRateLimitProof | undefined
   ) {}
 
   public verify(): boolean | undefined {
     return this.rateLimitProof
-      ? this.rlnInstance.verifyWithRoots(this.rateLimitProof, toRLNSignal(this)) // this.rlnInstance.verifyRLNProof once issue status-im/nwaku#1248 is fixed
+      ? this.rlnInstance.verifyWithRoots(
+          this.rateLimitProof,
+          toRLNSignal(this.msg.contentTopic, this.msg)
+        ) // this.rlnInstance.verifyRLNProof once issue status-im/nwaku#1248 is fixed
       : undefined;
   }
 
@@ -26,16 +36,16 @@ export class RlnMessage<T extends Message> implements Message {
     return this.rateLimitProof
       ? this.rlnInstance.verifyWithNoRoot(
           this.rateLimitProof,
-          toRLNSignal(this)
+          toRLNSignal(this.msg.contentTopic, this.msg)
         ) // this.rlnInstance.verifyRLNProof once issue status-im/nwaku#1248 is fixed
       : undefined;
   }
 
-  get payload(): Uint8Array | undefined {
+  get payload(): Uint8Array {
     return this.msg.payload;
   }
 
-  get contentTopic(): string | undefined {
+  get contentTopic(): string {
     return this.msg.contentTopic;
   }
 

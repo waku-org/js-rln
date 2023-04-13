@@ -1,5 +1,5 @@
+import type { IRateLimitProof } from "@waku/interfaces";
 import init, * as zerokitRLN from "@waku/zerokit-rln-wasm";
-import { RateLimitProof } from "js-waku/lib/interfaces";
 
 import { writeUIntLE } from "./byte_utils.js";
 import { dateToEpoch, epochIntToBytes } from "./epoch.js";
@@ -89,7 +89,7 @@ const shareYOffset = shareXOffset + 32;
 const nullifierOffset = shareYOffset + 32;
 const rlnIdentifierOffset = nullifierOffset + 32;
 
-export class Proof implements RateLimitProof {
+export class Proof implements IRateLimitProof {
   readonly proof: Uint8Array;
   readonly merkleRoot: Uint8Array;
   readonly epoch: Uint8Array;
@@ -114,7 +114,7 @@ export class Proof implements RateLimitProof {
   }
 }
 
-export function proofToBytes(p: RateLimitProof): Uint8Array {
+export function proofToBytes(p: IRateLimitProof): Uint8Array {
   return concatenate(
     p.proof,
     p.merkleRoot,
@@ -175,7 +175,7 @@ export class RLNInstance {
     index: number,
     epoch: Uint8Array | Date | undefined,
     idKey: Uint8Array
-  ): Promise<RateLimitProof> {
+  ): Promise<IRateLimitProof> {
     if (epoch == undefined) {
       epoch = epochIntToBytes(dateToEpoch(new Date()));
     } else if (epoch instanceof Date) {
@@ -206,7 +206,10 @@ export class RLNInstance {
     return new Proof(proofBytes);
   }
 
-  verifyRLNProof(proof: RateLimitProof | Uint8Array, msg: Uint8Array): boolean {
+  verifyRLNProof(
+    proof: IRateLimitProof | Uint8Array,
+    msg: Uint8Array
+  ): boolean {
     let pBytes: Uint8Array;
     if (proof instanceof Uint8Array) {
       pBytes = proof;
@@ -248,7 +251,7 @@ export class RLNInstance {
   }
 
   verifyWithNoRoot(
-    proof: RateLimitProof | Uint8Array,
+    proof: IRateLimitProof | Uint8Array,
     msg: Uint8Array
   ): boolean {
     let pBytes: Uint8Array;
