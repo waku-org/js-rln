@@ -3,7 +3,7 @@ import type {
   IMessage,
   IRateLimitProof,
 } from "@waku/interfaces";
-import utils from "@waku/utils/bytes";
+import * as utils from "@waku/utils/bytes";
 
 import { epochBytesToInt } from "./epoch.js";
 import { RLNInstance } from "./rln.js";

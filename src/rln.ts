@@ -227,7 +227,7 @@ export class RLNInstance {
   }
 
   verifyWithRoots(
-    proof: RateLimitProof | Uint8Array,
+    proof: IRateLimitProof | Uint8Array,
     msg: Uint8Array
   ): boolean {
     let pBytes: Uint8Array;
