@@ -39,6 +39,7 @@ export class RLNEncoder implements IEncoder {
     const protoMessage = await this.encoder.toProtoObj(message);
     if (!protoMessage) return;
 
+    protoMessage.contentTopic = this.encoder.contentTopic;
     protoMessage.rateLimitProof = await this.generateProof(message);
     log("Proof generated", protoMessage.rateLimitProof);
     return protoMessage;
