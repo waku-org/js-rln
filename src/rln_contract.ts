@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 
 import { RLN_ABI } from "./constants.js";
-import { RLNInstance } from "./rln.js";
+import { MembershipKey, RLNInstance } from "./rln.js";
 
 type Member = {
   pubkey: string;
@@ -91,6 +91,13 @@ export class RLNContract {
     const membershipKey = await rlnInstance.generateSeededMembershipKey(
       signature
     );
+
+    return this.registerMemberFromMembershipKey(membershipKey);
+  }
+
+  public async registerMemberFromMembershipKey(
+    membershipKey: MembershipKey
+  ): Promise<ethers.Event | undefined> {
     const depositValue = await this.contract.MEMBERSHIP_DEPOSIT();
 
     const txRegisterResponse: ethers.ContractTransaction =
