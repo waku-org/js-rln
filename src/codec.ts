@@ -14,8 +14,6 @@ import { MembershipKey, RLNInstance } from "./rln.js";
 const log = debug("waku:rln:encoder");
 
 export class RLNEncoder implements IEncoder {
-  public contentTopic: string;
-  public ephemeral = false;
   private readonly idKey: Uint8Array;
 
   constructor(
@@ -26,7 +24,6 @@ export class RLNEncoder implements IEncoder {
   ) {
     if (index < 0) throw "invalid membership index";
     this.idKey = membershipKey.IDKey;
-    this.contentTopic = encoder.contentTopic;
   }
 
   async toWire(message: IMessage): Promise<Uint8Array | undefined> {
@@ -39,7 +36,7 @@ export class RLNEncoder implements IEncoder {
     const protoMessage = await this.encoder.toProtoObj(message);
     if (!protoMessage) return;
 
-    protoMessage.contentTopic = this.encoder.contentTopic;
+    protoMessage.contentTopic = this.contentTopic;
     protoMessage.rateLimitProof = await this.generateProof(message);
     log("Proof generated", protoMessage.rateLimitProof);
     return protoMessage;
@@ -58,7 +55,31 @@ export class RLNEncoder implements IEncoder {
     console.timeEnd("proof_gen_timer");
     return proof;
   }
+
+  get contentTopic(): string {
+    return this.encoder.contentTopic;
+  }
+
+  get ephemeral(): boolean {
+    return this.encoder.ephemeral;
+  }
 }
+
+type RLNEncoderOptions = {
+  encoder: IEncoder;
+  rlnInstance: RLNInstance;
+  index: number;
+  membershipKey: MembershipKey;
+};
+
+export const createRLNEncoder = (options: RLNEncoderOptions): RLNEncoder => {
+  return new RLNEncoder(
+    options.encoder,
+    options.rlnInstance,
+    options.index,
+    options.membershipKey
+  );
+};
 
 export class RLNDecoder<T extends IDecodedMessage>
   implements IDecoder<RlnMessage<T>>
@@ -87,3 +108,14 @@ export class RLNDecoder<T extends IDecodedMessage>
     return new RlnMessage(this.rlnInstance, msg, proto.rateLimitProof);
   }
 }
+
+type RLNDecoderOptions<T extends IDecodedMessage> = {
+  decoder: IDecoder<T>;
+  rlnInstance: RLNInstance;
+};
+
+export const createRLNDecoder = <T extends IDecodedMessage>(
+  options: RLNDecoderOptions<T>
+): RLNDecoder<T> => {
+  return new RLNDecoder(options.rlnInstance, options.decoder);
+};

@@ -1,7 +1,7 @@
 import {
+  createDecoder,
+  createEncoder,
   DecodedMessage,
-  Decoder,
-  Encoder,
 } from "@waku/core/lib/message/version_0";
 import {
   generatePrivateKey,
@@ -18,13 +18,19 @@ import {
 } from "@waku/message-encryption/symmetric";
 import { expect } from "chai";
 
-import { RLNDecoder, RLNEncoder } from "./codec.js";
+import {
+  createRLNDecoder,
+  createRLNEncoder,
+  RLNDecoder,
+  RLNEncoder,
+} from "./codec.js";
 import { epochBytesToInt } from "./epoch.js";
 import { RlnMessage } from "./message.js";
 
 import * as rln from "./index.js";
 
 const TestContentTopic = "/test/1/waku-message/utf8";
+const EMPTY_PUBSUB_TOPIC = "";
 
 describe("RLN codec with version 0", () => {
   it("toWire", async function () {
@@ -35,23 +41,26 @@ describe("RLN codec with version 0", () => {
 
     rlnInstance.insertMember(memKeys.IDCommitment);
 
-    const rlnEncoder = new RLNEncoder(
-      new Encoder(TestContentTopic),
+    const rlnEncoder = createRLNEncoder({
+      encoder: createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
-      memKeys
-    );
-    const rlnDecoder = new RLNDecoder(
+      membershipKey: memKeys,
+    });
+    const rlnDecoder = createRLNDecoder({
       rlnInstance,
-      new Decoder(TestContentTopic)
-    );
+      decoder: createDecoder(TestContentTopic),
+    });
 
     const bytes = await rlnEncoder.toWire({ payload });
 
     expect(bytes).to.not.be.undefined;
     const protoResult = await rlnDecoder.fromWireToProtoObj(bytes!);
     expect(protoResult).to.not.be.undefined;
-    const msg = (await rlnDecoder.fromProtoObj("", protoResult!))!;
+    const msg = (await rlnDecoder.fromProtoObj(
+      EMPTY_PUBSUB_TOPIC,
+      protoResult!
+    ))!;
 
     expect(msg.rateLimitProof).to.not.be.undefined;
     expect(msg.verify()).to.be.true;
@@ -74,21 +83,21 @@ describe("RLN codec with version 0", () => {
     rlnInstance.insertMember(memKeys.IDCommitment);
 
     const rlnEncoder = new RLNEncoder(
-      new Encoder(TestContentTopic),
+      createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
       memKeys
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
-      new Decoder(TestContentTopic)
+      createDecoder(TestContentTopic)
     );
 
     const proto = await rlnEncoder.toProtoObj({ payload });
 
     expect(proto).to.not.be.undefined;
     const msg = (await rlnDecoder.fromProtoObj(
-      "",
+      EMPTY_PUBSUB_TOPIC,
       proto!
     )) as RlnMessage<DecodedMessage>;
 
@@ -138,7 +147,10 @@ describe("RLN codec with version 1", () => {
     const protoResult = await rlnDecoder.fromWireToProtoObj(bytes!);
 
     expect(protoResult).to.not.be.undefined;
-    const msg = (await rlnDecoder.fromProtoObj("", protoResult!))!;
+    const msg = (await rlnDecoder.fromProtoObj(
+      EMPTY_PUBSUB_TOPIC,
+      protoResult!
+    ))!;
 
     expect(msg.rateLimitProof).to.not.be.undefined;
     expect(msg.verify()).to.be.true;
@@ -180,7 +192,7 @@ describe("RLN codec with version 1", () => {
 
     expect(proto).to.not.be.undefined;
     const msg = (await rlnDecoder.fromProtoObj(
-      "",
+      EMPTY_PUBSUB_TOPIC,
       proto!
     )) as RlnMessage<DecodedMessage>;
 
@@ -229,7 +241,10 @@ describe("RLN codec with version 1", () => {
     const protoResult = await rlnDecoder.fromWireToProtoObj(bytes!);
 
     expect(protoResult).to.not.be.undefined;
-    const msg = (await rlnDecoder.fromProtoObj("", protoResult!))!;
+    const msg = (await rlnDecoder.fromProtoObj(
+      EMPTY_PUBSUB_TOPIC,
+      protoResult!
+    ))!;
 
     expect(msg.rateLimitProof).to.not.be.undefined;
     expect(msg.verify()).to.be.true;
@@ -272,7 +287,7 @@ describe("RLN codec with version 1", () => {
 
     expect(proto).to.not.be.undefined;
     const msg = (await rlnDecoder.fromProtoObj(
-      "",
+      EMPTY_PUBSUB_TOPIC,
       proto!
     )) as RlnMessage<DecodedMessage>;
 
@@ -301,21 +316,21 @@ describe("RLN Codec - epoch", () => {
     rlnInstance.insertMember(memKeys.IDCommitment);
 
     const rlnEncoder = new RLNEncoder(
-      new Encoder(TestContentTopic),
+      createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
       memKeys
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
-      new Decoder(TestContentTopic)
+      createDecoder(TestContentTopic)
     );
 
     const proto = await rlnEncoder.toProtoObj({ payload });
 
     expect(proto).to.not.be.undefined;
     const msg = (await rlnDecoder.fromProtoObj(
-      "",
+      EMPTY_PUBSUB_TOPIC,
       proto!
     )) as RlnMessage<DecodedMessage>;
 
