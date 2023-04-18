@@ -15,7 +15,6 @@ export function toRLNSignal(contentTopic: string, msg: IMessage): Uint8Array {
 
 export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
   public pubSubTopic = "";
-  public ephemeral = false;
 
   constructor(
     public rlnInstance: RLNInstance,
@@ -51,6 +50,10 @@ export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
 
   get timestamp(): Date | undefined {
     return this.msg.timestamp;
+  }
+
+  get ephemeral(): boolean | undefined {
+    return this.msg.ephemeral;
   }
 
   get epoch(): number | undefined {
