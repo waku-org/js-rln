@@ -46,7 +46,7 @@ describe("RLN Contract abstraction", () => {
     } as unknown as ethers.Contract;
     const contractSpy = chai.spy.on(rlnContract["_contract"], "register");
 
-    await rlnContract.registerMember(rlnInstance, mockSignature);
+    await rlnContract.registerWithSignature(rlnInstance, mockSignature);
 
     chai.expect(contractSpy).to.have.been.called();
   });
