@@ -84,7 +84,7 @@ export class RLNContract {
     rlnInstance.insertMember(idCommitment);
   }
 
-  public async registerMember(
+  public async registerWithSignature(
     rlnInstance: RLNInstance,
     signature: string
   ): Promise<ethers.Event | undefined> {
@@ -92,10 +92,10 @@ export class RLNContract {
       signature
     );
 
-    return this.registerMemberFromMembershipKey(membershipKey);
+    return this.registerWithKey(membershipKey);
   }
 
-  public async registerMemberFromMembershipKey(
+  public async registerWithKey(
     membershipKey: MembershipKey
   ): Promise<ethers.Event | undefined> {
     const depositValue = await this.contract.MEMBERSHIP_DEPOSIT();
