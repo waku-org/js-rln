@@ -16,6 +16,7 @@ type ContractOptions = {
 export class RLNContract {
   private _contract: ethers.Contract;
   private membersFilter: ethers.EventFilter;
+  private provider: ethers.Signer | ethers.providers.Provider;
 
   private _members: Member[] = [];
 
@@ -32,6 +33,7 @@ export class RLNContract {
   }
 
   constructor({ address, provider }: ContractOptions) {
+    this.provider = provider;
     this._contract = new ethers.Contract(address, RLN_ABI, provider);
     this.membersFilter = this.contract.filters.MemberRegistered();
   }
@@ -48,10 +50,10 @@ export class RLNContract {
     rlnInstance: RLNInstance,
     fromBlock?: number
   ): Promise<void> {
-    const registeredMemberEvents = await this.contract.queryFilter(
-      this.membersFilter,
-      fromBlock
-    );
+    const registeredMemberEvents = await queryFilter(this.contract, {
+      fromBlock,
+      membersFilter,
+    });
 
     for (const event of registeredMemberEvents) {
       this.addMemberFromEvent(rlnInstance, event);
@@ -102,3 +104,34 @@ export class RLNContract {
     return txRegisterReceipt?.events?.[0];
   }
 }
+
+type CustomQueryOptions = {
+  fromBlock?: number;
+  membersFilter: ethers.EventFilter;
+};
+
+const STEP = 3000; // this value should be tested on other networks
+async function queryFilter(
+  contract: ethers.Contract,
+  options: CustomQueryOptions
+): Promise<ethers.Event[]> {
+  const { fromBlock, membersFilter } = options;
+
+  if (!fromBlock) {
+    return contract.queryFilter(membersFilter);
+  }
+
+  if (!contract.signer.provider) {
+    throw Error("No provider found on the contract's signer.");
+  }
+
+  const toBlock = await contract.signer.provider.getBlockNumber();
+
+  if (fromBlock - toBlock < STEP) {
+    return contract.queryFilter(membersFilter);
+  }
+
+  // handle other cases
+}
+
+// tmp.contract.queryFilter(tmp.membersFilter, 7109391, 8888520).then(console.log)
