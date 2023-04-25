@@ -16,7 +16,6 @@ type ContractOptions = {
 export class RLNContract {
   private _contract: ethers.Contract;
   private membersFilter: ethers.EventFilter;
-  private provider: ethers.Signer | ethers.providers.Provider;
 
   private _members: Member[] = [];
 
@@ -33,7 +32,6 @@ export class RLNContract {
   }
 
   constructor({ address, provider }: ContractOptions) {
-    this.provider = provider;
     this._contract = new ethers.Contract(address, RLN_ABI, provider);
     this.membersFilter = this.contract.filters.MemberRegistered();
   }
@@ -52,7 +50,7 @@ export class RLNContract {
   ): Promise<void> {
     const registeredMemberEvents = await queryFilter(this.contract, {
       fromBlock,
-      membersFilter,
+      membersFilter: this.membersFilter,
     });
 
     for (const event of registeredMemberEvents) {
@@ -127,11 +125,41 @@ async function queryFilter(
 
   const toBlock = await contract.signer.provider.getBlockNumber();
 
-  if (fromBlock - toBlock < STEP) {
+  if (toBlock - fromBlock < STEP) {
     return contract.queryFilter(membersFilter);
   }
 
-  // handle other cases
+  const events = await Promise.all(
+    splitToChunks(fromBlock, toBlock, STEP).map(([left, right]) =>
+      contract.queryFilter(membersFilter, left, right).catch((e) => {
+        if (e?.data?.request?.method === "eth_getLogs") {
+          return [];
+        }
+        throw e;
+      })
+    )
+  );
+
+  return events.flatMap((event) => event);
+}
+
+function splitToChunks(
+  from: number,
+  to: number,
+  step: number
+): Array<[number, number]> {
+  const chunks = [];
+
+  let left = from;
+  while (left < to) {
+    const right = left + step < to ? left + step : to;
+
+    chunks.push([left, right] as [number, number]);
+
+    left = right;
+  }
+
+  return chunks;
 }
 
 // tmp.contract.queryFilter(tmp.membersFilter, 7109391, 8888520).then(console.log)
