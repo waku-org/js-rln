@@ -108,7 +108,10 @@ type CustomQueryOptions = {
   membersFilter: ethers.EventFilter;
 };
 
-const STEP = 3000; // this value should be tested on other networks
+// these value should be tested on other networks
+const FETCH_CHUNK = 5;
+const BLOCK_RANGE = 3000;
+
 async function queryFilter(
   contract: ethers.Contract,
   options: CustomQueryOptions
@@ -125,22 +128,22 @@ async function queryFilter(
 
   const toBlock = await contract.signer.provider.getBlockNumber();
 
-  if (toBlock - fromBlock < STEP) {
+  if (toBlock - fromBlock < BLOCK_RANGE) {
     return contract.queryFilter(membersFilter);
   }
 
-  const events = await Promise.all(
-    splitToChunks(fromBlock, toBlock, STEP).map(([left, right]) =>
-      contract.queryFilter(membersFilter, left, right).catch((e) => {
-        if (e?.data?.request?.method === "eth_getLogs") {
-          return [];
-        }
-        throw e;
-      })
-    )
-  );
+  const events: ethers.Event[][] = [];
+  const chunks = splitToChunks(fromBlock, toBlock, BLOCK_RANGE);
 
-  return events.flatMap((event) => event);
+  for (const portion of takeN<[number, number]>(chunks, FETCH_CHUNK)) {
+    const promises = portion.map(([left, right]) =>
+      ignoreErrors(contract.queryFilter(membersFilter, left, right), [])
+    );
+    const fetchedEvents = await Promise.all(promises);
+    events.push(fetchedEvents.flatMap((v) => v));
+  }
+
+  return events.flatMap((v) => v);
 }
 
 function splitToChunks(
@@ -160,4 +163,24 @@ function splitToChunks(
   }
 
   return chunks;
+}
+
+function* takeN<T>(array: T[], size: number): Iterable<T[]> {
+  let start = 0;
+  let skip = size;
+
+  while (skip < array.length) {
+    const portion = array.slice(start, skip);
+
+    yield portion;
+
+    start = skip;
+    skip += size;
+  }
+}
+
+function ignoreErrors<T>(promise: Promise<T>, defaultValue: T): Promise<T> {
+  return promise.catch((_) => {
+    return defaultValue;
+  });
 }
