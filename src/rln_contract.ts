@@ -161,5 +161,3 @@ function splitToChunks(
 
   return chunks;
 }
-
-// tmp.contract.queryFilter(tmp.membersFilter, 7109391, 8888520).then(console.log)
