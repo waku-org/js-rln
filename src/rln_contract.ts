@@ -13,6 +13,12 @@ type ContractOptions = {
   provider: ethers.Signer | ethers.providers.Provider;
 };
 
+type FetchMembersOptions = {
+  fromBlock?: number;
+  fetchRange?: number;
+  fetchChunks?: number;
+};
+
 export class RLNContract {
   private _contract: ethers.Contract;
   private membersFilter: ethers.EventFilter;
@@ -46,10 +52,10 @@ export class RLNContract {
 
   public async fetchMembers(
     rlnInstance: RLNInstance,
-    fromBlock?: number
+    options: FetchMembersOptions = {}
   ): Promise<void> {
     const registeredMemberEvents = await queryFilter(this.contract, {
-      fromBlock,
+      ...options,
       membersFilter: this.membersFilter,
     });
 
@@ -110,8 +116,7 @@ export class RLNContract {
   }
 }
 
-type CustomQueryOptions = {
-  fromBlock?: number;
+type CustomQueryOptions = FetchMembersOptions & {
   membersFilter: ethers.EventFilter;
 };
 
@@ -123,7 +128,12 @@ async function queryFilter(
   contract: ethers.Contract,
   options: CustomQueryOptions
 ): Promise<ethers.Event[]> {
-  const { fromBlock, membersFilter } = options;
+  const {
+    fromBlock,
+    membersFilter,
+    fetchRange = BLOCK_RANGE,
+    fetchChunks = FETCH_CHUNK,
+  } = options;
 
   if (!fromBlock) {
     return contract.queryFilter(membersFilter);
@@ -135,14 +145,14 @@ async function queryFilter(
 
   const toBlock = await contract.signer.provider.getBlockNumber();
 
-  if (toBlock - fromBlock < BLOCK_RANGE) {
+  if (toBlock - fromBlock < fetchRange) {
     return contract.queryFilter(membersFilter);
   }
 
   const events: ethers.Event[][] = [];
-  const chunks = splitToChunks(fromBlock, toBlock, BLOCK_RANGE);
+  const chunks = splitToChunks(fromBlock, toBlock, fetchRange);
 
-  for (const portion of takeN<[number, number]>(chunks, FETCH_CHUNK)) {
+  for (const portion of takeN<[number, number]>(chunks, fetchChunks)) {
     const promises = portion.map(([left, right]) =>
       ignoreErrors(contract.queryFilter(membersFilter, left, right), [])
     );
