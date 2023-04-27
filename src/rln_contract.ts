@@ -197,7 +197,8 @@ function* takeN<T>(array: T[], size: number): Iterable<T[]> {
 }
 
 function ignoreErrors<T>(promise: Promise<T>, defaultValue: T): Promise<T> {
-  return promise.catch((_) => {
+  return promise.catch((err) => {
+    console.error(`Ignoring an error during query: ${err?.message}`);
     return defaultValue;
   });
 }
