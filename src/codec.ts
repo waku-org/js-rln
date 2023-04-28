@@ -9,21 +9,21 @@ import type {
 import debug from "debug";
 
 import { RlnMessage, toRLNSignal } from "./message.js";
-import { MembershipKey, RLNInstance } from "./rln.js";
+import { IdentityCredential, RLNInstance } from "./rln.js";
 
 const log = debug("waku:rln:encoder");
 
 export class RLNEncoder implements IEncoder {
-  private readonly idKey: Uint8Array;
+  private readonly idSecretHash: Uint8Array;
 
   constructor(
     private encoder: IEncoder,
     private rlnInstance: RLNInstance,
     private index: number,
-    membershipKey: MembershipKey
+    identityCredential: IdentityCredential
   ) {
     if (index < 0) throw "invalid membership index";
-    this.idKey = membershipKey.IDKey;
+    this.idSecretHash = identityCredential.IDSecretHash;
   }
 
   async toWire(message: IMessage): Promise<Uint8Array | undefined> {
@@ -50,7 +50,7 @@ export class RLNEncoder implements IEncoder {
       signal,
       this.index,
       message.timestamp,
-      this.idKey
+      this.idSecretHash
     );
     console.timeEnd("proof_gen_timer");
     return proof;
@@ -69,7 +69,7 @@ type RLNEncoderOptions = {
   encoder: IEncoder;
   rlnInstance: RLNInstance;
   index: number;
-  membershipKey: MembershipKey;
+  credential: IdentityCredential;
 };
 
 export const createRLNEncoder = (options: RLNEncoderOptions): RLNEncoder => {
@@ -77,7 +77,7 @@ export const createRLNEncoder = (options: RLNEncoderOptions): RLNEncoder => {
     options.encoder,
     options.rlnInstance,
     options.index,
-    options.membershipKey
+    options.credential
   );
 };
 

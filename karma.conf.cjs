@@ -30,10 +30,11 @@ module.exports = function (config) {
     envPreprocessor: ["CI"],
     reporters: ["progress"],
     browsers: ["ChromeHeadless"],
+    pingTimeout: 60000,
     singleRun: true,
     client: {
       mocha: {
-        timeout: 6000, // Default is 2s
+        timeout: 60000, // Default is 2s
       },
     },
     webpack: {

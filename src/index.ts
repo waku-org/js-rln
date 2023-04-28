@@ -1,7 +1,11 @@
 import { RLNDecoder, RLNEncoder } from "./codec.js";
 import { GOERLI_CONTRACT, RLN_ABI } from "./constants.js";
-import { Proof, RLNInstance } from "./rln.js";
-import { MembershipKey } from "./rln.js";
+import {
+  IdentityCredential,
+  Proof,
+  ProofMetadata,
+  RLNInstance,
+} from "./rln.js";
 import { RLNContract } from "./rln_contract.js";
 
 // reexport the create function, dynamically imported from rln.ts
@@ -15,8 +19,9 @@ export async function create(): Promise<RLNInstance> {
 
 export {
   RLNInstance,
-  MembershipKey,
+  IdentityCredential,
   Proof,
+  ProofMetadata,
   RLNEncoder,
   RLNDecoder,
   RLNContract,

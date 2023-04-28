@@ -1,7 +1,7 @@
 import * as rln from "@waku/rln";
 
 rln.create().then(async rlnInstance => {
-    let memKeys = rlnInstance.generateMembershipKey();
+    let credentials = rlnInstance.generateIdentityCredentials();
 
     //peer's index in the Merkle Tree
     const index = 5
@@ -10,11 +10,11 @@ rln.create().then(async rlnInstance => {
     for (let i = 0; i < 10; i++) {
         if (i == index) {
             // insert the current peer's pk
-            rlnInstance.insertMember(memKeys.IDCommitment);
+            rlnInstance.insertMember(credentials.IDCommitment);
         } else {
             // create a new key pair
-            let memKeys = rlnInstance.generateMembershipKey(); // TODO: handle error
-            rlnInstance.insertMember(memKeys.IDCommitment);
+            let credentials = rlnInstance.generateIdentityCredentials(); // TODO: handle error
+            rlnInstance.insertMember(credentials.IDCommitment);
 
         }
     }
@@ -27,7 +27,7 @@ rln.create().then(async rlnInstance => {
 
     console.log("Generating proof...");
     console.time("proof_gen_timer");
-    let proof = await rlnInstance.generateRLNProof(uint8Msg, index, epoch, memKeys.IDKey)
+    let proof = await rlnInstance.generateRLNProof(uint8Msg, index, epoch, credentials.IDSecretHash)
     console.timeEnd("proof_gen_timer");
     console.log("Proof", proof)
 
