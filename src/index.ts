@@ -7,6 +7,7 @@ import {
   RLNInstance,
 } from "./rln.js";
 import { RLNContract } from "./rln_contract.js";
+import { MerkleRootTracker } from "./root_tracker.js";
 
 // reexport the create function, dynamically imported from rln.ts
 export async function create(): Promise<RLNInstance> {
@@ -24,6 +25,7 @@ export {
   ProofMetadata,
   RLNEncoder,
   RLNDecoder,
+  MerkleRootTracker,
   RLNContract,
   RLN_ABI,
   GOERLI_CONTRACT,
