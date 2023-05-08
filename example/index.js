@@ -1,7 +1,7 @@
 import * as rln from "@waku/rln";
 
 rln.create().then(async rlnInstance => {
-    let credentials = rlnInstance.generateIdentityCredentials();
+    const credentials = rlnInstance.generateIdentityCredentials();
 
     //peer's index in the Merkle Tree
     const index = 5
@@ -13,7 +13,7 @@ rln.create().then(async rlnInstance => {
             rlnInstance.insertMember(credentials.IDCommitment);
         } else {
             // create a new key pair
-            let credentials = rlnInstance.generateIdentityCredentials(); // TODO: handle error
+            const credentials = rlnInstance.generateIdentityCredentials(); // TODO: handle error
             rlnInstance.insertMember(credentials.IDCommitment);
 
         }

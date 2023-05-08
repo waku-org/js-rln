@@ -70,7 +70,7 @@ import * as rln from "@waku/rln";
 const rlnInstance = await rln.create();
 ```
 
-#### Generating RLN membership credentials
+#### Generating RLN Membership Credentials
 
 ```js
 let credentials = rlnInstance.generateIdentityCredentials();
