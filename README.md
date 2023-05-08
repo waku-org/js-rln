@@ -70,10 +70,10 @@ import * as rln from "@waku/rln";
 const rlnInstance = await rln.create();
 ```
 
-### Generating RLN Membership Keypair
+#### Generating RLN Membership Credentials
 
 ```js
-let memKeys = rlnInstance.generateMembershipKey();
+let credentials = rlnInstance.generateIdentityCredentials();
 ```
 
 ### Generating RLN Membership Keypair Using a Seed
@@ -81,13 +81,13 @@ let memKeys = rlnInstance.generateMembershipKey();
 This can be used to generate credentials from a signature hash (e.g. signed by an Ethereum account).
 
 ```js
-let memKeys = rlnInstance.generateSeededMembershipKey(seed);
+let credentials = rlnInstance.generateSeededIdentityCredentials(seed);
 ```
 
 ### Adding Membership Keys Into Merkle Tree
 
 ```js
-rlnInstance.insertMember(memKeys.IDCommitment);
+rlnInstance.insertMember(credentials.IDCommitment);
 ```
 
 ### Generating a Proof
@@ -106,7 +106,7 @@ const proof = await rlnInstance.generateProof(
   uint8Msg,
   index,
   epoch,
-  memKeys.IDKey
+  credentials.IDSecretHash
 );
 ```
 

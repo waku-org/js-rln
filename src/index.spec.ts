@@ -6,7 +6,7 @@ describe("js-rln", () => {
   it("should verify a proof", async function () {
     const rlnInstance = await rln.create();
 
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
 
     //peer's index in the Merkle Tree
     const index = 5;
@@ -15,11 +15,11 @@ describe("js-rln", () => {
     for (let i = 0; i < 10; i++) {
       if (i == index) {
         // insert the current peer's pk
-        rlnInstance.insertMember(memKeys.IDCommitment);
+        rlnInstance.insertMember(credential.IDCommitment);
       } else {
         // create a new key pair
         rlnInstance.insertMember(
-          rlnInstance.generateMembershipKey().IDCommitment
+          rlnInstance.generateIdentityCredentials().IDCommitment
         );
       }
     }
@@ -37,7 +37,7 @@ describe("js-rln", () => {
       uint8Msg,
       index,
       epoch,
-      memKeys.IDKey
+      credential.IDSecretHash
     );
 
     try {
@@ -61,7 +61,7 @@ describe("js-rln", () => {
   it("should verify a proof with a seeded membership key generation", async function () {
     const rlnInstance = await rln.create();
     const seed = "This is a test seed";
-    const memKeys = rlnInstance.generateSeededMembershipKey(seed);
+    const credential = rlnInstance.generateSeededIdentityCredential(seed);
 
     //peer's index in the Merkle Tree
     const index = 5;
@@ -70,11 +70,11 @@ describe("js-rln", () => {
     for (let i = 0; i < 10; i++) {
       if (i == index) {
         // insert the current peer's pk
-        rlnInstance.insertMember(memKeys.IDCommitment);
+        rlnInstance.insertMember(credential.IDCommitment);
       } else {
         // create a new key pair
         rlnInstance.insertMember(
-          rlnInstance.generateMembershipKey().IDCommitment
+          rlnInstance.generateIdentityCredentials().IDCommitment
         );
       }
     }
@@ -92,7 +92,7 @@ describe("js-rln", () => {
       uint8Msg,
       index,
       epoch,
-      memKeys.IDKey
+      credential.IDSecretHash
     );
 
     try {
@@ -116,14 +116,20 @@ describe("js-rln", () => {
   it("should generate the same membership key if the same seed is provided", async function () {
     const rlnInstance = await rln.create();
     const seed = "This is a test seed";
-    const memKeys1 = rlnInstance.generateSeededMembershipKey(seed);
-    const memKeys2 = rlnInstance.generateSeededMembershipKey(seed);
+    const memKeys1 = rlnInstance.generateSeededIdentityCredential(seed);
+    const memKeys2 = rlnInstance.generateSeededIdentityCredential(seed);
 
     memKeys1.IDCommitment.forEach((element, index) => {
       expect(element).to.equal(memKeys2.IDCommitment[index]);
     });
-    memKeys1.IDKey.forEach((element, index) => {
-      expect(element).to.equal(memKeys2.IDKey[index]);
+    memKeys1.IDNullifier.forEach((element, index) => {
+      expect(element).to.equal(memKeys2.IDNullifier[index]);
+    });
+    memKeys1.IDSecretHash.forEach((element, index) => {
+      expect(element).to.equal(memKeys2.IDSecretHash[index]);
+    });
+    memKeys1.IDTrapdoor.forEach((element, index) => {
+      expect(element).to.equal(memKeys2.IDTrapdoor[index]);
     });
   });
 });

@@ -66,18 +66,29 @@ export async function create(): Promise<RLNInstance> {
   return new RLNInstance(zkRLN, witnessCalculator);
 }
 
-export class MembershipKey {
+export class IdentityCredential {
   constructor(
-    public readonly IDKey: Uint8Array,
+    public readonly IDTrapdoor: Uint8Array,
+    public readonly IDNullifier: Uint8Array,
+    public readonly IDSecretHash: Uint8Array,
     public readonly IDCommitment: Uint8Array,
     public readonly IDCommitmentBigInt: bigint
   ) {}
 
-  static fromBytes(memKeys: Uint8Array): MembershipKey {
-    const idKey = memKeys.subarray(0, 32);
-    const idCommitment = memKeys.subarray(32);
+  static fromBytes(memKeys: Uint8Array): IdentityCredential {
+    const idTrapdoor = memKeys.subarray(0, 32);
+    const idNullifier = memKeys.subarray(32, 64);
+    const idSecretHash = memKeys.subarray(64, 96);
+    const idCommitment = memKeys.subarray(96);
     const idCommitmentBigInt = buildBigIntFromUint8Array(idCommitment);
-    return new MembershipKey(idKey, idCommitment, idCommitmentBigInt);
+
+    return new IdentityCredential(
+      idTrapdoor,
+      idNullifier,
+      idSecretHash,
+      idCommitment,
+      idCommitmentBigInt
+    );
   }
 }
 
@@ -89,6 +100,14 @@ const shareYOffset = shareXOffset + 32;
 const nullifierOffset = shareYOffset + 32;
 const rlnIdentifierOffset = nullifierOffset + 32;
 
+export class ProofMetadata {
+  constructor(
+    public readonly nullifier: Uint8Array,
+    public readonly shareX: Uint8Array,
+    public readonly shareY: Uint8Array,
+    public readonly externalNullifier: Uint8Array
+  ) {}
+}
 export class Proof implements IRateLimitProof {
   readonly proof: Uint8Array;
   readonly merkleRoot: Uint8Array;
@@ -112,6 +131,16 @@ export class Proof implements IRateLimitProof {
       rlnIdentifierOffset
     );
   }
+
+  extractMetadata(): ProofMetadata {
+    const externalNullifier = poseidonHash(this.epoch, this.rlnIdentifier);
+    return new ProofMetadata(
+      this.nullifier,
+      this.shareX,
+      this.shareY,
+      externalNullifier
+    );
+  }
 }
 
 export function proofToBytes(p: IRateLimitProof): Uint8Array {
@@ -126,28 +155,58 @@ export function proofToBytes(p: IRateLimitProof): Uint8Array {
   );
 }
 
+export function poseidonHash(...input: Array<Uint8Array>): Uint8Array {
+  const inputLen = writeUIntLE(new Uint8Array(8), input.length, 0, 8);
+  const lenPrefixedData = concatenate(inputLen, ...input);
+  return zerokitRLN.poseidonHash(lenPrefixedData);
+}
+
+export function sha256(input: Uint8Array): Uint8Array {
+  const inputLen = writeUIntLE(new Uint8Array(8), input.length, 0, 8);
+  const lenPrefixedData = concatenate(inputLen, input);
+  return zerokitRLN.hash(lenPrefixedData);
+}
+
 export class RLNInstance {
   constructor(
     private zkRLN: number,
     private witnessCalculator: WitnessCalculator
   ) {}
 
-  generateMembershipKey(): MembershipKey {
-    const memKeys = zerokitRLN.generateMembershipKey(this.zkRLN);
-    return MembershipKey.fromBytes(memKeys);
+  generateIdentityCredentials(): IdentityCredential {
+    const memKeys = zerokitRLN.generateExtendedMembershipKey(this.zkRLN); // TODO: rename this function in zerokit rln-wasm
+    return IdentityCredential.fromBytes(memKeys);
   }
 
-  generateSeededMembershipKey(seed: string): MembershipKey {
+  generateSeededIdentityCredential(seed: string): IdentityCredential {
     const seedBytes = stringEncoder.encode(seed);
-    const memKeys = zerokitRLN.generateSeededMembershipKey(
+    // TODO: rename this function in zerokit rln-wasm
+    const memKeys = zerokitRLN.generateSeededExtendedMembershipKey(
       this.zkRLN,
       seedBytes
     );
-    return MembershipKey.fromBytes(memKeys);
+    return IdentityCredential.fromBytes(memKeys);
   }
 
   insertMember(idCommitment: Uint8Array): void {
     zerokitRLN.insertMember(this.zkRLN, idCommitment);
+  }
+
+  insertMembers(index: number, ...idCommitments: Array<Uint8Array>): void {
+    // serializes a seq of IDCommitments to a byte seq
+    // the order of serialization is |id_commitment_len<8>|id_commitment<var>|
+    const idCommitmentLen = writeUIntLE(
+      new Uint8Array(8),
+      idCommitments.length,
+      0,
+      8
+    );
+    const idCommitmentBytes = concatenate(idCommitmentLen, ...idCommitments);
+    zerokitRLN.setLeavesFrom(this.zkRLN, index, idCommitmentBytes);
+  }
+
+  deleteMember(index: number): void {
+    zerokitRLN.deleteLeaf(this.zkRLN, index);
   }
 
   getMerkleRoot(): Uint8Array {
@@ -174,7 +233,7 @@ export class RLNInstance {
     msg: Uint8Array,
     index: number,
     epoch: Uint8Array | Date | undefined,
-    idKey: Uint8Array
+    idSecretHash: Uint8Array
   ): Promise<IRateLimitProof> {
     if (epoch == undefined) {
       epoch = epochIntToBytes(dateToEpoch(new Date()));
@@ -183,10 +242,15 @@ export class RLNInstance {
     }
 
     if (epoch.length != 32) throw "invalid epoch";
-    if (idKey.length != 32) throw "invalid id key";
+    if (idSecretHash.length != 32) throw "invalid id secret hash";
     if (index < 0) throw "index must be >= 0";
 
-    const serialized_msg = this.serializeMessage(msg, index, epoch, idKey);
+    const serialized_msg = this.serializeMessage(
+      msg,
+      index,
+      epoch,
+      idSecretHash
+    );
     const rlnWitness = zerokitRLN.getSerializedRLNWitness(
       this.zkRLN,
       serialized_msg
@@ -228,7 +292,8 @@ export class RLNInstance {
 
   verifyWithRoots(
     proof: IRateLimitProof | Uint8Array,
-    msg: Uint8Array
+    msg: Uint8Array,
+    ...roots: Array<Uint8Array>
   ): boolean {
     let pBytes: Uint8Array;
     if (proof instanceof Uint8Array) {
@@ -236,17 +301,15 @@ export class RLNInstance {
     } else {
       pBytes = proofToBytes(proof);
     }
-
     // calculate message length
     const msgLen = writeUIntLE(new Uint8Array(8), msg.length, 0, 8);
 
-    // obtain root
-    const root = zerokitRLN.getRoot(this.zkRLN);
+    const rootsBytes = concatenate(...roots);
 
     return zerokitRLN.verifyWithRoots(
       this.zkRLN,
       concatenate(pBytes, msgLen, msg),
-      root
+      rootsBytes
     );
   }
 

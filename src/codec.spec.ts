@@ -35,17 +35,17 @@ const EMPTY_PUBSUB_TOPIC = "";
 describe("RLN codec with version 0", () => {
   it("toWire", async function () {
     const rlnInstance = await rln.create();
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
 
-    rlnInstance.insertMember(memKeys.IDCommitment);
+    rlnInstance.insertMember(credential.IDCommitment);
 
     const rlnEncoder = createRLNEncoder({
       encoder: createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
-      membershipKey: memKeys,
+      credential,
     });
     const rlnDecoder = createRLNDecoder({
       rlnInstance,
@@ -76,17 +76,17 @@ describe("RLN codec with version 0", () => {
 
   it("toProtoObj", async function () {
     const rlnInstance = await rln.create();
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
 
-    rlnInstance.insertMember(memKeys.IDCommitment);
+    rlnInstance.insertMember(credential.IDCommitment);
 
     const rlnEncoder = new RLNEncoder(
       createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
-      memKeys
+      credential
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
@@ -119,11 +119,11 @@ describe("RLN codec with version 0", () => {
 describe("RLN codec with version 1", () => {
   it("Symmetric, toWire", async function () {
     const rlnInstance = await rln.create();
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
 
-    rlnInstance.insertMember(memKeys.IDCommitment);
+    rlnInstance.insertMember(credential.IDCommitment);
 
     const symKey = generateSymmetricKey();
 
@@ -134,7 +134,7 @@ describe("RLN codec with version 1", () => {
       }),
       rlnInstance,
       index,
-      memKeys
+      credential
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
@@ -166,11 +166,11 @@ describe("RLN codec with version 1", () => {
 
   it("Symmetric, toProtoObj", async function () {
     const rlnInstance = await rln.create();
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
 
-    rlnInstance.insertMember(memKeys.IDCommitment);
+    rlnInstance.insertMember(credential.IDCommitment);
 
     const symKey = generateSymmetricKey();
 
@@ -181,7 +181,7 @@ describe("RLN codec with version 1", () => {
       }),
       rlnInstance,
       index,
-      memKeys
+      credential
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
@@ -212,11 +212,11 @@ describe("RLN codec with version 1", () => {
 
   it("Asymmetric, toWire", async function () {
     const rlnInstance = await rln.create();
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
 
-    rlnInstance.insertMember(memKeys.IDCommitment);
+    rlnInstance.insertMember(credential.IDCommitment);
 
     const privateKey = generatePrivateKey();
     const publicKey = getPublicKey(privateKey);
@@ -228,7 +228,7 @@ describe("RLN codec with version 1", () => {
       }),
       rlnInstance,
       index,
-      memKeys
+      credential
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
@@ -260,11 +260,11 @@ describe("RLN codec with version 1", () => {
 
   it("Asymmetric, toProtoObj", async function () {
     const rlnInstance = await rln.create();
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
 
-    rlnInstance.insertMember(memKeys.IDCommitment);
+    rlnInstance.insertMember(credential.IDCommitment);
 
     const privateKey = generatePrivateKey();
     const publicKey = getPublicKey(privateKey);
@@ -276,7 +276,7 @@ describe("RLN codec with version 1", () => {
       }),
       rlnInstance,
       index,
-      memKeys
+      credential
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
@@ -309,17 +309,17 @@ describe("RLN codec with version 1", () => {
 describe("RLN Codec - epoch", () => {
   it("toProtoObj", async function () {
     const rlnInstance = await rln.create();
-    const memKeys = rlnInstance.generateMembershipKey();
+    const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
 
-    rlnInstance.insertMember(memKeys.IDCommitment);
+    rlnInstance.insertMember(credential.IDCommitment);
 
     const rlnEncoder = new RLNEncoder(
       createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
-      memKeys
+      credential
     );
     const rlnDecoder = new RLNDecoder(
       rlnInstance,
