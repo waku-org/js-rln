@@ -83,7 +83,7 @@
     "husky": "^7.0.4",
     "ignore-loader": "^0.1.2",
     "isomorphic-fetch": "^3.0.0",
-    "@waku/interfaces": "^0.0.11",
+    "@waku/interfaces": "^0.0.12",
     "@waku/message-encryption": "^0.0.15",
     "@waku/core": "^0.0.17",
     "jsdom": "^19.0.0",
