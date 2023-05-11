@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 
 import { RLN_ABI } from "./constants.js";
 import { IdentityCredential, RLNInstance } from "./rln.js";
+import { MerkleRootTracker } from "./root_tracker";
 
 type Member = {
   pubkey: string;
@@ -22,6 +23,7 @@ type FetchMembersOptions = {
 export class RLNContract {
   private _contract: ethers.Contract;
   private membersFilter: ethers.EventFilter;
+  private merkleRootTracker: MerkleRootTracker;
 
   private _members: Member[] = [];
 
@@ -29,7 +31,7 @@ export class RLNContract {
     rlnInstance: RLNInstance,
     options: ContractOptions
   ): Promise<RLNContract> {
-    const rlnContract = new RLNContract(options);
+    const rlnContract = new RLNContract(rlnInstance, options);
 
     await rlnContract.fetchMembers(rlnInstance);
     rlnContract.subscribeToMembers(rlnInstance);
@@ -37,8 +39,14 @@ export class RLNContract {
     return rlnContract;
   }
 
-  constructor({ address, provider }: ContractOptions) {
+  constructor(
+    rlnInstance: RLNInstance,
+    { address, provider }: ContractOptions
+  ) {
+    const initialRoot = rlnInstance.getMerkleRoot();
+
     this._contract = new ethers.Contract(address, RLN_ABI, provider);
+    this.merkleRootTracker = new MerkleRootTracker(5, initialRoot);
     this.membersFilter = this.contract.filters.MemberRegistered();
   }
 
@@ -58,36 +66,89 @@ export class RLNContract {
       ...options,
       membersFilter: this.membersFilter,
     });
+    this.processEvents(rlnInstance, registeredMemberEvents);
+  }
 
-    for (const event of registeredMemberEvents) {
-      this.addMemberFromEvent(rlnInstance, event);
-    }
+  public processEvents(rlnInstance: RLNInstance, events: ethers.Event[]): void {
+    const toRemoveTable = new Map<number, number[]>();
+    const toInsertTable = new Map<number, ethers.Event[]>();
+
+    events.forEach((evt) => {
+      if (!evt.args) {
+        return;
+      }
+
+      if (evt.removed) {
+        const index: number = evt.args.index;
+        const toRemoveVal = toRemoveTable.get(evt.blockNumber);
+        if (toRemoveVal != undefined) {
+          toRemoveVal.push(index);
+          toRemoveTable.set(evt.blockNumber, toRemoveVal);
+        } else {
+          toRemoveTable.set(evt.blockNumber, [index]);
+        }
+      } else {
+        let eventsPerBlock = toInsertTable.get(evt.blockNumber);
+        if (eventsPerBlock == undefined) {
+          eventsPerBlock = [];
+        }
+
+        eventsPerBlock.push(evt);
+        toInsertTable.set(evt.blockNumber, eventsPerBlock);
+      }
+
+      this.removeMembers(rlnInstance, toRemoveTable);
+      this.insertMembers(rlnInstance, toInsertTable);
+    });
+  }
+
+  private insertMembers(
+    rlnInstance: RLNInstance,
+    toInsert: Map<number, ethers.Event[]>
+  ): void {
+    toInsert.forEach((events: ethers.Event[], blockNumber: number) => {
+      events.forEach((evt) => {
+        if (!evt.args) {
+          return;
+        }
+
+        const pubkey = evt.args.pubkey;
+        const index = evt.args.index;
+        const idCommitment = ethers.utils.zeroPad(
+          ethers.utils.arrayify(pubkey),
+          32
+        );
+        rlnInstance.insertMember(idCommitment);
+        this.members.push({ index, pubkey });
+      });
+
+      const currentRoot = rlnInstance.getMerkleRoot();
+      this.merkleRootTracker.pushRoot(blockNumber, currentRoot);
+    });
+  }
+
+  private removeMembers(
+    rlnInstance: RLNInstance,
+    toRemove: Map<number, number[]>
+  ): void {
+    const removeDescending = new Map([...toRemove].sort().reverse());
+    removeDescending.forEach((indexes: number[], blockNumber: number) => {
+      indexes.forEach((index) => {
+        const idx = this.members.findIndex((m) => m.index === index);
+        if (idx > -1) {
+          this.members.splice(idx, 1);
+        }
+        rlnInstance.deleteMember(index);
+      });
+
+      this.merkleRootTracker.backFill(blockNumber);
+    });
   }
 
   public subscribeToMembers(rlnInstance: RLNInstance): void {
     this.contract.on(this.membersFilter, (_pubkey, _index, event) =>
-      this.addMemberFromEvent(rlnInstance, event)
+      this.processEvents(rlnInstance, event)
     );
-  }
-
-  private addMemberFromEvent(
-    rlnInstance: RLNInstance,
-    event: ethers.Event
-  ): void {
-    if (!event.args) {
-      return;
-    }
-
-    const pubkey: string = event.args.pubkey;
-    const index: number = event.args.index;
-
-    this.members.push({ index, pubkey });
-
-    const idCommitment = ethers.utils.zeroPad(
-      ethers.utils.arrayify(pubkey),
-      32
-    );
-    rlnInstance.insertMember(idCommitment);
   }
 
   public async registerWithSignature(
@@ -112,6 +173,10 @@ export class RLNContract {
     const txRegisterReceipt = await txRegisterResponse.wait();
 
     return txRegisterReceipt?.events?.[0];
+  }
+
+  public roots(): Uint8Array[] {
+    return this.merkleRootTracker.roots();
   }
 }
 

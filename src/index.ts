@@ -1,5 +1,5 @@
 import { RLNDecoder, RLNEncoder } from "./codec.js";
-import { GOERLI_CONTRACT, RLN_ABI } from "./constants.js";
+import { RLN_ABI, SEPOLIA_CONTRACT } from "./constants.js";
 import {
   IdentityCredential,
   Proof,
@@ -28,5 +28,5 @@ export {
   MerkleRootTracker,
   RLNContract,
   RLN_ABI,
-  GOERLI_CONTRACT,
+  SEPOLIA_CONTRACT,
 };
