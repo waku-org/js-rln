@@ -13,9 +13,9 @@ describe("RLN Contract abstraction", () => {
     rlnInstance.insertMember = () => undefined;
     const insertMemberSpy = chai.spy.on(rlnInstance, "insertMember");
 
-    const voidSigner = new ethers.VoidSigner(rln.GOERLI_CONTRACT.address);
-    const rlnContract = new rln.RLNContract({
-      address: rln.GOERLI_CONTRACT.address,
+    const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
+    const rlnContract = new rln.RLNContract(rlnInstance, {
+      address: rln.SEPOLIA_CONTRACT.address,
       provider: voidSigner,
     });
 
@@ -33,9 +33,9 @@ describe("RLN Contract abstraction", () => {
       "0xdeb8a6b00a8e404deb1f52d3aa72ed7f60a2ff4484c737eedaef18a0aacb2dfb4d5d74ac39bb71fa358cf2eb390565a35b026cc6272f2010d4351e17670311c21c";
 
     const rlnInstance = await rln.create();
-    const voidSigner = new ethers.VoidSigner(rln.GOERLI_CONTRACT.address);
-    const rlnContract = new rln.RLNContract({
-      address: rln.GOERLI_CONTRACT.address,
+    const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
+    const rlnContract = new rln.RLNContract(rlnInstance, {
+      address: rln.SEPOLIA_CONTRACT.address,
       provider: voidSigner,
     });
 

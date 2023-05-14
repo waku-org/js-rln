@@ -22,11 +22,12 @@ export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
     public rateLimitProof: IRateLimitProof | undefined
   ) {}
 
-  public verify(): boolean | undefined {
+  public verify(roots: Uint8Array[]): boolean | undefined {
     return this.rateLimitProof
       ? this.rlnInstance.verifyWithRoots(
           this.rateLimitProof,
-          toRLNSignal(this.msg.contentTopic, this.msg)
+          toRLNSignal(this.msg.contentTopic, this.msg),
+          ...roots
         ) // this.rlnInstance.verifyRLNProof once issue status-im/nwaku#1248 is fixed
       : undefined;
   }

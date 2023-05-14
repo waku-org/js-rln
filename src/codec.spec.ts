@@ -63,7 +63,7 @@ describe("RLN codec with version 0", () => {
     ))!;
 
     expect(msg.rateLimitProof).to.not.be.undefined;
-    expect(msg.verify()).to.be.true;
+    expect(msg.verify([rlnInstance.getMerkleRoot()])).to.be.true;
     expect(msg.verifyNoRoot()).to.be.true;
     expect(msg.epoch).to.not.be.undefined;
     expect(msg.epoch).to.be.gt(0);
@@ -104,7 +104,7 @@ describe("RLN codec with version 0", () => {
     expect(msg).to.not.be.undefined;
     expect(msg.rateLimitProof).to.not.be.undefined;
 
-    expect(msg.verify()).to.be.true;
+    expect(msg.verify([rlnInstance.getMerkleRoot()])).to.be.true;
     expect(msg.verifyNoRoot()).to.be.true;
     expect(msg.epoch).to.not.be.undefined;
     expect(msg.epoch).to.be.gt(0);
@@ -153,7 +153,7 @@ describe("RLN codec with version 1", () => {
     ))!;
 
     expect(msg.rateLimitProof).to.not.be.undefined;
-    expect(msg.verify()).to.be.true;
+    expect(msg.verify([rlnInstance.getMerkleRoot()])).to.be.true;
     expect(msg.verifyNoRoot()).to.be.true;
     expect(msg.epoch).to.not.be.undefined;
     expect(msg.epoch).to.be.gt(0);
@@ -199,7 +199,7 @@ describe("RLN codec with version 1", () => {
     expect(msg).to.not.be.undefined;
     expect(msg.rateLimitProof).to.not.be.undefined;
 
-    expect(msg.verify()).to.be.true;
+    expect(msg.verify([rlnInstance.getMerkleRoot()])).to.be.true;
     expect(msg.verifyNoRoot()).to.be.true;
     expect(msg.epoch).to.not.be.undefined;
     expect(msg.epoch).to.be.gt(0);
@@ -247,7 +247,7 @@ describe("RLN codec with version 1", () => {
     ))!;
 
     expect(msg.rateLimitProof).to.not.be.undefined;
-    expect(msg.verify()).to.be.true;
+    expect(msg.verify([rlnInstance.getMerkleRoot()])).to.be.true;
     expect(msg.verifyNoRoot()).to.be.true;
     expect(msg.epoch).to.not.be.undefined;
     expect(msg.epoch).to.be.gt(0);
@@ -294,7 +294,7 @@ describe("RLN codec with version 1", () => {
     expect(msg).to.not.be.undefined;
     expect(msg.rateLimitProof).to.not.be.undefined;
 
-    expect(msg.verify()).to.be.true;
+    expect(msg.verify([rlnInstance.getMerkleRoot()])).to.be.true;
     expect(msg.verifyNoRoot()).to.be.true;
     expect(msg.epoch).to.not.be.undefined;
     expect(msg.epoch).to.be.gt(0);
@@ -340,7 +340,7 @@ describe("RLN Codec - epoch", () => {
     expect(msg).to.not.be.undefined;
     expect(msg.rateLimitProof).to.not.be.undefined;
 
-    expect(msg.verify()).to.be.true;
+    expect(msg.verify([rlnInstance.getMerkleRoot()])).to.be.true;
     expect(msg.verifyNoRoot()).to.be.true;
     expect(msg.epoch).to.not.be.undefined;
     expect(msg.epoch!.toString(10).length).to.eq(9);
