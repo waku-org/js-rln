@@ -1,6 +1,6 @@
 import { assert, expect } from "chai";
 
-import { MerkleRootTracker } from "./root_tracker";
+import { MerkleRootTracker } from "./root_tracker.js";
 
 describe("js-rln", () => {
   it("should track merkle roots and backfill from block number", async function () {

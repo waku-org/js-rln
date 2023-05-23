@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 
 import { RLN_ABI } from "./constants.js";
 import { IdentityCredential, RLNInstance } from "./rln.js";
-import { MerkleRootTracker } from "./root_tracker";
+import { MerkleRootTracker } from "./root_tracker.js";
 
 type Member = {
   pubkey: string;
