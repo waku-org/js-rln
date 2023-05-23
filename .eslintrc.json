@@ -39,10 +39,7 @@
     "import/order": [
       "error",
       {
-        "newlines-between": "always",
-        "alphabetize": {
-          "order": "asc"
-        }
+        "newlines-between": "always"
       }
     ],
     "no-constant-condition": [
