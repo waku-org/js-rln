@@ -11,7 +11,7 @@
   "plugins": ["import", "eslint-comments", "functional"],
   "extends": [
     "eslint:recommended",
-    "plugin:eslint-comments/recommended",
+    "plugin:@eslint-community/eslint-comments/recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript",
     "plugin:prettier/recommended"
@@ -29,7 +29,7 @@
       }
     ],
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "eslint-comments/disable-enable-pair": [
+    "@eslint-community/eslint-comments/disable-enable-pair": [
       "error",
       {
         "allowWholeFile": true
