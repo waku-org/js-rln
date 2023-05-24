@@ -113,6 +113,7 @@ describe("js-rln", () => {
       console.log(err);
     }
   });
+
   it("should generate the same membership key if the same seed is provided", async function () {
     const rlnInstance = await rln.create();
     const seed = "This is a test seed";

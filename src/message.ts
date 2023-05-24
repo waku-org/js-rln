@@ -57,6 +57,10 @@ export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
     return this.msg.ephemeral;
   }
 
+  get meta(): Uint8Array | undefined {
+    return this.msg.meta;
+  }
+
   get epoch(): number | undefined {
     const bytes = this.msg.rateLimitProof?.epoch;
     if (!bytes) return;
