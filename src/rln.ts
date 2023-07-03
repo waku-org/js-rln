@@ -1,5 +1,6 @@
 import type { IRateLimitProof } from "@waku/interfaces";
-import init, * as zerokitRLN from "@waku/zerokit-rln-wasm";
+import { default as init } from "@waku/zerokit-rln-wasm";
+import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 
 import { writeUIntLE } from "./byte_utils.js";
 import { dateToEpoch, epochIntToBytes } from "./epoch.js";
