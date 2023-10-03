@@ -67,6 +67,9 @@
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^5.8.1",
     "@typescript-eslint/parser": "^5.8.1",
+    "@waku/core": "^0.0.18",
+    "@waku/interfaces": "^0.0.13",
+    "@waku/message-encryption": "^0.0.16",
     "@web/rollup-plugin-import-meta-assets": "^1.0.7",
     "app-root-path": "^3.0.0",
     "chai": "^4.3.4",
@@ -83,9 +86,6 @@
     "husky": "^7.0.4",
     "ignore-loader": "^0.1.2",
     "isomorphic-fetch": "^3.0.0",
-    "@waku/interfaces": "^0.0.13",
-    "@waku/message-encryption": "^0.0.16",
-    "@waku/core": "^0.0.18",
     "jsdom": "^19.0.0",
     "jsdom-global": "^3.0.2",
     "karma": "^6.3.12",
@@ -129,8 +129,10 @@
     ]
   },
   "dependencies": {
+    "@chainsafe/bls-keystore": "^3.0.0",
     "@waku/utils": "^0.0.6",
     "@waku/zerokit-rln-wasm": "^0.0.10",
-    "ethers": "^5.7.2"
+    "ethers": "^5.7.2",
+    "rlnjs": "^3.2.3"
   }
 }
