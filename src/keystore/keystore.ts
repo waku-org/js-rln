@@ -7,7 +7,7 @@ import {
   create as createEipKeystore,
   decrypt as decryptEipKeystore,
 } from "@chainsafe/bls-keystore";
-import { utf8ToBytes } from "@waku/utils/bytes";
+import { bytesToUtf8, utf8ToBytes } from "@waku/utils/bytes";
 import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
 
@@ -217,8 +217,8 @@ export class Keystore {
   // follows nwaku implementation
   // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L111
   private static computeMembershipHash(info: MembershipInfo): string {
-    return sha256(
-      utf8ToBytes(`${info.chainId}${info.address}${info.treeIndex}`)
+    return bytesToUtf8(
+      sha256(utf8ToBytes(`${info.chainId}${info.address}${info.treeIndex}`))
     );
   }
 
