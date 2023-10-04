@@ -1,3 +1,3 @@
-import { keystore } from "./keystore.js";
+import { Keystore } from "./keystore.js";
 
-export { keystore };
+export { Keystore };
