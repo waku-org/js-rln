@@ -97,7 +97,7 @@ describe.only("Keystore", () => {
       application: "waku-rln-relay",
       version: "01234567890abcdef",
       appIdentifier: "0.2",
-      credentials: {},
+      credentials: { a: 123 },
     });
   });
 
