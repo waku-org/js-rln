@@ -9,12 +9,13 @@
     "start": "webpack-dev-server"
   },
   "dependencies": {
-    "@waku/rln": "file:../"
+    "@waku/rln": "file:../",
+    "@waku/utils": "^0.0.11"
   },
   "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.1",
-    "copy-webpack-plugin": "^11.0.0"
+    "webpack-dev-server": "^4.11.1"
   }
 }
