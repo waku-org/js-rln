@@ -46,7 +46,7 @@
     "crypto": false
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "publishConfig": {
     "access": "public",
