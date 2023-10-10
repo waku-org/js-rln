@@ -87,23 +87,22 @@ const NWAKU_KEYSTORE = {
   version: "0.2",
 };
 
-console.log(NWAKU_KEYSTORE);
-
 describe.only("Keystore", () => {
-  it("shoud create store with predefined values", async () => {
+  it("shoud create empty store with predefined values", async () => {
     const store = Keystore.create();
 
     expect(store.toObject()).to.deep.eq({
       application: "waku-rln-relay",
       version: "01234567890abcdef",
       appIdentifier: "0.2",
-      credentials: { a: 123 },
+      credentials: {},
     });
   });
 
-  // it("shoud create empty store", async function () {});
-
-  // it("shoud create store from nwaku dump", async function () {});
+  it("shoud create store from nwaku dump", async () => {
+    const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
+    expect(store.toObject()).to.deep.eq(NWAKU_KEYSTORE);
+  });
 
   // it("should convert keystore to string", async function() {});
 
