@@ -3,26 +3,24 @@ import type {
   IKeystore as IEipKeystore,
   IPbkdf2KdfModule,
 } from "@chainsafe/bls-keystore";
-import {
-  create as createEipKeystore,
-  decrypt as decryptEipKeystore,
-} from "@chainsafe/bls-keystore";
-import { bytesToUtf8, utf8ToBytes } from "@waku/utils/bytes";
+import { create as createEipKeystore } from "@chainsafe/bls-keystore";
+import { sha256 } from "ethereum-cryptography/sha256";
+import { bytesToHex, utf8ToBytes } from "ethereum-cryptography/utils";
 import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
 
-import { sha256 } from "../rln.js";
 import type { IdentityCredential } from "../rln.js";
 
+import { decryptEipKeystore, keccak256Checksum } from "./cipher.js";
 import { isCredentialValid, isKeystoreValid } from "./schema_validator.js";
+import type {
+  Keccak256Hash,
+  MembershipHash,
+  Password,
+  Sha256Hash,
+} from "./types.js";
 
-// on side of nwaku computed like this
-// https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L111C90-L111C99
-type MembershipHash = string;
-type Sha256Hash = string;
-type Password = string | Uint8Array;
-
-// needed to compute MembershipHash
+// see reference
 // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L111
 type MembershipInfo = {
   chainId: number;
@@ -56,9 +54,14 @@ interface NwakuKeystore {
 }
 
 type KeystoreCreateOptions = {
-  application: string;
-  version: string;
-  appIdentifier: string;
+  application?: string;
+  version?: string;
+  appIdentifier?: string;
+};
+
+type CredentialOptions = {
+  identity: IdentityCredential;
+  membership: MembershipInfo;
 };
 
 export class Keystore {
@@ -96,16 +99,20 @@ export class Keystore {
   }
 
   public static fromObject(obj: NwakuKeystore): Keystore {
+    if (!Keystore.isValidNwakuStore(obj)) {
+      throw Error("Invalid object, does not match Nwaku Keystore format.");
+    }
+
     return new Keystore(obj);
   }
 
   public async addCredential(
-    identity: IdentityCredential,
-    membershipInfo: MembershipInfo,
+    options: CredentialOptions,
     password: Password
-  ): Promise<void> {
-    const membershipHash: MembershipHash =
-      Keystore.computeMembershipHash(membershipInfo);
+  ): Promise<MembershipHash> {
+    const membershipHash: MembershipHash = Keystore.computeMembershipHash(
+      options.membership
+    );
 
     if (this.data.credentials[membershipHash]) {
       throw Error("Credential already exists in the store.");
@@ -114,7 +121,7 @@ export class Keystore {
     // these are not important
     const stubPath = "/stub/path";
     const stubPubkey = new Uint8Array([0]);
-    const secret = Keystore.computeIdentityToBytes(identity, membershipInfo);
+    const secret = Keystore.computeIdentityToBytes(options);
 
     const eipKeystore = await createEipKeystore(
       password,
@@ -122,9 +129,12 @@ export class Keystore {
       stubPubkey,
       stubPath
     );
-    const nwakuCredential = Keystore.fromEipToCredential(eipKeystore);
+    // need to re-compute checksum since nwaku uses keccak256 instead of sha256
+    const checksum = await keccak256Checksum(password, eipKeystore);
+    const nwakuCredential = Keystore.fromEipToCredential(eipKeystore, checksum);
 
     this.data.credentials[membershipHash] = nwakuCredential;
+    return membershipHash;
   }
 
   public async readCredential(
@@ -138,7 +148,7 @@ export class Keystore {
     }
 
     const eipKeystore = Keystore.fromCredentialToEip(nwakuCredential);
-    return decryptEipKeystore(eipKeystore, password);
+    return decryptEipKeystore(password, eipKeystore);
   }
 
   public removeCredential(hash: MembershipHash): void {
@@ -181,6 +191,9 @@ export class Keystore {
         message: nwakuCrypto.ciphertext,
       },
       checksum: {
+        // @chainsafe/bls-keystore supports only sha256
+        // but nwaku uses keccak256
+        // https://github.com/waku-org/nwaku/blob/25d6e52e3804d15f9b61bc4cc6dd448540c072a1/waku/waku_keystore/keyfile.nim#L367
         function: "sha256",
         params: {},
         message: nwakuCrypto.mac,
@@ -198,7 +211,8 @@ export class Keystore {
   }
 
   private static fromEipToCredential(
-    eipKeystore: IEipKeystore
+    eipKeystore: IEipKeystore,
+    checksum: Keccak256Hash
   ): NwakuCredential {
     const eipCrypto = eipKeystore.crypto;
     const eipKdf = eipCrypto.kdf as IPbkdf2KdfModule;
@@ -209,7 +223,10 @@ export class Keystore {
         ciphertext: eipCrypto.cipher.message,
         kdf: eipKdf.function,
         kdfparams: eipKdf.params,
-        mac: eipCrypto.checksum.message,
+        // @chainsafe/bls-keystore generates only sha256
+        // but nwaku uses keccak256
+        // https://github.com/waku-org/nwaku/blob/25d6e52e3804d15f9b61bc4cc6dd448540c072a1/waku/waku_keystore/keyfile.nim#L367
+        mac: checksum,
       },
     };
   }
@@ -217,21 +234,30 @@ export class Keystore {
   // follows nwaku implementation
   // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L111
   private static computeMembershipHash(info: MembershipInfo): string {
-    return bytesToUtf8(
+    return bytesToHex(
       sha256(utf8ToBytes(`${info.chainId}${info.address}${info.treeIndex}`))
-    );
+    ).toUpperCase();
   }
 
   // follows nwaku implementation
   // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L98
   private static computeIdentityToBytes(
-    identity: IdentityCredential,
-    membershipInfo: MembershipInfo
+    options: CredentialOptions
   ): Uint8Array {
-    // TODO: fix implementation once clarified
-    const str = `${JSON.stringify(identity)}=${JSON.stringify(
-      membershipInfo
-    )}}`;
-    return utf8ToBytes(str);
+    return utf8ToBytes(
+      JSON.stringify({
+        treeIndex: options.membership.treeIndex,
+        identityCredential: {
+          idCommitment: options.identity.IDCommitment,
+          idNullifier: options.identity.IDNullifier,
+          idSecretHash: options.identity.IDSecretHash,
+          idTrapdoor: options.identity.IDTrapdoor,
+        },
+        membershipContract: {
+          chainId: options.membership.chainId,
+          address: options.membership.address,
+        },
+      })
+    );
   }
 }
