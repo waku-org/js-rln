@@ -79,7 +79,7 @@ export class Keystore {
     );
   }
 
-  public static create(options: KeystoreCreateOptions): Keystore {
+  public static create(options: KeystoreCreateOptions = {}): Keystore {
     return new Keystore(options);
   }
 
@@ -161,6 +161,10 @@ export class Keystore {
 
   public toString(): string {
     return JSON.stringify(this.data);
+  }
+
+  public toObject(): NwakuKeystore {
+    return this.data;
   }
 
   private static isValidNwakuStore(obj: unknown): boolean {
