@@ -88,7 +88,7 @@ const NWAKU_KEYSTORE = {
 };
 
 describe.only("Keystore", () => {
-  it("shoud create empty store with predefined values", async () => {
+  it("shoud create empty store with predefined values", () => {
     const store = Keystore.create();
 
     expect(store.toObject()).to.deep.eq({
@@ -99,12 +99,111 @@ describe.only("Keystore", () => {
     });
   });
 
-  it("shoud create store from nwaku dump", async () => {
+  // TODO: add more thorow credentials testing
+  [
+    {
+      some: "3123",
+      dadw: "1212",
+    },
+    {
+      application: 123,
+      version: "01234567890abcdef",
+      appIdentifier: "0.2",
+      credentials: {},
+    },
+    {
+      application: "waku-rln-relay",
+      version: 213,
+      appIdentifier: "0.2",
+      credentials: {},
+    },
+    {
+      application: "waku-rln-relay",
+      version: "01234567890abcdef",
+      appIdentifier: 12,
+      credentials: {},
+    },
+    {
+      application: "waku-rln-relay",
+      version: "01234567890abcdef",
+      appIdentifier: "12",
+      credentials: [],
+    },
+    {
+      application: "waku-rln-relay",
+      version: "01234567890abcdef",
+      appIdentifier: "12",
+      credentials: 123,
+    },
+    {
+      application: "waku-rln-relay",
+      version: "01234567890abcdef",
+      appIdentifier: "12",
+      credentials: "123",
+    },
+    {
+      application: "waku-rln-relay",
+      version: "01234567890abcdef",
+      appIdentifier: "12",
+      credentials: {
+        hash: {
+          invalid: "here",
+        },
+      },
+    },
+  ].map((options) => {
+    it("should fail to create store from invalid object", () => {
+      try {
+        Keystore.fromObject(options as any);
+        expect(false).to.eq(true);
+      } catch (e) {
+        expect(e.message).to.eq(
+          "Invalid object, does not match Nwaku Keystore format."
+        );
+      }
+    });
+  });
+
+  it("shoud create store from valid object", () => {
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
     expect(store.toObject()).to.deep.eq(NWAKU_KEYSTORE);
   });
 
-  // it("should convert keystore to string", async function() {});
+  it("should fail to create store from invalid string", () => {
+    try {
+      Keystore.fromString("/asdq}");
+    } catch (e) {
+      expect(e.message).to.contain("Cannot create Keystore from string:");
+    }
+
+    try {
+      Keystore.fromString("{ name: 'it' }");
+    } catch (e) {
+      expect(e.message).to.contain(
+        "Invalid string, does not match Nwaku Keystore format."
+      );
+    }
+  });
+
+  it("shoud create store from valid string", async () => {
+    const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
+    expect(store.toObject()).to.deep.eq(NWAKU_KEYSTORE);
+  });
+
+  it("should convert keystore to string", async () => {
+    let store = Keystore.create();
+    expect(store.toString()).to.eq(
+      JSON.stringify({
+        application: "waku-rln-relay",
+        version: "01234567890abcdef",
+        appIdentifier: "0.2",
+        credentials: {},
+      })
+    );
+
+    store = Keystore.fromObject(NWAKU_KEYSTORE as any);
+    expect(store.toString()).to.eq(JSON.stringify(NWAKU_KEYSTORE));
+  });
 
   // it("shoud add new credentials", async function () {});
 
