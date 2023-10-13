@@ -161,7 +161,7 @@ describe.only("Keystore", () => {
         Keystore.fromObject(options as any);
         expect(false).to.eq(true);
       } catch (e) {
-        expect(e.message).to.eq(
+        expect((e as Error).message).to.eq(
           "Invalid object, does not match Nwaku Keystore format."
         );
       }
@@ -177,13 +177,15 @@ describe.only("Keystore", () => {
     try {
       Keystore.fromString("/asdq}");
     } catch (e) {
-      expect(e.message).to.contain("Cannot create Keystore from string:");
+      expect((e as Error).message).to.contain(
+        "Cannot create Keystore from string:"
+      );
     }
 
     try {
       Keystore.fromString("{ name: 'it' }");
     } catch (e) {
-      expect(e.message).to.contain(
+      expect((e as Error).message).to.contain(
         "Invalid string, does not match Nwaku Keystore format."
       );
     }
@@ -293,8 +295,10 @@ describe.only("Keystore", () => {
 
     try {
       await store.addCredential({ identity, membership }, DEFAULT_PASSWORD);
-    } catch (err) {
-      expect(err.message).to.eq("Credential already exists in the store.");
+    } catch (e) {
+      expect((e as Error).message).to.eq(
+        "Credential already exists in the store."
+      );
     }
   });
 
@@ -305,8 +309,8 @@ describe.only("Keystore", () => {
 
     try {
       await store.readCredential(expectedHash, "wrong-password");
-    } catch (err) {
-      expect(err.message).to.eq("Password is invalid.");
+    } catch (e) {
+      expect((e as Error).message).to.eq("Password is invalid.");
     }
   });
 
