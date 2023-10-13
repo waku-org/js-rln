@@ -1,5 +1,4 @@
 import * as rln from "@waku/rln";
-import * as utils from "@waku/utils/bytes";
 
 rln.create().then(async (rlnInstance) => {
   const credentials = rlnInstance.generateIdentityCredentials();
@@ -155,7 +154,7 @@ const run = async () => {
 
   await keystore.addCredential({ identity, membership }, "sup3rsecure");
 
-  await keystore.readCredential("8479C6B9125D43E7B7739F1BAB41779F2F5A4D27FF0E2B6F6CA353032010A22C", "sup3rsecure").then(utils.bytesToUtf8).then(JSON.parse).then(console.log);
+  await keystore.readCredential("8479C6B9125D43E7B7739F1BAB41779F2F5A4D27FF0E2B6F6CA353032010A22C", "sup3rsecure").then(console.log);
 };
 
 run();
