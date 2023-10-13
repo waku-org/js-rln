@@ -183,6 +183,17 @@ describe.only("Keystore", () => {
   it("should convert keystore to string", async () => {
     let store = Keystore.create();
 
+    console.log("left", store.toString());
+    console.log(
+      "right",
+      JSON.stringify({
+        application: "waku-rln-relay",
+        version: "01234567890abcdef",
+        appIdentifier: "0.2",
+        credentials: {},
+      })
+    );
+
     expect(store.toString()).to.eq(
       JSON.stringify({
         application: "waku-rln-relay",
@@ -193,6 +204,10 @@ describe.only("Keystore", () => {
     );
 
     store = Keystore.fromObject(NWAKU_KEYSTORE as any);
+
+    console.log("left2", Keystore.fromObject(NWAKU_KEYSTORE as any).toString());
+    console.log("right2", JSON.stringify(NWAKU_KEYSTORE));
+
     expect(store.toString()).to.eq(JSON.stringify(NWAKU_KEYSTORE));
   });
 
@@ -278,9 +293,9 @@ describe.only("Keystore", () => {
 
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    await expect(async () =>
-      store.addCredential({ identity, membership }, DEFAULT_PASSWORD)
-    ).to.be.rejectedWith("Credential already exists in the store.");
+    await expect(async () => {
+      await store.addCredential({ identity, membership }, DEFAULT_PASSWORD);
+    }).to.be.rejectedWith("Credential already exists in the store.");
   });
 
   it("shoud fail to read credentials with wrong password", async () => {
