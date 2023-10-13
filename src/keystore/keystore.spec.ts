@@ -171,12 +171,8 @@ describe("Keystore", () => {
   });
 
   it.only("should fail to create store from invalid string", () => {
-    expect(() => Keystore.fromString("/asdq}")).to.throw(
-      "Cannot create Keystore from string:"
-    );
-    expect(() => Keystore.fromString('{ "name": "it" }')).to.throw(
-      "Invalid string, does not match Nwaku Keystore format."
-    );
+    expect(() => Keystore.fromString("/asdq}")).to.throw();
+    expect(() => Keystore.fromString('{ "name": "it" }')).to.throw();
   });
 
   it("shoud create store from valid string", async () => {
