@@ -5,8 +5,12 @@ import deepEqualInAnyOrder from "deep-equal-in-any-order";
 chai.use(chaiSubset);
 chai.use(deepEqualInAnyOrder);
 
-import { Keystore } from "./keystore";
+import { IdentityCredential } from "../rln";
 
+import { Keystore } from "./keystore";
+import { MembershipInfo } from "./types";
+
+const DEFAULT_PASSWORD = "sup3rsecure";
 const NWAKU_KEYSTORE = {
   application: "waku-rln-relay",
   appIdentifier: "01234567890abcdef",
@@ -205,13 +209,111 @@ describe.only("Keystore", () => {
     expect(store.toString()).to.eq(JSON.stringify(NWAKU_KEYSTORE));
   });
 
-  // it("shoud add new credentials", async function () {});
+  it("shoud add / read new credentials", async () => {
+    const expectedHash =
+      "9DB2B4718A97485B9F70F68D1CC19F4E10F0B4CE943418838E94956CB8E57548";
+    const identity = {
+      IDTrapdoor: [
+        211, 23, 66, 42, 179, 130, 131, 111, 201, 205, 244, 34, 27, 238, 244,
+        216, 131, 240, 188, 45, 193, 172, 4, 168, 225, 225, 43, 197, 114, 176,
+        126, 9,
+      ],
+      IDNullifier: [
+        238, 168, 239, 65, 73, 63, 105, 19, 132, 62, 213, 205, 191, 255, 209, 9,
+        178, 155, 239, 201, 131, 125, 233, 136, 246, 217, 9, 237, 55, 89, 81,
+        42,
+      ],
+      IDSecretHash: [
+        150, 54, 194, 28, 18, 216, 138, 253, 95, 139, 120, 109, 98, 129, 146,
+        101, 41, 194, 36, 36, 96, 152, 152, 89, 151, 160, 118, 15, 222, 124,
+        187, 4,
+      ],
+      IDCommitment: [
+        112, 216, 27, 89, 188, 135, 203, 19, 168, 211, 117, 13, 231, 135, 229,
+        58, 94, 20, 246, 8, 33, 65, 238, 37, 112, 97, 65, 241, 255, 93, 171, 15,
+      ],
+    } as unknown as IdentityCredential;
+    const membership = {
+      chainId: "0xAA36A7",
+      treeIndex: 8,
+      address: "0x8e1F3742B987d8BA376c0CBbD7357fE1F003ED71",
+    } as unknown as MembershipInfo;
 
-  // it("shoud fail to add credentials if already exist", async function () {});
+    const store = Keystore.create();
+    const hash = await store.addCredential(
+      { identity, membership },
+      DEFAULT_PASSWORD
+    );
 
-  // it("shoud read credentials with valid password", async function () {});
+    expect(hash).to.eq(expectedHash);
 
-  // it("shoud fail to read credentials with wrong password", async function () {});
+    const actualCredentials = await store.readCredential(
+      expectedHash,
+      DEFAULT_PASSWORD
+    );
+    expect(actualCredentials).to.deep.equalInAnyOrder({
+      identity,
+      membership: {
+        chainId: membership.chainId,
+        address: membership.address,
+      },
+      treeIndex: membership.treeIndex,
+    });
+  });
 
-  // it("shoud fail to read missing credentials", async function () {});
+  it("shoud fail to add credentials if already exist", async () => {
+    const identity = {
+      IDTrapdoor: [
+        211, 23, 66, 42, 179, 130, 131, 111, 201, 205, 244, 34, 27, 238, 244,
+        216, 131, 240, 188, 45, 193, 172, 4, 168, 225, 225, 43, 197, 114, 176,
+        126, 9,
+      ],
+      IDNullifier: [
+        238, 168, 239, 65, 73, 63, 105, 19, 132, 62, 213, 205, 191, 255, 209, 9,
+        178, 155, 239, 201, 131, 125, 233, 136, 246, 217, 9, 237, 55, 89, 81,
+        42,
+      ],
+      IDSecretHash: [
+        150, 54, 194, 28, 18, 216, 138, 253, 95, 139, 120, 109, 98, 129, 146,
+        101, 41, 194, 36, 36, 96, 152, 152, 89, 151, 160, 118, 15, 222, 124,
+        187, 4,
+      ],
+      IDCommitment: [
+        112, 216, 27, 89, 188, 135, 203, 19, 168, 211, 117, 13, 231, 135, 229,
+        58, 94, 20, 246, 8, 33, 65, 238, 37, 112, 97, 65, 241, 255, 93, 171, 15,
+      ],
+    } as unknown as IdentityCredential;
+    const membership = {
+      chainId: "0xAA36A7",
+      treeIndex: 8,
+      address: "0x8e1F3742B987d8BA376c0CBbD7357fE1F003ED71",
+    } as unknown as MembershipInfo;
+
+    const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
+
+    try {
+      await store.addCredential({ identity, membership }, DEFAULT_PASSWORD);
+    } catch (err) {
+      expect(err.message).to.eq("Credential already exists in the store.");
+    }
+  });
+
+  it("shoud fail to read credentials with wrong password", async () => {
+    const expectedHash =
+      "9DB2B4718A97485B9F70F68D1CC19F4E10F0B4CE943418838E94956CB8E57548";
+    const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
+
+    try {
+      await store.readCredential(expectedHash, "wrong-password");
+    } catch (err) {
+      expect(err.message).to.eq("Password is invalid.");
+    }
+  });
+
+  it("shoud fail to read missing credentials", async () => {
+    const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
+
+    const result = await store.readCredential("wrong-hash", "wrong-password");
+    expect(result).to.eq(null);
+  });
 });

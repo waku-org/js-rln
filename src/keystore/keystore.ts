@@ -5,7 +5,11 @@ import type {
 } from "@chainsafe/bls-keystore";
 import { create as createEipKeystore } from "@chainsafe/bls-keystore";
 import { sha256 } from "ethereum-cryptography/sha256";
-import { bytesToHex, utf8ToBytes } from "ethereum-cryptography/utils";
+import {
+  bytesToHex,
+  bytesToUtf8,
+  utf8ToBytes,
+} from "ethereum-cryptography/utils";
 import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
 
@@ -16,17 +20,10 @@ import { isCredentialValid, isKeystoreValid } from "./schema_validator.js";
 import type {
   Keccak256Hash,
   MembershipHash,
+  MembershipInfo,
   Password,
   Sha256Hash,
 } from "./types.js";
-
-// see reference
-// https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L111
-type MembershipInfo = {
-  chainId: number;
-  address: string;
-  treeIndex: number;
-};
 
 type NwakuCredential = {
   crypto: {
@@ -59,7 +56,7 @@ type KeystoreCreateOptions = {
   appIdentifier?: string;
 };
 
-type CredentialOptions = {
+type IdentityOptions = {
   identity: IdentityCredential;
   membership: MembershipInfo;
 };
@@ -107,7 +104,7 @@ export class Keystore {
   }
 
   public async addCredential(
-    options: CredentialOptions,
+    options: IdentityOptions,
     password: Password
   ): Promise<MembershipHash> {
     const membershipHash: MembershipHash = Keystore.computeMembershipHash(
@@ -121,7 +118,7 @@ export class Keystore {
     // these are not important
     const stubPath = "/stub/path";
     const stubPubkey = new Uint8Array([0]);
-    const secret = Keystore.computeIdentityToBytes(options);
+    const secret = Keystore.fromIdentityToBytes(options);
 
     const eipKeystore = await createEipKeystore(
       password,
@@ -140,7 +137,7 @@ export class Keystore {
   public async readCredential(
     membershipHash: MembershipHash,
     password: Password
-  ): Promise<null | Uint8Array> {
+  ): Promise<null | IdentityOptions> {
     const nwakuCredential = this.data.credentials[membershipHash];
 
     if (!nwakuCredential) {
@@ -148,7 +145,9 @@ export class Keystore {
     }
 
     const eipKeystore = Keystore.fromCredentialToEip(nwakuCredential);
-    return decryptEipKeystore(password, eipKeystore);
+    const bytes = await decryptEipKeystore(password, eipKeystore);
+
+    return Keystore.fromBytesToIdentity(bytes);
   }
 
   public removeCredential(hash: MembershipHash): void {
@@ -235,9 +234,28 @@ export class Keystore {
     };
   }
 
+  private static fromBytesToIdentity(
+    bytes: Uint8Array
+  ): null | IdentityOptions {
+    try {
+      const str = bytesToUtf8(bytes);
+      const obj = JSON.parse(str);
+
+      // TODO: add runtime validation of nwaku credentials
+      if (!isCredentialValid(obj)) {
+        throw Error("Parsed object is not valid Nwaku Credential.");
+      }
+
+      return obj as IdentityOptions;
+    } catch (err) {
+      console.error("Cannot parse bytes to Nwaku Credentials:", err);
+      return null;
+    }
+  }
+
   // follows nwaku implementation
   // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L111
-  private static computeMembershipHash(info: MembershipInfo): string {
+  private static computeMembershipHash(info: MembershipInfo): MembershipHash {
     return bytesToHex(
       sha256(utf8ToBytes(`${info.chainId}${info.address}${info.treeIndex}`))
     ).toUpperCase();
@@ -245,9 +263,7 @@ export class Keystore {
 
   // follows nwaku implementation
   // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L98
-  private static computeIdentityToBytes(
-    options: CredentialOptions
-  ): Uint8Array {
+  private static fromIdentityToBytes(options: IdentityOptions): Uint8Array {
     return utf8ToBytes(
       JSON.stringify({
         treeIndex: options.membership.treeIndex,

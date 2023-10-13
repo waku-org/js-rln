@@ -139,9 +139,9 @@ const run = async () => {
         }
     },
     "version": "0.2"
-};
+  };
 
-const keystore = await rln.Keystore.fromObject(data);
+  const keystore = await rln.Keystore.fromObject(data);
 
   const identity = {
     "idTrapdoor":[248,73,210,129,12,83,146,208,57,117,35,145,20,66,203,61,238,130,60,23,94,249,123,92,114,190,24,0,4,242,10,24],
