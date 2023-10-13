@@ -18,7 +18,7 @@ function schemaValidationErrors(
   validator: ValidatorFn,
   data: unknown
 ): ErrorObject[] | null {
-  const validated = _validateKeystore(data);
+  const validated = validator(data);
   if (validated) {
     return null;
   }

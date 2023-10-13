@@ -159,7 +159,7 @@ describe("Keystore", () => {
     },
   ].map((options) => {
     it.only("should fail to create store from invalid object", () => {
-      expect(async () => Keystore.fromObject(options as any)).to.throw(
+      expect(() => Keystore.fromObject(options as any)).to.throw(
         "Invalid object, does not match Nwaku Keystore format."
       );
     });
