@@ -93,8 +93,8 @@ const NWAKU_KEYSTORE = {
   version: "0.2",
 };
 
-describe.only("Keystore", () => {
-  it("shoud create empty store with predefined values", () => {
+describe("Keystore", () => {
+  it.only("shoud create empty store with predefined values", () => {
     const store = Keystore.create();
 
     expect(store.toObject()).to.deep.eq({
@@ -159,7 +159,7 @@ describe.only("Keystore", () => {
     },
   ].map((options) => {
     it("should fail to create store from invalid object", () => {
-      expect(() => Keystore.fromObject(options as any)).to.throw(
+      expect(async () => Keystore.fromObject(options as any)).to.throw(
         "Invalid object, does not match Nwaku Keystore format."
       );
     });
@@ -282,7 +282,7 @@ describe.only("Keystore", () => {
 
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    await expect(() =>
+    await expect(async () =>
       store.addCredential({ identity, membership }, DEFAULT_PASSWORD)
     ).to.be.rejectedWith("Credential already exists in the store.");
   });
@@ -292,7 +292,7 @@ describe.only("Keystore", () => {
       "9DB2B4718A97485B9F70F68D1CC19F4E10F0B4CE943418838E94956CB8E57548";
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    await expect(() =>
+    await expect(async () =>
       store.readCredential(expectedHash, "wrong-password")
     ).to.be.rejectedWith("Password is invalid.");
   });
