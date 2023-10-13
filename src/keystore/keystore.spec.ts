@@ -16,6 +16,7 @@ const DEFAULT_PASSWORD = "sup3rsecure";
 const NWAKU_KEYSTORE = {
   application: "waku-rln-relay",
   appIdentifier: "01234567890abcdef",
+  version: "0.2",
   credentials: {
     "9DB2B4718A97485B9F70F68D1CC19F4E10F0B4CE943418838E94956CB8E57548": {
       crypto: {
@@ -90,7 +91,6 @@ const NWAKU_KEYSTORE = {
       },
     },
   },
-  version: "0.2",
 };
 
 describe.only("Keystore", () => {
@@ -183,17 +183,6 @@ describe.only("Keystore", () => {
   it("should convert keystore to string", async () => {
     let store = Keystore.create();
 
-    console.log("left", store.toString());
-    console.log(
-      "right",
-      JSON.stringify({
-        application: "waku-rln-relay",
-        version: "01234567890abcdef",
-        appIdentifier: "0.2",
-        credentials: {},
-      })
-    );
-
     expect(store.toString()).to.eq(
       JSON.stringify({
         application: "waku-rln-relay",
@@ -204,9 +193,6 @@ describe.only("Keystore", () => {
     );
 
     store = Keystore.fromObject(NWAKU_KEYSTORE as any);
-
-    console.log("left2", Keystore.fromObject(NWAKU_KEYSTORE as any).toString());
-    console.log("right2", JSON.stringify(NWAKU_KEYSTORE));
 
     expect(store.toString()).to.eq(JSON.stringify(NWAKU_KEYSTORE));
   });
@@ -293,7 +279,7 @@ describe.only("Keystore", () => {
 
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    await expect(async () => {
+    expect(async () => {
       await store.addCredential({ identity, membership }, DEFAULT_PASSWORD);
     }).to.be.rejectedWith("Credential already exists in the store.");
   });
@@ -303,7 +289,7 @@ describe.only("Keystore", () => {
       "9DB2B4718A97485B9F70F68D1CC19F4E10F0B4CE943418838E94956CB8E57548";
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    await expect(async () =>
+    expect(async () =>
       store.readCredential(expectedHash, "wrong-password")
     ).to.be.rejectedWith("Password is invalid.");
   });
