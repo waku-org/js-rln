@@ -7,6 +7,7 @@ chai.use(chaiSubset);
 chai.use(deepEqualInAnyOrder);
 chai.use(chaiAsPromised);
 
+import { buildBigIntFromUint8Array } from "../byte_utils.js";
 import { IdentityCredential } from "../rln";
 
 import { Keystore } from "./keystore";
@@ -186,8 +187,8 @@ describe.only("Keystore", () => {
     expect(store.toString()).to.eq(
       JSON.stringify({
         application: "waku-rln-relay",
-        version: "01234567890abcdef",
-        appIdentifier: "0.2",
+        appIdentifier: "01234567890abcdef",
+        version: "0.2",
         credentials: {},
       })
     );
@@ -220,6 +221,13 @@ describe.only("Keystore", () => {
         112, 216, 27, 89, 188, 135, 203, 19, 168, 211, 117, 13, 231, 135, 229,
         58, 94, 20, 246, 8, 33, 65, 238, 37, 112, 97, 65, 241, 255, 93, 171, 15,
       ],
+      IDCommitmentBigInt: buildBigIntFromUint8Array(
+        new Uint8Array([
+          112, 216, 27, 89, 188, 135, 203, 19, 168, 211, 117, 13, 231, 135, 229,
+          58, 94, 20, 246, 8, 33, 65, 238, 37, 112, 97, 65, 241, 255, 93, 171,
+          15,
+        ])
+      ),
     } as unknown as IdentityCredential;
     const membership = {
       chainId: "0xAA36A7",

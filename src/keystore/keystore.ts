@@ -69,8 +69,8 @@ export class Keystore {
     this.data = Object.assign(
       {
         application: "waku-rln-relay",
-        version: "01234567890abcdef",
-        appIdentifier: "0.2",
+        appIdentifier: "01234567890abcdef",
+        version: "0.2",
         credentials: {},
       },
       options
