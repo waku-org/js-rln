@@ -171,8 +171,12 @@ describe("Keystore", () => {
   });
 
   it.only("should fail to create store from invalid string", () => {
-    expect(() => Keystore.fromString("/asdq}")).to.throw();
-    expect(() => Keystore.fromString('{ "name": "it" }')).to.throw();
+    expect(() => {
+      Keystore.fromString("/asdq}");
+    }).to.throw();
+    expect(() => {
+      Keystore.fromString('{ "name": "it" }');
+    }).to.throw();
   });
 
   it("shoud create store from valid string", async () => {
