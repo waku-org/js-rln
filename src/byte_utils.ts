@@ -37,3 +37,13 @@ export function writeUIntLE(
 
   return buf;
 }
+
+/**
+ * Transforms Uint8Array into BigInt
+ * @param array: Uint8Array
+ * @returns BigInt
+ */
+export function buildBigIntFromUint8Array(array: Uint8Array): bigint {
+  const dataView = new DataView(array.buffer);
+  return dataView.getBigUint64(0, true);
+}

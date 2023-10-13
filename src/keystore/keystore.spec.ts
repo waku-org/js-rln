@@ -183,7 +183,7 @@ describe.only("Keystore", () => {
     }
 
     try {
-      Keystore.fromString("{ 'name': 'it' }");
+      Keystore.fromString('{ "name": "it" }');
     } catch (e) {
       expect((e as Error).message).to.contain(
         "Invalid string, does not match Nwaku Keystore format."
@@ -263,7 +263,6 @@ describe.only("Keystore", () => {
       expectedHash,
       DEFAULT_PASSWORD
     );
-    console.log("got", actualCredentials);
     expect(actualCredentials).to.deep.equalInAnyOrder({
       identity,
       membership: {

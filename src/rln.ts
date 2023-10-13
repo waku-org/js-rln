@@ -2,7 +2,7 @@ import type { IRateLimitProof } from "@waku/interfaces";
 import { default as init } from "@waku/zerokit-rln-wasm";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 
-import { writeUIntLE } from "./byte_utils.js";
+import { buildBigIntFromUint8Array, writeUIntLE } from "./byte_utils.js";
 import { dateToEpoch, epochIntToBytes } from "./epoch.js";
 import verificationKey from "./resources/verification_key.js";
 import * as wc from "./witness_calculator.js";
@@ -25,16 +25,6 @@ function concatenate(...input: Uint8Array[]): Uint8Array {
     offset += arr.length;
   }
   return result;
-}
-
-/**
- * Transforms Uint8Array into BigInt
- * @param array: Uint8Array
- * @returns BigInt
- */
-function buildBigIntFromUint8Array(array: Uint8Array): bigint {
-  const dataView = new DataView(array.buffer);
-  return dataView.getBigUint64(0, true);
 }
 
 const stringEncoder = new TextEncoder();

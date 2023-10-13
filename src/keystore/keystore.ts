@@ -13,6 +13,7 @@ import {
 import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
 
+import { buildBigIntFromUint8Array } from "../byte_utils.js";
 import type { IdentityCredential } from "../rln.js";
 
 import { decryptEipKeystore, keccak256Checksum } from "./cipher.js";
@@ -242,11 +243,22 @@ export class Keystore {
       const obj = JSON.parse(str);
 
       // TODO: add runtime validation of nwaku credentials
-      if (!isCredentialValid(obj)) {
-        throw Error("Parsed object is not valid Nwaku Credential.");
-      }
-
-      return obj as IdentityOptions;
+      return {
+        identity: {
+          IDCommitment: _.get(obj, "identityCredential.idCommitment"),
+          IDTrapdoor: _.get(obj, "identityCredential.idTrapdoor"),
+          IDNullifier: _.get(obj, "identityCredential.idNullifier"),
+          IDCommitmentBigInt: buildBigIntFromUint8Array(
+            _.get(obj, "identityCredential.idCommitment")
+          ),
+          IDSecretHash: _.get(obj, "identityCredential.idSecretHash"),
+        },
+        membership: {
+          treeIndex: _.get(obj, "treeIndex"),
+          chainId: _.get(obj, "membershipContract.chainId"),
+          address: _.get(obj, "membershipContract.address"),
+        },
+      };
     } catch (err) {
       console.error("Cannot parse bytes to Nwaku Credentials:", err);
       return null;
