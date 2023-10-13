@@ -198,6 +198,16 @@ describe.only("Keystore", () => {
 
   it("should convert keystore to string", async () => {
     let store = Keystore.create();
+    console.log("left", store.toString());
+    console.log(
+      "right",
+      JSON.stringify({
+        application: "waku-rln-relay",
+        version: "01234567890abcdef",
+        appIdentifier: "0.2",
+        credentials: {},
+      })
+    );
     expect(store.toString()).to.eq(
       JSON.stringify({
         application: "waku-rln-relay",
@@ -253,6 +263,7 @@ describe.only("Keystore", () => {
       expectedHash,
       DEFAULT_PASSWORD
     );
+    console.log("got", actualCredentials);
     expect(actualCredentials).to.deep.equalInAnyOrder({
       identity,
       membership: {
