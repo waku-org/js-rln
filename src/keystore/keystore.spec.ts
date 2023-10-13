@@ -249,11 +249,7 @@ describe.only("Keystore", () => {
     );
     expect(actualCredentials).to.deep.equalInAnyOrder({
       identity,
-      membership: {
-        chainId: membership.chainId,
-        address: membership.address,
-      },
-      treeIndex: membership.treeIndex,
+      membership,
     });
   });
 
