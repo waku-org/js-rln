@@ -249,7 +249,7 @@ export class Keystore {
           IDTrapdoor: _.get(obj, "identityCredential.idTrapdoor"),
           IDNullifier: _.get(obj, "identityCredential.idNullifier"),
           IDCommitmentBigInt: buildBigIntFromUint8Array(
-            _.get(obj, "identityCredential.idCommitment")
+            new Uint8Array(_.get(obj, "identityCredential.idCommitment", []))
           ),
           IDSecretHash: _.get(obj, "identityCredential.idSecretHash"),
         },
