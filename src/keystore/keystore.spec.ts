@@ -94,7 +94,7 @@ const NWAKU_KEYSTORE = {
 };
 
 describe("Keystore", () => {
-  it.only("shoud create empty store with predefined values", () => {
+  it("shoud create empty store with predefined values", () => {
     const store = Keystore.create();
 
     expect(store.toObject()).to.deep.eq({
@@ -158,7 +158,7 @@ describe("Keystore", () => {
       },
     },
   ].map((options) => {
-    it("should fail to create store from invalid object", () => {
+    it.only("should fail to create store from invalid object", () => {
       expect(async () => Keystore.fromObject(options as any)).to.throw(
         "Invalid object, does not match Nwaku Keystore format."
       );
