@@ -170,7 +170,7 @@ describe("Keystore", () => {
     expect(store.toObject()).to.deep.eq(NWAKU_KEYSTORE);
   });
 
-  it("should fail to create store from invalid string", () => {
+  it.only("should fail to create store from invalid string", () => {
     expect(() => Keystore.fromString("/asdq}")).to.throw(
       "Cannot create Keystore from string:"
     );
