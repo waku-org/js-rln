@@ -1,9 +1,11 @@
 import chai, { expect } from "chai";
+import chaiAsPromised from "chai-as-promised";
 import chaiSubset from "chai-subset";
 import deepEqualInAnyOrder from "deep-equal-in-any-order";
 
 chai.use(chaiSubset);
 chai.use(deepEqualInAnyOrder);
+chai.use(chaiAsPromised);
 
 import { IdentityCredential } from "../rln";
 
@@ -157,14 +159,9 @@ describe.only("Keystore", () => {
     },
   ].map((options) => {
     it("should fail to create store from invalid object", () => {
-      try {
-        Keystore.fromObject(options as any);
-        expect(false).to.eq(true);
-      } catch (e) {
-        expect((e as Error).message).to.eq(
-          "Invalid object, does not match Nwaku Keystore format."
-        );
-      }
+      expect(() => Keystore.fromObject(options as any)).to.throw(
+        "Invalid object, does not match Nwaku Keystore format."
+      );
     });
   });
 
@@ -174,21 +171,12 @@ describe.only("Keystore", () => {
   });
 
   it("should fail to create store from invalid string", () => {
-    try {
-      Keystore.fromString("/asdq}");
-    } catch (e) {
-      expect((e as Error).message).to.contain(
-        "Cannot create Keystore from string:"
-      );
-    }
-
-    try {
-      Keystore.fromString('{ "name": "it" }');
-    } catch (e) {
-      expect((e as Error).message).to.contain(
-        "Invalid string, does not match Nwaku Keystore format."
-      );
-    }
+    expect(() => Keystore.fromString("/asdq}")).to.throw(
+      "Cannot create Keystore from string:"
+    );
+    expect(() => Keystore.fromString('{ "name": "it" }')).to.throw(
+      "Invalid string, does not match Nwaku Keystore format."
+    );
   });
 
   it("shoud create store from valid string", async () => {
@@ -198,16 +186,7 @@ describe.only("Keystore", () => {
 
   it("should convert keystore to string", async () => {
     let store = Keystore.create();
-    console.log("left", store.toString());
-    console.log(
-      "right",
-      JSON.stringify({
-        application: "waku-rln-relay",
-        version: "01234567890abcdef",
-        appIdentifier: "0.2",
-        credentials: {},
-      })
-    );
+
     expect(store.toString()).to.eq(
       JSON.stringify({
         application: "waku-rln-relay",
@@ -303,13 +282,9 @@ describe.only("Keystore", () => {
 
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    try {
-      await store.addCredential({ identity, membership }, DEFAULT_PASSWORD);
-    } catch (e) {
-      expect((e as Error).message).to.eq(
-        "Credential already exists in the store."
-      );
-    }
+    await expect(() =>
+      store.addCredential({ identity, membership }, DEFAULT_PASSWORD)
+    ).to.be.rejectedWith("Credential already exists in the store.");
   });
 
   it("shoud fail to read credentials with wrong password", async () => {
@@ -317,11 +292,9 @@ describe.only("Keystore", () => {
       "9DB2B4718A97485B9F70F68D1CC19F4E10F0B4CE943418838E94956CB8E57548";
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    try {
-      await store.readCredential(expectedHash, "wrong-password");
-    } catch (e) {
-      expect((e as Error).message).to.eq("Password is invalid.");
-    }
+    await expect(() =>
+      store.readCredential(expectedHash, "wrong-password")
+    ).to.be.rejectedWith("Password is invalid.");
   });
 
   it("shoud fail to read missing credentials", async () => {
