@@ -8,10 +8,10 @@ chai.use(deepEqualInAnyOrder);
 chai.use(chaiAsPromised);
 
 import { buildBigIntFromUint8Array } from "../byte_utils.js";
-import { IdentityCredential } from "../rln";
+import { IdentityCredential } from "../rln.js";
 
-import { Keystore } from "./keystore";
-import { MembershipInfo } from "./types";
+import { Keystore } from "./keystore.js";
+import type { MembershipInfo } from "./types.js";
 
 const DEFAULT_PASSWORD = "sup3rsecure";
 const NWAKU_KEYSTORE = {
