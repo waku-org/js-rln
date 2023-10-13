@@ -93,7 +93,7 @@ const NWAKU_KEYSTORE = {
   version: "0.2",
 };
 
-describe("Keystore", () => {
+describe.only("Keystore", () => {
   it("shoud create empty store with predefined values", () => {
     const store = Keystore.create();
 
@@ -170,13 +170,9 @@ describe("Keystore", () => {
     expect(store.toObject()).to.deep.eq(NWAKU_KEYSTORE);
   });
 
-  it.only("should fail to create store from invalid string", () => {
-    expect(() => {
-      Keystore.fromString("/asdq}");
-    }).to.throw();
-    expect(() => {
-      Keystore.fromString('{ "name": "it" }');
-    }).to.throw();
+  it("should fail to create store from invalid string", () => {
+    expect(Keystore.fromString("/asdq}")).to.eq(null);
+    expect(Keystore.fromString('{ "name": "it" }')).to.eq(null);
   });
 
   it("shoud create store from valid string", async () => {
