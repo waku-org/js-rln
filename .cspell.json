@@ -13,7 +13,14 @@
     "vkey",
     "Waku",
     "zerokit",
-    "zkey"
+    "zkey",
+    "Keccak",
+    "keccak",
+    "chainsafe",
+    "kdfparams",
+    "ciphertext",
+    "cipherparams",
+    "codegen"
   ],
   "flagWords": [],
   "ignorePaths": [

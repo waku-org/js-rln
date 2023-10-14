@@ -1,5 +1,6 @@
 import { RLNDecoder, RLNEncoder } from "./codec.js";
 import { RLN_ABI, SEPOLIA_CONTRACT } from "./constants.js";
+import { Keystore } from "./keystore/index.js";
 import {
   IdentityCredential,
   Proof,
@@ -19,6 +20,7 @@ export async function create(): Promise<RLNInstance> {
 }
 
 export {
+  Keystore,
   RLNInstance,
   IdentityCredential,
   Proof,
