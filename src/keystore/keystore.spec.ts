@@ -94,7 +94,7 @@ const NWAKU_KEYSTORE = {
   },
 };
 
-describe.only("Keystore", () => {
+describe("Keystore", () => {
   it("shoud create empty store with predefined values", () => {
     const store = Keystore.create();
 
@@ -297,11 +297,11 @@ describe.only("Keystore", () => {
       "9DB2B4718A97485B9F70F68D1CC19F4E10F0B4CE943418838E94956CB8E57548";
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
-    expect(
-      store.readCredential(expectedHash, "wrong-password").catch((e) => {
-        expect((e as Error).message).to.eq("Password is invalid.");
-      })
-    ).to.eventually.fulfilled;
+    try {
+      await store.readCredential(expectedHash, "wrong-password");
+    } catch (e) {
+      expect((e as Error).message).to.eq("Password is invalid.");
+    }
   });
 
   it("shoud fail to read missing credentials", async () => {
