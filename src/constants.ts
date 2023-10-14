@@ -1,14 +1,11 @@
 export const RLN_ABI = [
-  "function MEMBERSHIP_DEPOSIT() public view returns(uint256)",
-  "function register(uint256 pubkey) external payable",
-  "function withdraw(uint256 secret, uint256 _pubkeyIndex, address payable receiver) external",
-  "event MemberRegistered(uint256 pubkey, uint256 index)",
-  "event MemberWithdrawn(uint256 pubkey, uint256 index)",
+  "function register(uint256[] calldata commitments) external payable",
+  "event MemberRegistered(uint256 idCommitment, uint256 idCommitmentIndex)",
 ];
 
 export const SEPOLIA_CONTRACT = {
   chainId: 11155111,
-  startBlock: 3193048,
-  address: "0x9C09146844C1326c2dBC41c451766C7138F88155",
+  startBlock: 4230713,
+  address: "0xF1935b338321013f11068abCafC548A7B0db732C",
   abi: RLN_ABI,
 };

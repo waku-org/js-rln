@@ -164,11 +164,9 @@ export class RLNContract {
   public async registerWithKey(
     credential: IdentityCredential
   ): Promise<ethers.Event | undefined> {
-    const depositValue = await this.contract.MEMBERSHIP_DEPOSIT();
-
     const txRegisterResponse: ethers.ContractTransaction =
-      await this.contract.register(credential.IDCommitmentBigInt, {
-        value: depositValue,
+      await this.contract.register([credential.IDCommitmentBigInt], {
+        gasLimit: 100000,
       });
     const txRegisterReceipt = await txRegisterResponse.wait();
 
