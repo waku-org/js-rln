@@ -30,7 +30,7 @@ export const RLN_REGISTRY_ABI = [
 ];
 
 // ref https://github.com/waku-org/waku-rln-contract/blob/19fded82bca07e7b535b429dc507cfb83f10dfcf/deployments/sepolia/WakuRlnStorage_0.json#L3
-export const RLN_ABI = [
+export const RLN_STORAGE_ABI = [
   "constructor(address _poseidonHasher, uint16 _contractIndex)",
   "error DuplicateIdCommitment()",
   "error FullTree()",

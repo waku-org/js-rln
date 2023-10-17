@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { RLN_ABI } from "./constants.js";
+import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
 import { IdentityCredential, RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 
@@ -9,9 +9,11 @@ type Member = {
   index: number;
 };
 
+type Provider = ethers.Signer | ethers.providers.Provider;
+
 type ContractOptions = {
   address: string;
-  provider: ethers.Signer | ethers.providers.Provider;
+  provider: Provider;
 };
 
 type FetchMembersOptions = {
@@ -21,9 +23,13 @@ type FetchMembersOptions = {
 };
 
 export class RLNContract {
-  private _contract: ethers.Contract;
-  private membersFilter: ethers.EventFilter;
+  private registryContract: ethers.Contract;
   private merkleRootTracker: MerkleRootTracker;
+
+  private deployBlock: undefined | number;
+  private storageIndex: undefined | number;
+  private storageContract: undefined | ethers.Contract;
+  private _membersFilter: undefined | ethers.EventFilter;
 
   private _members: Member[] = [];
 
@@ -33,29 +39,56 @@ export class RLNContract {
   ): Promise<RLNContract> {
     const rlnContract = new RLNContract(rlnInstance, options);
 
+    await rlnContract.initStorageContract(options.provider);
     await rlnContract.fetchMembers(rlnInstance);
     rlnContract.subscribeToMembers(rlnInstance);
 
     return rlnContract;
   }
 
-  constructor(
+  private constructor(
     rlnInstance: RLNInstance,
     { address, provider }: ContractOptions
   ) {
     const initialRoot = rlnInstance.getMerkleRoot();
 
-    this._contract = new ethers.Contract(address, RLN_ABI, provider);
+    this.registryContract = new ethers.Contract(
+      address,
+      RLN_REGISTRY_ABI,
+      provider
+    );
     this.merkleRootTracker = new MerkleRootTracker(5, initialRoot);
-    this.membersFilter = this.contract.filters.MemberRegistered();
+  }
+
+  private async initStorageContract(provider: Provider): Promise<void> {
+    const index = await this.registryContract.usingStorageIndex();
+    const address = await this.registryContract.storages(index);
+
+    this.storageIndex = index;
+    this.storageContract = new ethers.Contract(
+      address,
+      RLN_STORAGE_ABI,
+      provider
+    );
+    this._membersFilter = this.storageContract.filters.MemberRegistered();
+
+    this.deployBlock = await this.storageContract.deployedBlockNumber();
   }
 
   public get contract(): ethers.Contract {
-    return this._contract;
+    // since init is only way to create RLNContract class
+    // it is guaranteed that this.storageContract is populated
+    return this.storageContract as ethers.Contract;
   }
 
   public get members(): Member[] {
     return this._members;
+  }
+
+  private get membersFilter(): ethers.EventFilter {
+    // since init is only way to create RLNContract class
+    // it is guaranteed that this.storageContract is populated
+    return this._membersFilter as ethers.EventFilter;
   }
 
   public async fetchMembers(
@@ -63,6 +96,7 @@ export class RLNContract {
     options: FetchMembersOptions = {}
   ): Promise<void> {
     const registeredMemberEvents = await queryFilter(this.contract, {
+      fromBlock: this.deployBlock,
       ...options,
       membersFilter: this.membersFilter,
     });
@@ -164,10 +198,19 @@ export class RLNContract {
   public async registerWithKey(
     credential: IdentityCredential
   ): Promise<ethers.Event | undefined> {
+    if (!this.storageIndex) {
+      throw Error(
+        "Cannot register credential, no storage contract index found."
+      );
+    }
     const txRegisterResponse: ethers.ContractTransaction =
-      await this.contract.register([credential.IDCommitmentBigInt], {
-        gasLimit: 100000,
-      });
+      await this.registryContract.register(
+        this.storageIndex,
+        credential.IDCommitmentBigInt,
+        {
+          gasLimit: 100000,
+        }
+      );
     const txRegisterReceipt = await txRegisterResponse.wait();
 
     return txRegisterReceipt?.events?.[0];
