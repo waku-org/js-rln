@@ -40,6 +40,7 @@ describe("RLN Contract abstraction", () => {
     });
 
     rlnContract["storageIndex"] = 1;
+    rlnContract["_membersFilter"] = {} as unknown as ethers.EventFilter;
     rlnContract["registryContract"] = {
       register: () =>
         Promise.resolve({ wait: () => Promise.resolve(undefined) }),
