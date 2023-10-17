@@ -1,5 +1,9 @@
 import { RLNDecoder, RLNEncoder } from "./codec.js";
-import { RLN_ABI, SEPOLIA_CONTRACT } from "./constants.js";
+import {
+  RLN_REGISTRY_ABI,
+  RLN_STORAGE_ABI,
+  SEPOLIA_CONTRACT,
+} from "./constants.js";
 import { Keystore } from "./keystore/index.js";
 import {
   IdentityCredential,
@@ -29,6 +33,7 @@ export {
   RLNDecoder,
   MerkleRootTracker,
   RLNContract,
-  RLN_ABI,
+  RLN_STORAGE_ABI,
+  RLN_REGISTRY_ABI,
   SEPOLIA_CONTRACT,
 };
