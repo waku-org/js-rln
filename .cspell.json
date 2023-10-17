@@ -20,7 +20,8 @@
     "kdfparams",
     "ciphertext",
     "cipherparams",
-    "codegen"
+    "codegen",
+    "hexlify"
   ],
   "flagWords": [],
   "ignorePaths": [
