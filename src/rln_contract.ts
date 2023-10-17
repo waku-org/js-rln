@@ -46,7 +46,7 @@ export class RLNContract {
     return rlnContract;
   }
 
-  private constructor(
+  constructor(
     rlnInstance: RLNInstance,
     { address, provider }: ContractOptions
   ) {
@@ -76,8 +76,9 @@ export class RLNContract {
   }
 
   public get contract(): ethers.Contract {
-    // since init is only way to create RLNContract class
-    // it is guaranteed that this.storageContract is populated
+    if (!this.storageContract) {
+      throw Error("Storage contract was not initialized.");
+    }
     return this.storageContract as ethers.Contract;
   }
 
@@ -86,8 +87,9 @@ export class RLNContract {
   }
 
   private get membersFilter(): ethers.EventFilter {
-    // since init is only way to create RLNContract class
-    // it is guaranteed that this.storageContract is populated
+    if (!this._membersFilter) {
+      throw Error("Members filter was not initialized.");
+    }
     return this._membersFilter as ethers.EventFilter;
   }
 
