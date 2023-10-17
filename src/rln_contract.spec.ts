@@ -7,7 +7,7 @@ import * as rln from "./index.js";
 chai.use(spies);
 
 describe("RLN Contract abstraction", () => {
-  it("should be able to fetch members from events and store to rln instance", async () => {
+  it.only("should be able to fetch members from events and store to rln instance", async () => {
     const rlnInstance = await rln.create();
 
     rlnInstance.insertMember = () => undefined;
@@ -19,9 +19,13 @@ describe("RLN Contract abstraction", () => {
       provider: voidSigner,
     });
 
-    rlnContract["_contract"] = {
+    rlnContract["storageContract"] = {
       queryFilter: () => Promise.resolve([mockEvent()]),
     } as unknown as ethers.Contract;
+    rlnContract["_membersFilter"] = {
+      address: "",
+      topics: [],
+    } as unknown as ethers.EventFilter;
 
     await rlnContract.fetchMembers(rlnInstance);
 
@@ -39,12 +43,19 @@ describe("RLN Contract abstraction", () => {
       provider: voidSigner,
     });
 
-    rlnContract["_contract"] = {
+    rlnContract["storageIndex"] = 1;
+    rlnContract["_membersFilter"] = {
+      address: "",
+      topics: [],
+    } as unknown as ethers.EventFilter;
+    rlnContract["registryContract"] = {
       register: () =>
         Promise.resolve({ wait: () => Promise.resolve(undefined) }),
-      MEMBERSHIP_DEPOSIT: () => Promise.resolve(1),
     } as unknown as ethers.Contract;
-    const contractSpy = chai.spy.on(rlnContract["_contract"], "register");
+    const contractSpy = chai.spy.on(
+      rlnContract["registryContract"],
+      "register"
+    );
 
     await rlnContract.registerWithSignature(rlnInstance, mockSignature);
 
