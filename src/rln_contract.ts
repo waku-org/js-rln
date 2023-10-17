@@ -87,7 +87,6 @@ export class RLNContract {
   }
 
   private get membersFilter(): ethers.EventFilter {
-    console.log("get", this._membersFilter);
     if (!this._membersFilter) {
       throw Error("Members filter was not initialized.");
     }

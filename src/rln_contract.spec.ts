@@ -22,6 +22,10 @@ describe("RLN Contract abstraction", () => {
     rlnContract["storageContract"] = {
       queryFilter: () => Promise.resolve([mockEvent()]),
     } as unknown as ethers.Contract;
+    rlnContract["_membersFilter"] = {
+      address: "",
+      topics: [],
+    } as unknown as ethers.EventFilter;
 
     await rlnContract.fetchMembers(rlnInstance);
 
@@ -44,7 +48,6 @@ describe("RLN Contract abstraction", () => {
       address: "",
       topics: [],
     } as unknown as ethers.EventFilter;
-    console.log("test", rlnContract["_membersFilter"]);
     rlnContract["registryContract"] = {
       register: () =>
         Promise.resolve({ wait: () => Promise.resolve(undefined) }),
