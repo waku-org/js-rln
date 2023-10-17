@@ -71,8 +71,8 @@ export class RLNContract {
     options: RLNStorageOptions = {}
   ): Promise<void> {
     const storageIndex = options?.storageIndex
-      ? await this.registryContract.usingStorageIndex()
-      : options.storageIndex;
+      ? options.storageIndex
+      : await this.registryContract.usingStorageIndex();
     const storageAddress = await this.registryContract.storages(storageIndex);
 
     if (!storageAddress || storageAddress === ethers.constants.AddressZero) {
