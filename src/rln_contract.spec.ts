@@ -44,6 +44,7 @@ describe("RLN Contract abstraction", () => {
       address: "",
       topics: [],
     } as unknown as ethers.EventFilter;
+    console.log("test", rlnContract["_membersFilter"]);
     rlnContract["registryContract"] = {
       register: () =>
         Promise.resolve({ wait: () => Promise.resolve(undefined) }),
