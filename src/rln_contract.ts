@@ -5,16 +5,22 @@ import { IdentityCredential, RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 
 type Member = {
-  pubkey: string;
+  idCommitment: string;
   index: number;
 };
 
 type Provider = ethers.Signer | ethers.providers.Provider;
 
-type ContractOptions = {
-  address: string;
+type RLNContractOptions = {
   provider: Provider;
+  registryAddress: string;
 };
+
+type RLNStorageOptions = {
+  storageIndex?: number;
+};
+
+type RLNContractInitOptions = RLNContractOptions & RLNStorageOptions;
 
 type FetchMembersOptions = {
   fromBlock?: number;
@@ -35,7 +41,7 @@ export class RLNContract {
 
   public static async init(
     rlnInstance: RLNInstance,
-    options: ContractOptions
+    options: RLNContractInitOptions
   ): Promise<RLNContract> {
     const rlnContract = new RLNContract(rlnInstance, options);
 
@@ -48,25 +54,34 @@ export class RLNContract {
 
   constructor(
     rlnInstance: RLNInstance,
-    { address, provider }: ContractOptions
+    { registryAddress, provider }: RLNContractOptions
   ) {
     const initialRoot = rlnInstance.getMerkleRoot();
 
     this.registryContract = new ethers.Contract(
-      address,
+      registryAddress,
       RLN_REGISTRY_ABI,
       provider
     );
     this.merkleRootTracker = new MerkleRootTracker(5, initialRoot);
   }
 
-  private async initStorageContract(provider: Provider): Promise<void> {
-    const index = await this.registryContract.usingStorageIndex();
-    const address = await this.registryContract.storages(index);
+  private async initStorageContract(
+    provider: Provider,
+    options: RLNStorageOptions = {}
+  ): Promise<void> {
+    const storageIndex = options?.storageIndex
+      ? await this.registryContract.usingStorageIndex()
+      : options.storageIndex;
+    const storageAddress = await this.registryContract.storages(storageIndex);
 
-    this.storageIndex = index;
+    if (!storageAddress || storageAddress === ethers.constants.AddressZero) {
+      throw Error("No RLN Storage initialized on registry contract.");
+    }
+
+    this.storageIndex = storageIndex;
     this.storageContract = new ethers.Contract(
-      address,
+      storageAddress,
       RLN_STORAGE_ABI,
       provider
     );
@@ -144,18 +159,22 @@ export class RLNContract {
   ): void {
     toInsert.forEach((events: ethers.Event[], blockNumber: number) => {
       events.forEach((evt) => {
-        if (!evt.args) {
+        const _idCommitment = evt?.args?.idCommitment;
+        const index = evt?.args?.index;
+
+        if (!_idCommitment || !index) {
           return;
         }
 
-        const pubkey = evt.args.pubkey;
-        const index = evt.args.index;
         const idCommitment = ethers.utils.zeroPad(
-          ethers.utils.arrayify(pubkey),
+          ethers.utils.arrayify(_idCommitment),
           32
         );
         rlnInstance.insertMember(idCommitment);
-        this.members.push({ index, pubkey });
+        this.members.push({
+          index,
+          idCommitment: ethers.utils.hexlify(idCommitment),
+        });
       });
 
       const currentRoot = rlnInstance.getMerkleRoot();
