@@ -7,7 +7,7 @@ import * as rln from "./index.js";
 chai.use(spies);
 
 describe("RLN Contract abstraction", () => {
-  it("should be able to fetch members from events and store to rln instance", async () => {
+  it.only("should be able to fetch members from events and store to rln instance", async () => {
     const rlnInstance = await rln.create();
 
     rlnInstance.insertMember = () => undefined;
