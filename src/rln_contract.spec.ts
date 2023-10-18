@@ -49,7 +49,7 @@ describe("RLN Contract abstraction", () => {
       topics: [],
     } as unknown as ethers.EventFilter;
     rlnContract["registryContract"] = {
-      register: () =>
+      "register(uint16,uint256)": () =>
         Promise.resolve({ wait: () => Promise.resolve(undefined) }),
     } as unknown as ethers.Contract;
     const contractSpy = chai.spy.on(

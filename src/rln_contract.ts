@@ -214,7 +214,7 @@ export class RLNContract {
   public async registerWithSignature(
     rlnInstance: RLNInstance,
     signature: string
-  ): Promise<Member> {
+  ): Promise<Member | undefined> {
     const identityCredential =
       await rlnInstance.generateSeededIdentityCredential(signature);
 
@@ -223,7 +223,7 @@ export class RLNContract {
 
   public async registerWithKey(
     credential: IdentityCredential
-  ): Promise<Member> {
+  ): Promise<Member | undefined> {
     if (this.storageIndex === undefined) {
       throw Error(
         "Cannot register credential, no storage contract index found."
@@ -241,7 +241,7 @@ export class RLNContract {
     const memberRegistered = txRegisterReceipt?.events?.[0];
 
     if (!memberRegistered) {
-      throw Error("No MemberRegistered event was emitted.");
+      return undefined;
     }
 
     const decodedData = this.contract.interface.decodeEventLog(
