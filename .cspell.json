@@ -21,7 +21,8 @@
     "ciphertext",
     "cipherparams",
     "codegen",
-    "hexlify"
+    "hexlify",
+    "Arraylike"
   ],
   "flagWords": [],
   "ignorePaths": [
