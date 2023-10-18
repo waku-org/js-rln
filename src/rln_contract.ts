@@ -6,7 +6,7 @@ import { MerkleRootTracker } from "./root_tracker.js";
 
 type Member = {
   idCommitment: string;
-  index: number;
+  index: ethers.BigNumber;
 };
 
 type Provider = ethers.Signer | ethers.providers.Provider;
@@ -98,6 +98,9 @@ export class RLNContract {
   }
 
   public get members(): Member[] {
+    this._members.sort(
+      (left, right) => left.index.toNumber() - right.index.toNumber()
+    );
     return this._members;
   }
 
@@ -130,13 +133,13 @@ export class RLNContract {
       }
 
       if (evt.removed) {
-        const index: number = evt.args.index;
+        const index: ethers.BigNumber = evt.args.index;
         const toRemoveVal = toRemoveTable.get(evt.blockNumber);
         if (toRemoveVal != undefined) {
-          toRemoveVal.push(index);
+          toRemoveVal.push(index.toNumber());
           toRemoveTable.set(evt.blockNumber, toRemoveVal);
         } else {
-          toRemoveTable.set(evt.blockNumber, [index]);
+          toRemoveTable.set(evt.blockNumber, [index.toNumber()]);
         }
       } else {
         let eventsPerBlock = toInsertTable.get(evt.blockNumber);
@@ -170,6 +173,7 @@ export class RLNContract {
           ethers.utils.arrayify(_idCommitment),
           32
         );
+        console.log("got member");
         rlnInstance.insertMember(idCommitment);
         this.members.push({
           index,
@@ -190,7 +194,7 @@ export class RLNContract {
     const removeDescending = new Map([...toRemove].sort().reverse());
     removeDescending.forEach((indexes: number[], blockNumber: number) => {
       indexes.forEach((index) => {
-        const idx = this.members.findIndex((m) => m.index === index);
+        const idx = this.members.findIndex((m) => m.index.toNumber() === index);
         if (idx > -1) {
           this.members.splice(idx, 1);
         }
@@ -203,14 +207,14 @@ export class RLNContract {
 
   public subscribeToMembers(rlnInstance: RLNInstance): void {
     this.contract.on(this.membersFilter, (_pubkey, _index, event) =>
-      this.processEvents(rlnInstance, event)
+      this.processEvents(rlnInstance, [event])
     );
   }
 
   public async registerWithSignature(
     rlnInstance: RLNInstance,
     signature: string
-  ): Promise<ethers.Event | undefined> {
+  ): Promise<Member> {
     const identityCredential =
       await rlnInstance.generateSeededIdentityCredential(signature);
 
@@ -219,23 +223,36 @@ export class RLNContract {
 
   public async registerWithKey(
     credential: IdentityCredential
-  ): Promise<ethers.Event | undefined> {
-    if (!this.storageIndex) {
+  ): Promise<Member> {
+    if (this.storageIndex === undefined) {
       throw Error(
         "Cannot register credential, no storage contract index found."
       );
     }
     const txRegisterResponse: ethers.ContractTransaction =
-      await this.registryContract.register(
+      await this.registryContract["register(uint16,uint256)"](
         this.storageIndex,
         credential.IDCommitmentBigInt,
-        {
-          gasLimit: 100000,
-        }
+        { gasLimit: 100000 }
       );
     const txRegisterReceipt = await txRegisterResponse.wait();
 
-    return txRegisterReceipt?.events?.[0];
+    // assumption: register(uint16,uint256) emits one event
+    const memberRegistered = txRegisterReceipt?.events?.[0];
+
+    if (!memberRegistered) {
+      throw Error("No MemberRegistered event was emitted.");
+    }
+
+    const decodedData = this.contract.interface.decodeEventLog(
+      "MemberRegistered",
+      memberRegistered.data
+    );
+
+    return {
+      idCommitment: decodedData.idCommitment,
+      index: decodedData.index,
+    };
   }
 
   public roots(): Uint8Array[] {

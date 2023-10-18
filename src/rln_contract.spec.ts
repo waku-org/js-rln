@@ -54,7 +54,7 @@ describe("RLN Contract abstraction", () => {
     } as unknown as ethers.Contract;
     const contractSpy = chai.spy.on(
       rlnContract["registryContract"],
-      "register"
+      "register(uint16,uint256)"
     );
 
     await rlnContract.registerWithSignature(rlnInstance, mockSignature);

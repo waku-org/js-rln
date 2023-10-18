@@ -245,13 +245,23 @@ export class Keystore {
       // TODO: add runtime validation of nwaku credentials
       return {
         identity: {
-          IDCommitment: _.get(obj, "identityCredential.idCommitment"),
-          IDTrapdoor: _.get(obj, "identityCredential.idTrapdoor"),
-          IDNullifier: _.get(obj, "identityCredential.idNullifier"),
-          IDCommitmentBigInt: buildBigIntFromUint8Array(
-            new Uint8Array(_.get(obj, "identityCredential.idCommitment", []))
+          IDCommitment: Keystore.fromArraylikeToBytes(
+            _.get(obj, "identityCredential.idCommitment", [])
           ),
-          IDSecretHash: _.get(obj, "identityCredential.idSecretHash"),
+          IDTrapdoor: Keystore.fromArraylikeToBytes(
+            _.get(obj, "identityCredential.idTrapdoor", [])
+          ),
+          IDNullifier: Keystore.fromArraylikeToBytes(
+            _.get(obj, "identityCredential.idNullifier", [])
+          ),
+          IDCommitmentBigInt: buildBigIntFromUint8Array(
+            Keystore.fromArraylikeToBytes(
+              _.get(obj, "identityCredential.idCommitment", [])
+            )
+          ),
+          IDSecretHash: Keystore.fromArraylikeToBytes(
+            _.get(obj, "identityCredential.idSecretHash", [])
+          ),
         },
         membership: {
           treeIndex: _.get(obj, "treeIndex"),
@@ -263,6 +273,23 @@ export class Keystore {
       console.error("Cannot parse bytes to Nwaku Credentials:", err);
       return null;
     }
+  }
+
+  private static fromArraylikeToBytes(obj: {
+    [key: number]: number;
+  }): Uint8Array {
+    const bytes = [];
+
+    let index = 0;
+    let lastElement = obj[index];
+
+    while (lastElement !== undefined) {
+      bytes.push(lastElement);
+      index += 1;
+      lastElement = obj[index];
+    }
+
+    return new Uint8Array(bytes);
   }
 
   // follows nwaku implementation
