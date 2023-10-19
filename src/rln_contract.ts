@@ -37,7 +37,7 @@ export class RLNContract {
   private storageContract: undefined | ethers.Contract;
   private _membersFilter: undefined | ethers.EventFilter;
 
-  private _members: Member[] = [];
+  private _members: Map<number, Member> = new Map();
 
   public static async init(
     rlnInstance: RLNInstance,
@@ -98,10 +98,10 @@ export class RLNContract {
   }
 
   public get members(): Member[] {
-    this._members.sort(
+    const sortedMembers = Array.from(this._members.values()).sort(
       (left, right) => left.index.toNumber() - right.index.toNumber()
     );
-    return this._members;
+    return sortedMembers;
   }
 
   private get membersFilter(): ethers.EventFilter {
@@ -163,7 +163,7 @@ export class RLNContract {
     toInsert.forEach((events: ethers.Event[], blockNumber: number) => {
       events.forEach((evt) => {
         const _idCommitment = evt?.args?.idCommitment;
-        const index = evt?.args?.index;
+        const index: ethers.BigNumber = evt?.args?.index;
 
         if (!_idCommitment || !index) {
           return;
@@ -173,9 +173,8 @@ export class RLNContract {
           ethers.utils.arrayify(_idCommitment),
           32
         );
-        console.log("got member");
         rlnInstance.insertMember(idCommitment);
-        this.members.push({
+        this._members.set(index.toNumber(), {
           index,
           idCommitment:
             _idCommitment?._hex || ethers.utils.hexlify(idCommitment),
@@ -194,9 +193,8 @@ export class RLNContract {
     const removeDescending = new Map([...toRemove].sort().reverse());
     removeDescending.forEach((indexes: number[], blockNumber: number) => {
       indexes.forEach((index) => {
-        const idx = this.members.findIndex((m) => m.index.toNumber() === index);
-        if (idx > -1) {
-          this.members.splice(idx, 1);
+        if (this._members.has(index)) {
+          this._members.delete(index);
         }
         rlnInstance.deleteMember(index);
       });
