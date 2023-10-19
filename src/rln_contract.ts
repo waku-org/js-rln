@@ -92,7 +92,7 @@ export class RLNContract {
 
   public get contract(): ethers.Contract {
     if (!this.storageContract) {
-      throw Error("Storage contract was not initialized.");
+      throw Error("Storage contract was not initialized");
     }
     return this.storageContract as ethers.Contract;
   }
