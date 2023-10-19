@@ -63,6 +63,6 @@ export const RLN_STORAGE_ABI = [
 
 export const SEPOLIA_CONTRACT = {
   chainId: 11155111,
-  address: "0xF1935b338321013f11068abCafC548A7B0db732C",
+  address: "0xF471d71E9b1455bBF4b85d475afb9BB0954A29c4",
   abi: RLN_REGISTRY_ABI,
 };

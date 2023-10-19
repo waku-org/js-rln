@@ -5,16 +5,22 @@ import { IdentityCredential, RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 
 type Member = {
-  pubkey: string;
-  index: number;
+  idCommitment: string;
+  index: ethers.BigNumber;
 };
 
 type Provider = ethers.Signer | ethers.providers.Provider;
 
-type ContractOptions = {
-  address: string;
+type RLNContractOptions = {
   provider: Provider;
+  registryAddress: string;
 };
+
+type RLNStorageOptions = {
+  storageIndex?: number;
+};
+
+type RLNContractInitOptions = RLNContractOptions & RLNStorageOptions;
 
 type FetchMembersOptions = {
   fromBlock?: number;
@@ -31,11 +37,11 @@ export class RLNContract {
   private storageContract: undefined | ethers.Contract;
   private _membersFilter: undefined | ethers.EventFilter;
 
-  private _members: Member[] = [];
+  private _members: Map<number, Member> = new Map();
 
   public static async init(
     rlnInstance: RLNInstance,
-    options: ContractOptions
+    options: RLNContractInitOptions
   ): Promise<RLNContract> {
     const rlnContract = new RLNContract(rlnInstance, options);
 
@@ -48,25 +54,34 @@ export class RLNContract {
 
   constructor(
     rlnInstance: RLNInstance,
-    { address, provider }: ContractOptions
+    { registryAddress, provider }: RLNContractOptions
   ) {
     const initialRoot = rlnInstance.getMerkleRoot();
 
     this.registryContract = new ethers.Contract(
-      address,
+      registryAddress,
       RLN_REGISTRY_ABI,
       provider
     );
     this.merkleRootTracker = new MerkleRootTracker(5, initialRoot);
   }
 
-  private async initStorageContract(provider: Provider): Promise<void> {
-    const index = await this.registryContract.usingStorageIndex();
-    const address = await this.registryContract.storages(index);
+  private async initStorageContract(
+    provider: Provider,
+    options: RLNStorageOptions = {}
+  ): Promise<void> {
+    const storageIndex = options?.storageIndex
+      ? options.storageIndex
+      : await this.registryContract.usingStorageIndex();
+    const storageAddress = await this.registryContract.storages(storageIndex);
 
-    this.storageIndex = index;
+    if (!storageAddress || storageAddress === ethers.constants.AddressZero) {
+      throw Error("No RLN Storage initialized on registry contract.");
+    }
+
+    this.storageIndex = storageIndex;
     this.storageContract = new ethers.Contract(
-      address,
+      storageAddress,
       RLN_STORAGE_ABI,
       provider
     );
@@ -77,13 +92,16 @@ export class RLNContract {
 
   public get contract(): ethers.Contract {
     if (!this.storageContract) {
-      throw Error("Storage contract was not initialized.");
+      throw Error("Storage contract was not initialized");
     }
     return this.storageContract as ethers.Contract;
   }
 
   public get members(): Member[] {
-    return this._members;
+    const sortedMembers = Array.from(this._members.values()).sort(
+      (left, right) => left.index.toNumber() - right.index.toNumber()
+    );
+    return sortedMembers;
   }
 
   private get membersFilter(): ethers.EventFilter {
@@ -115,13 +133,13 @@ export class RLNContract {
       }
 
       if (evt.removed) {
-        const index: number = evt.args.index;
+        const index: ethers.BigNumber = evt.args.index;
         const toRemoveVal = toRemoveTable.get(evt.blockNumber);
         if (toRemoveVal != undefined) {
-          toRemoveVal.push(index);
+          toRemoveVal.push(index.toNumber());
           toRemoveTable.set(evt.blockNumber, toRemoveVal);
         } else {
-          toRemoveTable.set(evt.blockNumber, [index]);
+          toRemoveTable.set(evt.blockNumber, [index.toNumber()]);
         }
       } else {
         let eventsPerBlock = toInsertTable.get(evt.blockNumber);
@@ -144,18 +162,23 @@ export class RLNContract {
   ): void {
     toInsert.forEach((events: ethers.Event[], blockNumber: number) => {
       events.forEach((evt) => {
-        if (!evt.args) {
+        const _idCommitment = evt?.args?.idCommitment;
+        const index: ethers.BigNumber = evt?.args?.index;
+
+        if (!_idCommitment || !index) {
           return;
         }
 
-        const pubkey = evt.args.pubkey;
-        const index = evt.args.index;
         const idCommitment = ethers.utils.zeroPad(
-          ethers.utils.arrayify(pubkey),
+          ethers.utils.arrayify(_idCommitment),
           32
         );
         rlnInstance.insertMember(idCommitment);
-        this.members.push({ index, pubkey });
+        this._members.set(index.toNumber(), {
+          index,
+          idCommitment:
+            _idCommitment?._hex || ethers.utils.hexlify(idCommitment),
+        });
       });
 
       const currentRoot = rlnInstance.getMerkleRoot();
@@ -170,9 +193,8 @@ export class RLNContract {
     const removeDescending = new Map([...toRemove].sort().reverse());
     removeDescending.forEach((indexes: number[], blockNumber: number) => {
       indexes.forEach((index) => {
-        const idx = this.members.findIndex((m) => m.index === index);
-        if (idx > -1) {
-          this.members.splice(idx, 1);
+        if (this._members.has(index)) {
+          this._members.delete(index);
         }
         rlnInstance.deleteMember(index);
       });
@@ -183,14 +205,14 @@ export class RLNContract {
 
   public subscribeToMembers(rlnInstance: RLNInstance): void {
     this.contract.on(this.membersFilter, (_pubkey, _index, event) =>
-      this.processEvents(rlnInstance, event)
+      this.processEvents(rlnInstance, [event])
     );
   }
 
   public async registerWithSignature(
     rlnInstance: RLNInstance,
     signature: string
-  ): Promise<ethers.Event | undefined> {
+  ): Promise<Member | undefined> {
     const identityCredential =
       await rlnInstance.generateSeededIdentityCredential(signature);
 
@@ -199,23 +221,36 @@ export class RLNContract {
 
   public async registerWithKey(
     credential: IdentityCredential
-  ): Promise<ethers.Event | undefined> {
-    if (!this.storageIndex) {
+  ): Promise<Member | undefined> {
+    if (this.storageIndex === undefined) {
       throw Error(
         "Cannot register credential, no storage contract index found."
       );
     }
     const txRegisterResponse: ethers.ContractTransaction =
-      await this.registryContract.register(
+      await this.registryContract["register(uint16,uint256)"](
         this.storageIndex,
         credential.IDCommitmentBigInt,
-        {
-          gasLimit: 100000,
-        }
+        { gasLimit: 100000 }
       );
     const txRegisterReceipt = await txRegisterResponse.wait();
 
-    return txRegisterReceipt?.events?.[0];
+    // assumption: register(uint16,uint256) emits one event
+    const memberRegistered = txRegisterReceipt?.events?.[0];
+
+    if (!memberRegistered) {
+      return undefined;
+    }
+
+    const decodedData = this.contract.interface.decodeEventLog(
+      "MemberRegistered",
+      memberRegistered.data
+    );
+
+    return {
+      idCommitment: decodedData.idCommitment,
+      index: decodedData.index,
+    };
   }
 
   public roots(): Uint8Array[] {

@@ -15,7 +15,7 @@ describe("RLN Contract abstraction", () => {
 
     const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
     const rlnContract = new rln.RLNContract(rlnInstance, {
-      address: rln.SEPOLIA_CONTRACT.address,
+      registryAddress: rln.SEPOLIA_CONTRACT.address,
       provider: voidSigner,
     });
 
@@ -39,7 +39,7 @@ describe("RLN Contract abstraction", () => {
     const rlnInstance = await rln.create();
     const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
     const rlnContract = new rln.RLNContract(rlnInstance, {
-      address: rln.SEPOLIA_CONTRACT.address,
+      registryAddress: rln.SEPOLIA_CONTRACT.address,
       provider: voidSigner,
     });
 
@@ -49,12 +49,12 @@ describe("RLN Contract abstraction", () => {
       topics: [],
     } as unknown as ethers.EventFilter;
     rlnContract["registryContract"] = {
-      register: () =>
+      "register(uint16,uint256)": () =>
         Promise.resolve({ wait: () => Promise.resolve(undefined) }),
     } as unknown as ethers.Contract;
     const contractSpy = chai.spy.on(
       rlnContract["registryContract"],
-      "register"
+      "register(uint16,uint256)"
     );
 
     await rlnContract.registerWithSignature(rlnInstance, mockSignature);
@@ -66,8 +66,8 @@ describe("RLN Contract abstraction", () => {
 function mockEvent(): ethers.Event {
   return {
     args: {
-      pubkey: "0x9e7d3f8f8c7a1d2bef96a2e8dbb8e7c1ea9a9ab78d6b3c6c3c",
-      index: 1,
+      idCommitment: "0x9e7d3f8f8c7a1d2bef96a2e8dbb8e7c1ea9a9ab78d6b3c6c3c",
+      index: ethers.BigNumber.from(1),
     },
   } as unknown as ethers.Event;
 }
