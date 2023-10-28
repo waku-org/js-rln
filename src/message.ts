@@ -14,7 +14,7 @@ export function toRLNSignal(contentTopic: string, msg: IMessage): Uint8Array {
 }
 
 export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
-  public pubSubTopic = "";
+  public pubsubTopic = "";
 
   constructor(
     public rlnInstance: RLNInstance,

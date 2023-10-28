@@ -1,5 +1,5 @@
 import type { IRateLimitProof } from "@waku/interfaces";
-import { default as init } from "@waku/zerokit-rln-wasm";
+import init from "@waku/zerokit-rln-wasm";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 
 import { buildBigIntFromUint8Array, writeUIntLE } from "./byte_utils.js";
@@ -48,7 +48,7 @@ async function loadZkey(): Promise<Uint8Array> {
  * @returns RLNInstance
  */
 export async function create(): Promise<RLNInstance> {
-  await init();
+  await (init as any)();
   zerokitRLN.init_panic_hook();
   const witnessCalculator = await loadWitnessCalculator();
   const zkey = await loadZkey();
