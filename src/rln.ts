@@ -8,6 +8,8 @@ import verificationKey from "./resources/verification_key.js";
 import * as wc from "./witness_calculator.js";
 import { WitnessCalculator } from "./witness_calculator.js";
 
+type VoidFunction = () => Promise<void>;
+
 /**
  * Concatenate Uint8Arrays
  * @param input
@@ -48,7 +50,7 @@ async function loadZkey(): Promise<Uint8Array> {
  * @returns RLNInstance
  */
 export async function create(): Promise<RLNInstance> {
-  await (init as any)();
+  await (init as any)?.();
   zerokitRLN.init_panic_hook();
   const witnessCalculator = await loadWitnessCalculator();
   const zkey = await loadZkey();
