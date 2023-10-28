@@ -8,8 +8,6 @@ import verificationKey from "./resources/verification_key.js";
 import * as wc from "./witness_calculator.js";
 import { WitnessCalculator } from "./witness_calculator.js";
 
-type VoidFunction = () => Promise<void>;
-
 /**
  * Concatenate Uint8Arrays
  * @param input
