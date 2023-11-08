@@ -56,6 +56,10 @@ export class RLNEncoder implements IEncoder {
     return proof;
   }
 
+  get pubsubTopic(): string {
+    return this.encoder.pubsubTopic;
+  }
+
   get contentTopic(): string {
     return this.encoder.contentTopic;
   }
@@ -86,6 +90,10 @@ export class RLNDecoder<T extends IDecodedMessage>
 {
   constructor(private rlnInstance: RLNInstance, private decoder: IDecoder<T>) {}
 
+  get pubsubTopic(): string {
+    return this.decoder.pubsubTopic;
+  }
+
   get contentTopic(): string {
     return this.decoder.contentTopic;
   }
@@ -97,11 +105,11 @@ export class RLNDecoder<T extends IDecodedMessage>
   }
 
   async fromProtoObj(
-    pubSubTopic: string,
+    pubsubTopic: string,
     proto: IProtoMessage
   ): Promise<RlnMessage<T> | undefined> {
     const msg: T | undefined = await this.decoder.fromProtoObj(
-      pubSubTopic,
+      pubsubTopic,
       proto
     );
     if (!msg) return;
