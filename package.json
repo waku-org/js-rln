@@ -141,7 +141,7 @@
   "dependencies": {
     "@chainsafe/bls-keystore": "^3.0.0",
     "@waku/utils": "^0.0.12",
-    "@waku/zerokit-rln-wasm": "^0.0.12",
+    "@waku/zerokit-rln-wasm": "^0.0.13",
     "ethereum-cryptography": "^2.1.2",
     "ethers": "^5.7.2",
     "lodash": "^4.17.21",
