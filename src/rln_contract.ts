@@ -63,7 +63,7 @@ export class RLNContract {
       RLN_REGISTRY_ABI,
       provider
     );
-    this.merkleRootTracker = new MerkleRootTracker(5, initialRoot);
+    this.merkleRootTracker = new MerkleRootTracker(10000, initialRoot);
   }
 
   private async initStorageContract(
@@ -150,10 +150,10 @@ export class RLNContract {
         eventsPerBlock.push(evt);
         toInsertTable.set(evt.blockNumber, eventsPerBlock);
       }
-
-      this.removeMembers(rlnInstance, toRemoveTable);
-      this.insertMembers(rlnInstance, toInsertTable);
     });
+
+    this.removeMembers(rlnInstance, toRemoveTable);
+    this.insertMembers(rlnInstance, toInsertTable);
   }
 
   private insertMembers(
