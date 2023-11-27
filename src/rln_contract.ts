@@ -63,7 +63,7 @@ export class RLNContract {
       RLN_REGISTRY_ABI,
       provider
     );
-    this.merkleRootTracker = new MerkleRootTracker(10000, initialRoot);
+    this.merkleRootTracker = new MerkleRootTracker(5, initialRoot);
   }
 
   private async initStorageContract(
