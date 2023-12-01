@@ -1,6 +1,7 @@
 import { hexToBytes } from "@waku/utils/bytes";
 import { ethers } from "ethers";
 
+import { zeroPadLE } from "./byte_utils.js";
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
 import { IdentityCredential, RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
@@ -170,7 +171,7 @@ export class RLNContract {
           return;
         }
 
-        const idCommitment = hexToBytes(_idCommitment?._hex);
+        const idCommitment = zeroPadLE(hexToBytes(_idCommitment?._hex), 32);
         rlnInstance.insertMember(idCommitment);
         this._members.set(index.toNumber(), {
           index,
