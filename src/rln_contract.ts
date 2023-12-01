@@ -1,3 +1,4 @@
+import { hexToBytes } from "@waku/utils/bytes";
 import { ethers } from "ethers";
 
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
@@ -169,10 +170,7 @@ export class RLNContract {
           return;
         }
 
-        const idCommitment = ethers.utils.zeroPad(
-          ethers.utils.arrayify(_idCommitment),
-          32
-        );
+        const idCommitment = hexToBytes(_idCommitment?._hex);
         rlnInstance.insertMember(idCommitment);
         this._members.set(index.toNumber(), {
           index,
