@@ -47,3 +47,17 @@ export function buildBigIntFromUint8Array(array: Uint8Array): bigint {
   const dataView = new DataView(array.buffer);
   return dataView.getBigUint64(0, true);
 }
+
+/**
+ * Fills with zeros to set length
+ * @param array little endian Uint8Array
+ * @param length amount to pad
+ * @returns little endian Uint8Array padded with zeros to set length
+ */
+export function zeroPadLE(array: Uint8Array, length: number): Uint8Array {
+  const result = new Uint8Array(length);
+  for (let i = 0; i < length; i++) {
+    result[i] = array[i] || 0;
+  }
+  return result;
+}

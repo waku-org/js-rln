@@ -66,7 +66,7 @@ describe("RLN Contract abstraction", () => {
 function mockEvent(): ethers.Event {
   return {
     args: {
-      idCommitment: "0x9e7d3f8f8c7a1d2bef96a2e8dbb8e7c1ea9a9ab78d6b3c6c3c",
+      idCommitment: { _hex: "0xb3df1c4e5600ef2b" },
       index: ethers.BigNumber.from(1),
     },
   } as unknown as ethers.Event;
