@@ -174,8 +174,7 @@ export class RLNContract {
         rlnInstance.insertMember(idCommitment);
         this._members.set(index.toNumber(), {
           index,
-          idCommitment:
-            _idCommitment?._hex || ethers.utils.hexlify(idCommitment),
+          idCommitment: _idCommitment?._hex,
         });
       });
 
