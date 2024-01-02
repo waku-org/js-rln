@@ -51,7 +51,11 @@ Or to use ESM import directly from a `<script>` tag:
 ```
 git clone https://github.com/waku-org/js-rln
 
-cd js-rln/example
+cd js-rln/
+
+npm install
+
+cd example/
 
 npm install  # or yarn
 
