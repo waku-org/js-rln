@@ -44,15 +44,12 @@ export class RLNEncoder implements IEncoder {
 
   private async generateProof(message: IMessage): Promise<IRateLimitProof> {
     const signal = toRLNSignal(this.contentTopic, message);
-
-    console.time("proof_gen_timer");
     const proof = await this.rlnInstance.generateRLNProof(
       signal,
       this.index,
       message.timestamp,
       this.idSecretHash
     );
-    console.timeEnd("proof_gen_timer");
     return proof;
   }
 
