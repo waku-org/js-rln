@@ -8,7 +8,7 @@ chai.use(spies);
 
 describe("RLN Contract abstraction", () => {
   it("should be able to fetch members from events and store to rln instance", async () => {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
 
     rlnInstance.insertMember = () => undefined;
     const insertMemberSpy = chai.spy.on(rlnInstance, "insertMember");
@@ -36,7 +36,7 @@ describe("RLN Contract abstraction", () => {
     const mockSignature =
       "0xdeb8a6b00a8e404deb1f52d3aa72ed7f60a2ff4484c737eedaef18a0aacb2dfb4d5d74ac39bb71fa358cf2eb390565a35b026cc6272f2010d4351e17670311c21c";
 
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
     const rlnContract = new rln.RLNContract(rlnInstance, {
       registryAddress: rln.SEPOLIA_CONTRACT.address,

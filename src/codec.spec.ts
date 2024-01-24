@@ -44,7 +44,7 @@ const EMPTY_PROTO_MESSAGE = {
 
 describe("RLN codec with version 0", () => {
   it("toWire", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -85,7 +85,7 @@ describe("RLN codec with version 0", () => {
   });
 
   it("toProtoObj", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -128,7 +128,7 @@ describe("RLN codec with version 0", () => {
 
 describe("RLN codec with version 1", () => {
   it("Symmetric, toWire", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -175,7 +175,7 @@ describe("RLN codec with version 1", () => {
   });
 
   it("Symmetric, toProtoObj", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -221,7 +221,7 @@ describe("RLN codec with version 1", () => {
   });
 
   it("Asymmetric, toWire", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -269,7 +269,7 @@ describe("RLN codec with version 1", () => {
   });
 
   it("Asymmetric, toProtoObj", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -318,7 +318,7 @@ describe("RLN codec with version 1", () => {
 
 describe("RLN Codec - epoch", () => {
   it("toProtoObj", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -374,7 +374,7 @@ describe("RLN codec with version 0 and meta setter", () => {
   };
 
   it("toWire", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);
@@ -422,7 +422,7 @@ describe("RLN codec with version 0 and meta setter", () => {
   });
 
   it("toProtoObj", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const credential = rlnInstance.generateIdentityCredentials();
     const index = 0;
     const payload = new Uint8Array([1, 2, 3, 4, 5]);

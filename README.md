@@ -71,7 +71,16 @@ Browse http://localhost:8080 and open the dev tools console to see the proof bei
 ```js
 import * as rln from "@waku/rln";
 
-const rlnInstance = await rln.create();
+const rlnInstance = await rln.createRLN();
+```
+
+### Starting RLN to listen to a contract
+
+```js
+import * as rln from "@waku/rln";
+
+const rlnInstance = await rln.createRLN();
+await rlnInstance.start(); // will use default Sepolia contract
 ```
 
 #### Generating RLN Membership Credentials
@@ -92,6 +101,17 @@ let credentials = rlnInstance.generateSeededIdentityCredentials(seed);
 
 ```js
 rlnInstance.insertMember(credentials.IDCommitment);
+```
+
+### Registering Membership on a contract
+
+```js
+import * as rln from "@waku/rln";
+
+const rlnInstance = await rln.createRLN();
+await rlnInstance.start(); // will use default Sepolia contract
+
+const membershipInfo = await rlnInstance.contract.registerWithKey(credentials);
 ```
 
 ### Generating a Proof
