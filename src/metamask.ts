@@ -6,7 +6,7 @@ export const extractMetaMaskAccount =
 
     if (!ethereum) {
       throw Error(
-        "Missing or invalid Ethereum provider. Please install MetaMask."
+        "Missing or invalid Ethereum provider. Please install a Web3 wallet such as MetaMask."
       );
     }
 
