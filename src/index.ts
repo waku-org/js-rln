@@ -4,7 +4,7 @@ import {
   RLN_STORAGE_ABI,
   SEPOLIA_CONTRACT,
 } from "./constants.js";
-import { create } from "./create.js";
+import { createRLN } from "./create.js";
 import { Keystore } from "./keystore/index.js";
 import {
   IdentityCredential,
@@ -16,7 +16,7 @@ import { RLNContract } from "./rln_contract.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 
 export {
-  create,
+  createRLN,
   Keystore,
   RLNInstance,
   IdentityCredential,
