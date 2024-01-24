@@ -166,7 +166,7 @@ type StartRLNOptions = {
   /**
    * If not set - will extract MetaMask account and get provider from it.
    */
-  provider?: ethers.providers.Web3Provider;
+  provider?: ethers.providers.Provider;
   /**
    * If not set - will use default SEPOLIA_CONTRACT address.
    */
