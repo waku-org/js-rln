@@ -1,10 +1,14 @@
 import type { IRateLimitProof } from "@waku/interfaces";
 import init from "@waku/zerokit-rln-wasm";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
+import { ethers } from "ethers";
 
 import { buildBigIntFromUint8Array, writeUIntLE } from "./byte_utils.js";
+import { SEPOLIA_CONTRACT } from "./constants.js";
 import { dateToEpoch, epochIntToBytes } from "./epoch.js";
+import { extractMetaMaskAccount } from "./metamask.js";
 import verificationKey from "./resources/verification_key.js";
+import { RLNContract } from "./rln_contract.js";
 import * as wc from "./witness_calculator.js";
 import { WitnessCalculator } from "./witness_calculator.js";
 
@@ -158,11 +162,38 @@ export function sha256(input: Uint8Array): Uint8Array {
   return zerokitRLN.hash(lenPrefixedData);
 }
 
+type StartRLNOptions = {
+  /**
+   * If not set - will extract MetaMask account and get provider from it.
+   */
+  provider?: ethers.providers.Provider;
+  /**
+   * If not set - will use default SEPOLIA_CONTRACT address.
+   */
+  registryAddress?: string;
+};
+
 export class RLNInstance {
+  private _contract: null | RLNContract = null;
+
   constructor(
     private zkRLN: number,
     private witnessCalculator: WitnessCalculator
   ) {}
+
+  public get contract(): null | RLNContract {
+    return this._contract;
+  }
+
+  public async start(options: StartRLNOptions = {}): Promise<void> {
+    const provider = options.provider || (await extractMetaMaskAccount());
+    const registryAddress = options.registryAddress || SEPOLIA_CONTRACT.address;
+
+    this._contract = await RLNContract.init(this, {
+      registryAddress,
+      provider,
+    });
+  }
 
   generateIdentityCredentials(): IdentityCredential {
     const memKeys = zerokitRLN.generateExtendedMembershipKey(this.zkRLN); // TODO: rename this function in zerokit rln-wasm

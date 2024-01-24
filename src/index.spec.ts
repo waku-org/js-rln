@@ -4,7 +4,7 @@ import * as rln from "./index.js";
 
 describe("js-rln", () => {
   it("should verify a proof", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
 
     const credential = rlnInstance.generateIdentityCredentials();
 
@@ -59,7 +59,7 @@ describe("js-rln", () => {
     }
   });
   it("should verify a proof with a seeded membership key generation", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const seed = "This is a test seed";
     const credential = rlnInstance.generateSeededIdentityCredential(seed);
 
@@ -115,7 +115,7 @@ describe("js-rln", () => {
   });
 
   it("should generate the same membership key if the same seed is provided", async function () {
-    const rlnInstance = await rln.create();
+    const rlnInstance = await rln.createRLN();
     const seed = "This is a test seed";
     const memKeys1 = rlnInstance.generateSeededIdentityCredential(seed);
     const memKeys2 = rlnInstance.generateSeededIdentityCredential(seed);
