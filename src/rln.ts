@@ -191,7 +191,7 @@ export class RLNInstance {
 
     this._contract = await RLNContract.init(this, {
       registryAddress,
-      provider: provider.getSigner(),
+      provider,
     });
   }
 
