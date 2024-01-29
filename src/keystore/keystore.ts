@@ -14,12 +14,12 @@ import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
 
 import { buildBigIntFromUint8Array } from "../byte_utils.js";
-import type { IdentityCredential } from "../rln.js";
 
 import { decryptEipKeystore, keccak256Checksum } from "./cipher.js";
 import { isCredentialValid, isKeystoreValid } from "./schema_validator.js";
 import type {
   Keccak256Hash,
+  KeystoreEntity,
   MembershipHash,
   MembershipInfo,
   Password,
@@ -55,11 +55,6 @@ type KeystoreCreateOptions = {
   application?: string;
   version?: string;
   appIdentifier?: string;
-};
-
-type IdentityOptions = {
-  identity: IdentityCredential;
-  membership: MembershipInfo;
 };
 
 export class Keystore {
@@ -105,7 +100,7 @@ export class Keystore {
   }
 
   public async addCredential(
-    options: IdentityOptions,
+    options: KeystoreEntity,
     password: Password
   ): Promise<MembershipHash> {
     const membershipHash: MembershipHash = Keystore.computeMembershipHash(
@@ -138,7 +133,7 @@ export class Keystore {
   public async readCredential(
     membershipHash: MembershipHash,
     password: Password
-  ): Promise<null | IdentityOptions> {
+  ): Promise<null | KeystoreEntity> {
     const nwakuCredential = this.data.credentials[membershipHash];
 
     if (!nwakuCredential) {
@@ -235,9 +230,7 @@ export class Keystore {
     };
   }
 
-  private static fromBytesToIdentity(
-    bytes: Uint8Array
-  ): null | IdentityOptions {
+  private static fromBytesToIdentity(bytes: Uint8Array): null | KeystoreEntity {
     try {
       const str = bytesToUtf8(bytes);
       const obj = JSON.parse(str);
@@ -302,7 +295,7 @@ export class Keystore {
 
   // follows nwaku implementation
   // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L98
-  private static fromIdentityToBytes(options: IdentityOptions): Uint8Array {
+  private static fromIdentityToBytes(options: KeystoreEntity): Uint8Array {
     return utf8ToBytes(
       JSON.stringify({
         treeIndex: options.membership.treeIndex,

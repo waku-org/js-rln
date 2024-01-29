@@ -6,6 +6,7 @@ import {
 } from "./constants.js";
 import { createRLN } from "./create.js";
 import { Keystore } from "./keystore/index.js";
+import { extractMetaMaskSigner } from "./metamask.js";
 import {
   IdentityCredential,
   Proof,
@@ -29,4 +30,5 @@ export {
   RLN_STORAGE_ABI,
   RLN_REGISTRY_ABI,
   SEPOLIA_CONTRACT,
+  extractMetaMaskSigner,
 };

@@ -1,3 +1,5 @@
+import type { IdentityCredential } from "../rln.js";
+
 export type MembershipHash = string;
 export type Sha256Hash = string;
 export type Keccak256Hash = string;
@@ -9,4 +11,9 @@ export type MembershipInfo = {
   chainId: number;
   address: string;
   treeIndex: number;
+};
+
+export type KeystoreEntity = {
+  identity: IdentityCredential;
+  membership: MembershipInfo;
 };
