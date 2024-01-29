@@ -203,7 +203,7 @@ export class RLNInstance {
   private _contract: undefined | RLNContract;
   private _signer: undefined | ethers.Signer;
 
-  private _keystore: undefined | Keystore;
+  private _keystore = Keystore.create();
   private _credentials: undefined | DecryptedCredentials;
 
   constructor(
@@ -219,7 +219,7 @@ export class RLNInstance {
     return this._signer;
   }
 
-  public get keystore(): undefined | Keystore {
+  public get keystore(): Keystore {
     return this._keystore;
   }
 
