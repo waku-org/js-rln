@@ -308,7 +308,7 @@ export class RLNInstance {
 
   public async registerMembership(
     options: RegisterMembershipOptions
-  ): Promise<undefined | KeystoreEntity> {
+  ): Promise<undefined | DecryptedCredentials> {
     if (!this.contract) {
       throw Error("RLN Contract is not initialized.");
     }

@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 
 import { zeroPadLE } from "./byte_utils.js";
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
-import type { KeystoreEntity } from "./keystore/index.js";
+import type { DecryptedCredentials } from "./keystore/index.js";
 import { type IdentityCredential, RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 
@@ -210,7 +210,7 @@ export class RLNContract {
 
   public async registerWithIdentity(
     identity: IdentityCredential
-  ): Promise<KeystoreEntity | undefined> {
+  ): Promise<DecryptedCredentials | undefined> {
     if (this.storageIndex === undefined) {
       throw Error(
         "Cannot register credential, no storage contract index found."
