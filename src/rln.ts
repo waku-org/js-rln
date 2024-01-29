@@ -203,7 +203,7 @@ export class RLNInstance {
   private _contract: undefined | RLNContract;
   private _signer: undefined | ethers.Signer;
 
-  private _keystore = Keystore.create();
+  private keystore = Keystore.create();
   private _credentials: undefined | DecryptedCredentials;
 
   constructor(
@@ -217,10 +217,6 @@ export class RLNInstance {
 
   public get signer(): undefined | ethers.Signer {
     return this._signer;
-  }
-
-  public get keystore(): Keystore {
-    return this._keystore;
   }
 
   public async start(options: StartRLNOptions = {}): Promise<void> {
@@ -297,7 +293,7 @@ export class RLNInstance {
       throw Error("Failed to start RLN: cannot read Keystore provided.");
     }
 
-    this._keystore = keystore;
+    this.keystore = keystore;
     this._credentials = await keystore.readCredential(
       credentials.id,
       credentials.password

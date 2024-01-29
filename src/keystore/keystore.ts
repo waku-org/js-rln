@@ -164,6 +164,14 @@ export class Keystore {
     return this.data;
   }
 
+  /**
+   * Read array of hashes of current credentials
+   * @returns array of keys of credentials in current Keystore
+   */
+  public keys(): string[] {
+    return Object.keys(this.toObject().credentials || {});
+  }
+
   private static isValidNwakuStore(obj: unknown): boolean {
     if (!isKeystoreValid(obj)) {
       return false;
