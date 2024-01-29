@@ -14,7 +14,12 @@ import type { RLNDecoder, RLNEncoder } from "./codec.js";
 import { createRLNDecoder, createRLNEncoder } from "./codec.js";
 import { SEPOLIA_CONTRACT } from "./constants.js";
 import { dateToEpoch, epochIntToBytes } from "./epoch.js";
-import type { KeystoreEntity } from "./keystore/index.js";
+import { Keystore } from "./keystore/index.js";
+import type {
+  DecryptedCredentials,
+  EncryptedCredentials,
+} from "./keystore/index.js";
+import { Password } from "./keystore/types.js";
 import { extractMetaMaskSigner } from "./metamask.js";
 import verificationKey from "./resources/verification_key.js";
 import { RLNContract } from "./rln_contract.js";
@@ -184,7 +189,7 @@ type StartRLNOptions = {
    * Credentials to use for generating proofs and connecting to the contract and network.
    * If provided used for validating the network chainId and connecting to registry contract.
    */
-  credentials?: KeystoreEntity;
+  credentials?: EncryptedCredentials | DecryptedCredentials;
 };
 
 type RegisterMembershipOptions =
@@ -197,7 +202,9 @@ export class RLNInstance {
 
   private _contract: undefined | RLNContract;
   private _signer: undefined | ethers.Signer;
-  private _credentials: undefined | KeystoreEntity;
+
+  private _keystore: undefined | Keystore;
+  private _credentials: undefined | DecryptedCredentials;
 
   constructor(
     private zkRLN: number,
@@ -212,6 +219,10 @@ export class RLNInstance {
     return this._signer;
   }
 
+  public get keystore(): undefined | Keystore {
+    return this._keystore;
+  }
+
   public async start(options: StartRLNOptions = {}): Promise<void> {
     if (this.started || this.starting) {
       return;
@@ -220,11 +231,11 @@ export class RLNInstance {
     this.starting = true;
 
     try {
-      const { signer, credentials, registryAddress } =
-        await this.determineStartOptions(options);
+      const { signer, registryAddress } = await this.determineStartOptions(
+        options
+      );
 
       this._signer = signer!;
-      this._credentials = credentials;
       this._contract = await RLNContract.init(this, {
         registryAddress: registryAddress!,
         signer: signer!,
@@ -238,9 +249,13 @@ export class RLNInstance {
   private async determineStartOptions(
     options: StartRLNOptions
   ): Promise<StartRLNOptions> {
-    let chainId = options.credentials?.membership.chainId;
+    const credentials = await this.decryptCredentialsIfNeeded(
+      options.credentials
+    );
+
+    let chainId = credentials?.membership.chainId;
     const registryAddress =
-      options.credentials?.membership.address ||
+      credentials?.membership.address ||
       options.registryAddress ||
       SEPOLIA_CONTRACT.address;
 
@@ -264,6 +279,33 @@ export class RLNInstance {
     };
   }
 
+  private async decryptCredentialsIfNeeded(
+    credentials?: EncryptedCredentials | DecryptedCredentials
+  ): Promise<undefined | DecryptedCredentials> {
+    if (!credentials) {
+      return;
+    }
+
+    if ("identity" in credentials) {
+      this._credentials = credentials;
+      return credentials;
+    }
+
+    const keystore = Keystore.fromString(credentials.keystore);
+
+    if (!keystore) {
+      throw Error("Failed to start RLN: cannot read Keystore provided.");
+    }
+
+    this._keystore = keystore;
+    this._credentials = await keystore.readCredential(
+      credentials.id,
+      credentials.password
+    );
+
+    return this._credentials;
+  }
+
   public async registerMembership(
     options: RegisterMembershipOptions
   ): Promise<undefined | KeystoreEntity> {
@@ -282,6 +324,15 @@ export class RLNInstance {
     }
 
     return this.contract.registerWithIdentity(identity);
+  }
+
+  /**
+   * Changes credentials in use by relying on provided Keystore earlier in rln.start
+   * @param id: string, hash of credentials to select from Keystore
+   * @param password: string or bytes to use to decrypt credentials from Keystore
+   */
+  public async useCredentials(id: string, password: Password): Promise<void> {
+    this._credentials = await this.keystore?.readCredential(id, password);
   }
 
   public createEncoder(options: WakuEncoderOptions): RLNEncoder {

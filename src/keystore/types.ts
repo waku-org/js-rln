@@ -17,3 +17,20 @@ export type KeystoreEntity = {
   identity: IdentityCredential;
   membership: MembershipInfo;
 };
+
+export type DecryptedCredentials = KeystoreEntity;
+
+export type EncryptedCredentials = {
+  /**
+   * Valid JSON string that contains Keystore
+   */
+  keystore: string;
+  /**
+   * ID of credentials from provided Keystore to use
+   */
+  id: string;
+  /**
+   * Password to decrypt credentials provided
+   */
+  password: Password;
+};

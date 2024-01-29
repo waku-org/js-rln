@@ -76,7 +76,9 @@ export class Keystore {
     return new Keystore(options);
   }
 
-  public static fromString(str: string): Keystore | null {
+  // should be valid JSON string that contains Keystore file
+  // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/keyfile.nim#L376
+  public static fromString(str: string): undefined | Keystore {
     try {
       const obj = JSON.parse(str);
 
@@ -87,7 +89,7 @@ export class Keystore {
       return new Keystore(obj);
     } catch (err) {
       console.error("Cannot create Keystore from string:", err);
-      return null;
+      return;
     }
   }
 
@@ -133,11 +135,11 @@ export class Keystore {
   public async readCredential(
     membershipHash: MembershipHash,
     password: Password
-  ): Promise<null | KeystoreEntity> {
+  ): Promise<undefined | KeystoreEntity> {
     const nwakuCredential = this.data.credentials[membershipHash];
 
     if (!nwakuCredential) {
-      return null;
+      return;
     }
 
     const eipKeystore = Keystore.fromCredentialToEip(nwakuCredential);
@@ -230,7 +232,9 @@ export class Keystore {
     };
   }
 
-  private static fromBytesToIdentity(bytes: Uint8Array): null | KeystoreEntity {
+  private static fromBytesToIdentity(
+    bytes: Uint8Array
+  ): undefined | KeystoreEntity {
     try {
       const str = bytesToUtf8(bytes);
       const obj = JSON.parse(str);
@@ -264,7 +268,7 @@ export class Keystore {
       };
     } catch (err) {
       console.error("Cannot parse bytes to Nwaku Credentials:", err);
-      return null;
+      return;
     }
   }
 
