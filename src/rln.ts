@@ -271,14 +271,14 @@ export class RLNInstance {
       throw Error("RLN Contract is not initialized.");
     }
 
-    if (!options.identity || !options.signature) {
-      throw Error("Missing signature or identity to register membership.");
+    let identity = "identity" in options && options.identity;
+
+    if ("signature" in options) {
+      identity = await this.generateSeededIdentityCredential(options.signature);
     }
 
-    let identity = options.identity;
-
-    if (options.signature) {
-      identity = await this.generateSeededIdentityCredential(signature);
+    if (!identity) {
+      throw Error("Missing signature or identity to register membership.");
     }
 
     return this.contract.registerWithIdentity(identity);
