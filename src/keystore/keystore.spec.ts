@@ -172,8 +172,8 @@ describe("Keystore", () => {
   });
 
   it("should fail to create store from invalid string", () => {
-    expect(Keystore.fromString("/asdq}")).to.eq(null);
-    expect(Keystore.fromString('{ "name": "it" }')).to.eq(null);
+    expect(Keystore.fromString("/asdq}")).to.eq(undefined);
+    expect(Keystore.fromString('{ "name": "it" }')).to.eq(undefined);
   });
 
   it("shoud create store from valid string", async () => {
@@ -308,6 +308,6 @@ describe("Keystore", () => {
     const store = Keystore.fromObject(NWAKU_KEYSTORE as any);
 
     const result = await store.readCredential("wrong-hash", "wrong-password");
-    expect(result).to.eq(null);
+    expect(result).to.eq(undefined);
   });
 });

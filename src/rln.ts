@@ -1,12 +1,26 @@
+import { createDecoder, createEncoder } from "@waku/core";
 import type { IRateLimitProof } from "@waku/interfaces";
+import type {
+  ContentTopic,
+  IDecodedMessage,
+  EncoderOptions as WakuEncoderOptions,
+} from "@waku/interfaces";
 import init from "@waku/zerokit-rln-wasm";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 import { ethers } from "ethers";
 
 import { buildBigIntFromUint8Array, writeUIntLE } from "./byte_utils.js";
+import type { RLNDecoder, RLNEncoder } from "./codec.js";
+import { createRLNDecoder, createRLNEncoder } from "./codec.js";
 import { SEPOLIA_CONTRACT } from "./constants.js";
 import { dateToEpoch, epochIntToBytes } from "./epoch.js";
-import { extractMetaMaskAccount } from "./metamask.js";
+import { Keystore } from "./keystore/index.js";
+import type {
+  DecryptedCredentials,
+  EncryptedCredentials,
+} from "./keystore/index.js";
+import { Password } from "./keystore/types.js";
+import { extractMetaMaskSigner } from "./metamask.js";
 import verificationKey from "./resources/verification_key.js";
 import { RLNContract } from "./rln_contract.js";
 import * as wc from "./witness_calculator.js";
@@ -164,34 +178,180 @@ export function sha256(input: Uint8Array): Uint8Array {
 
 type StartRLNOptions = {
   /**
-   * If not set - will extract MetaMask account and get provider from it.
+   * If not set - will extract MetaMask account and get signer from it.
    */
-  provider?: ethers.providers.Provider;
+  signer?: ethers.Signer;
   /**
    * If not set - will use default SEPOLIA_CONTRACT address.
    */
   registryAddress?: string;
+  /**
+   * Credentials to use for generating proofs and connecting to the contract and network.
+   * If provided used for validating the network chainId and connecting to registry contract.
+   */
+  credentials?: EncryptedCredentials | DecryptedCredentials;
 };
 
+type RegisterMembershipOptions =
+  | { signature: string }
+  | { identity: IdentityCredential };
+
 export class RLNInstance {
-  private _contract: null | RLNContract = null;
+  private started = false;
+  private starting = false;
+
+  private _contract: undefined | RLNContract;
+  private _signer: undefined | ethers.Signer;
+
+  private keystore = Keystore.create();
+  private _credentials: undefined | DecryptedCredentials;
 
   constructor(
     private zkRLN: number,
     private witnessCalculator: WitnessCalculator
   ) {}
 
-  public get contract(): null | RLNContract {
+  public get contract(): undefined | RLNContract {
     return this._contract;
   }
 
-  public async start(options: StartRLNOptions = {}): Promise<void> {
-    const provider = options.provider || (await extractMetaMaskAccount());
-    const registryAddress = options.registryAddress || SEPOLIA_CONTRACT.address;
+  public get signer(): undefined | ethers.Signer {
+    return this._signer;
+  }
 
-    this._contract = await RLNContract.init(this, {
+  public async start(options: StartRLNOptions = {}): Promise<void> {
+    if (this.started || this.starting) {
+      return;
+    }
+
+    this.starting = true;
+
+    try {
+      const { signer, registryAddress } = await this.determineStartOptions(
+        options
+      );
+
+      this._signer = signer!;
+      this._contract = await RLNContract.init(this, {
+        registryAddress: registryAddress!,
+        signer: signer!,
+      });
+      this.started = true;
+    } finally {
+      this.starting = false;
+    }
+  }
+
+  private async determineStartOptions(
+    options: StartRLNOptions
+  ): Promise<StartRLNOptions> {
+    const credentials = await this.decryptCredentialsIfNeeded(
+      options.credentials
+    );
+
+    let chainId = credentials?.membership.chainId;
+    const registryAddress =
+      credentials?.membership.address ||
+      options.registryAddress ||
+      SEPOLIA_CONTRACT.address;
+
+    if (registryAddress === SEPOLIA_CONTRACT.address) {
+      chainId = SEPOLIA_CONTRACT.chainId;
+    }
+
+    const signer = options.signer || (await extractMetaMaskSigner());
+    const currentChainId = await signer.getChainId();
+
+    if (chainId && chainId !== currentChainId) {
+      throw Error(
+        `Failed to start RLN contract, chain ID of contract is different from current one: contract-${chainId}, current network-${currentChainId}`
+      );
+    }
+
+    return {
+      signer,
       registryAddress,
-      provider,
+      credentials: options.credentials,
+    };
+  }
+
+  private async decryptCredentialsIfNeeded(
+    credentials?: EncryptedCredentials | DecryptedCredentials
+  ): Promise<undefined | DecryptedCredentials> {
+    if (!credentials) {
+      return;
+    }
+
+    if ("identity" in credentials) {
+      this._credentials = credentials;
+      return credentials;
+    }
+
+    const keystore = Keystore.fromString(credentials.keystore);
+
+    if (!keystore) {
+      throw Error("Failed to start RLN: cannot read Keystore provided.");
+    }
+
+    this.keystore = keystore;
+    this._credentials = await keystore.readCredential(
+      credentials.id,
+      credentials.password
+    );
+
+    return this._credentials;
+  }
+
+  public async registerMembership(
+    options: RegisterMembershipOptions
+  ): Promise<undefined | DecryptedCredentials> {
+    if (!this.contract) {
+      throw Error("RLN Contract is not initialized.");
+    }
+
+    let identity = "identity" in options && options.identity;
+
+    if ("signature" in options) {
+      identity = await this.generateSeededIdentityCredential(options.signature);
+    }
+
+    if (!identity) {
+      throw Error("Missing signature or identity to register membership.");
+    }
+
+    return this.contract.registerWithIdentity(identity);
+  }
+
+  /**
+   * Changes credentials in use by relying on provided Keystore earlier in rln.start
+   * @param id: string, hash of credentials to select from Keystore
+   * @param password: string or bytes to use to decrypt credentials from Keystore
+   */
+  public async useCredentials(id: string, password: Password): Promise<void> {
+    this._credentials = await this.keystore?.readCredential(id, password);
+  }
+
+  public createEncoder(options: WakuEncoderOptions): RLNEncoder {
+    if (!this._credentials) {
+      throw Error(
+        "Failed to create Encoder: missing RLN credentials. Use createRLNEncoder directly."
+      );
+    }
+
+    return createRLNEncoder({
+      encoder: createEncoder(options),
+      rlnInstance: this,
+      index: this._credentials.membership.treeIndex,
+      credential: this._credentials.identity,
+    });
+  }
+
+  public createDecoder(
+    contentTopic: ContentTopic
+  ): RLNDecoder<IDecodedMessage> {
+    return createRLNDecoder({
+      rlnInstance: this,
+      decoder: createDecoder(contentTopic),
     });
   }
 

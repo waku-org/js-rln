@@ -14,12 +14,12 @@ import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
 
 import { buildBigIntFromUint8Array } from "../byte_utils.js";
-import type { IdentityCredential } from "../rln.js";
 
 import { decryptEipKeystore, keccak256Checksum } from "./cipher.js";
 import { isCredentialValid, isKeystoreValid } from "./schema_validator.js";
 import type {
   Keccak256Hash,
+  KeystoreEntity,
   MembershipHash,
   MembershipInfo,
   Password,
@@ -57,11 +57,6 @@ type KeystoreCreateOptions = {
   appIdentifier?: string;
 };
 
-type IdentityOptions = {
-  identity: IdentityCredential;
-  membership: MembershipInfo;
-};
-
 export class Keystore {
   private data: NwakuKeystore;
 
@@ -81,7 +76,9 @@ export class Keystore {
     return new Keystore(options);
   }
 
-  public static fromString(str: string): Keystore | null {
+  // should be valid JSON string that contains Keystore file
+  // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/keyfile.nim#L376
+  public static fromString(str: string): undefined | Keystore {
     try {
       const obj = JSON.parse(str);
 
@@ -92,7 +89,7 @@ export class Keystore {
       return new Keystore(obj);
     } catch (err) {
       console.error("Cannot create Keystore from string:", err);
-      return null;
+      return;
     }
   }
 
@@ -105,7 +102,7 @@ export class Keystore {
   }
 
   public async addCredential(
-    options: IdentityOptions,
+    options: KeystoreEntity,
     password: Password
   ): Promise<MembershipHash> {
     const membershipHash: MembershipHash = Keystore.computeMembershipHash(
@@ -138,11 +135,11 @@ export class Keystore {
   public async readCredential(
     membershipHash: MembershipHash,
     password: Password
-  ): Promise<null | IdentityOptions> {
+  ): Promise<undefined | KeystoreEntity> {
     const nwakuCredential = this.data.credentials[membershipHash];
 
     if (!nwakuCredential) {
-      return null;
+      return;
     }
 
     const eipKeystore = Keystore.fromCredentialToEip(nwakuCredential);
@@ -165,6 +162,14 @@ export class Keystore {
 
   public toObject(): NwakuKeystore {
     return this.data;
+  }
+
+  /**
+   * Read array of hashes of current credentials
+   * @returns array of keys of credentials in current Keystore
+   */
+  public keys(): string[] {
+    return Object.keys(this.toObject().credentials || {});
   }
 
   private static isValidNwakuStore(obj: unknown): boolean {
@@ -237,7 +242,7 @@ export class Keystore {
 
   private static fromBytesToIdentity(
     bytes: Uint8Array
-  ): null | IdentityOptions {
+  ): undefined | KeystoreEntity {
     try {
       const str = bytesToUtf8(bytes);
       const obj = JSON.parse(str);
@@ -271,7 +276,7 @@ export class Keystore {
       };
     } catch (err) {
       console.error("Cannot parse bytes to Nwaku Credentials:", err);
-      return null;
+      return;
     }
   }
 
@@ -302,7 +307,7 @@ export class Keystore {
 
   // follows nwaku implementation
   // https://github.com/waku-org/nwaku/blob/f05528d4be3d3c876a8b07f9bb7dfaae8aa8ec6e/waku/waku_keystore/protocol_types.nim#L98
-  private static fromIdentityToBytes(options: IdentityOptions): Uint8Array {
+  private static fromIdentityToBytes(options: KeystoreEntity): Uint8Array {
     return utf8ToBytes(
       JSON.stringify({
         treeIndex: options.membership.treeIndex,

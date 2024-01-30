@@ -16,7 +16,7 @@ describe("RLN Contract abstraction", () => {
     const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
     const rlnContract = new rln.RLNContract(rlnInstance, {
       registryAddress: rln.SEPOLIA_CONTRACT.address,
-      provider: voidSigner,
+      signer: voidSigner,
     });
 
     rlnContract["storageContract"] = {
@@ -32,7 +32,7 @@ describe("RLN Contract abstraction", () => {
     chai.expect(insertMemberSpy).to.have.been.called();
   });
 
-  it("should register a member by signature", async () => {
+  it("should register a member", async () => {
     const mockSignature =
       "0xdeb8a6b00a8e404deb1f52d3aa72ed7f60a2ff4484c737eedaef18a0aacb2dfb4d5d74ac39bb71fa358cf2eb390565a35b026cc6272f2010d4351e17670311c21c";
 
@@ -40,7 +40,7 @@ describe("RLN Contract abstraction", () => {
     const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
     const rlnContract = new rln.RLNContract(rlnInstance, {
       registryAddress: rln.SEPOLIA_CONTRACT.address,
-      provider: voidSigner,
+      signer: voidSigner,
     });
 
     rlnContract["storageIndex"] = 1;
@@ -57,7 +57,9 @@ describe("RLN Contract abstraction", () => {
       "register(uint16,uint256)"
     );
 
-    await rlnContract.registerWithSignature(rlnInstance, mockSignature);
+    const identity =
+      rlnInstance.generateSeededIdentityCredential(mockSignature);
+    await rlnContract.registerWithIdentity(identity);
 
     chai.expect(contractSpy).to.have.been.called();
   });

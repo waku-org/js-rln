@@ -3,7 +3,8 @@ import { ethers } from "ethers";
 
 import { zeroPadLE } from "./byte_utils.js";
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
-import { IdentityCredential, RLNInstance } from "./rln.js";
+import type { DecryptedCredentials } from "./keystore/index.js";
+import { type IdentityCredential, RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 
 type Member = {
@@ -11,10 +12,10 @@ type Member = {
   index: ethers.BigNumber;
 };
 
-type Provider = ethers.Signer | ethers.providers.Provider;
+type Signer = ethers.Signer;
 
 type RLNContractOptions = {
-  provider: Provider;
+  signer: Signer;
   registryAddress: string;
 };
 
@@ -47,7 +48,7 @@ export class RLNContract {
   ): Promise<RLNContract> {
     const rlnContract = new RLNContract(rlnInstance, options);
 
-    await rlnContract.initStorageContract(options.provider);
+    await rlnContract.initStorageContract(options.signer);
     await rlnContract.fetchMembers(rlnInstance);
     rlnContract.subscribeToMembers(rlnInstance);
 
@@ -56,20 +57,20 @@ export class RLNContract {
 
   constructor(
     rlnInstance: RLNInstance,
-    { registryAddress, provider }: RLNContractOptions
+    { registryAddress, signer }: RLNContractOptions
   ) {
     const initialRoot = rlnInstance.getMerkleRoot();
 
     this.registryContract = new ethers.Contract(
       registryAddress,
       RLN_REGISTRY_ABI,
-      provider
+      signer
     );
     this.merkleRootTracker = new MerkleRootTracker(5, initialRoot);
   }
 
   private async initStorageContract(
-    provider: Provider,
+    signer: Signer,
     options: RLNStorageOptions = {}
   ): Promise<void> {
     const storageIndex = options?.storageIndex
@@ -85,7 +86,7 @@ export class RLNContract {
     this.storageContract = new ethers.Contract(
       storageAddress,
       RLN_STORAGE_ABI,
-      provider
+      signer
     );
     this._membersFilter = this.storageContract.filters.MemberRegistered();
 
@@ -207,19 +208,9 @@ export class RLNContract {
     );
   }
 
-  public async registerWithSignature(
-    rlnInstance: RLNInstance,
-    signature: string
-  ): Promise<Member | undefined> {
-    const identityCredential =
-      await rlnInstance.generateSeededIdentityCredential(signature);
-
-    return this.registerWithKey(identityCredential);
-  }
-
-  public async registerWithKey(
-    credential: IdentityCredential
-  ): Promise<Member | undefined> {
+  public async registerWithIdentity(
+    identity: IdentityCredential
+  ): Promise<DecryptedCredentials | undefined> {
     if (this.storageIndex === undefined) {
       throw Error(
         "Cannot register credential, no storage contract index found."
@@ -228,7 +219,7 @@ export class RLNContract {
     const txRegisterResponse: ethers.ContractTransaction =
       await this.registryContract["register(uint16,uint256)"](
         this.storageIndex,
-        credential.IDCommitmentBigInt,
+        identity.IDCommitmentBigInt,
         { gasLimit: 100000 }
       );
     const txRegisterReceipt = await txRegisterResponse.wait();
@@ -245,9 +236,17 @@ export class RLNContract {
       memberRegistered.data
     );
 
+    const network = await this.registryContract.provider.getNetwork();
+    const address = this.registryContract.address;
+    const membershipId = decodedData.index.toNumber();
+
     return {
-      idCommitment: decodedData.idCommitment,
-      index: decodedData.index,
+      identity,
+      membership: {
+        address,
+        treeIndex: membershipId,
+        chainId: network.chainId,
+      },
     };
   }
 
