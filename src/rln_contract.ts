@@ -93,6 +93,13 @@ export class RLNContract {
     this.deployBlock = await this.storageContract.deployedBlockNumber();
   }
 
+  public get registry(): ethers.Contract {
+    if (!this.registryContract) {
+      throw Error("Registry contract was not initialized");
+    }
+    return this.registryContract as ethers.Contract;
+  }
+
   public get contract(): ethers.Contract {
     if (!this.storageContract) {
       throw Error("Storage contract was not initialized");

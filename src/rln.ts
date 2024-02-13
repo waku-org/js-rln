@@ -19,7 +19,7 @@ import type {
   DecryptedCredentials,
   EncryptedCredentials,
 } from "./keystore/index.js";
-import { Password } from "./keystore/types.js";
+import { KeystoreEntity, Password } from "./keystore/types.js";
 import { extractMetaMaskSigner } from "./metamask.js";
 import verificationKey from "./resources/verification_key.js";
 import { RLNContract } from "./rln_contract.js";
@@ -196,6 +196,10 @@ type RegisterMembershipOptions =
   | { signature: string }
   | { identity: IdentityCredential };
 
+type WakuRLNEncoderOptions = WakuEncoderOptions & {
+  credentials: EncryptedCredentials | DecryptedCredentials;
+};
+
 export class RLNInstance {
   private started = false;
   private starting = false;
@@ -227,10 +231,18 @@ export class RLNInstance {
     this.starting = true;
 
     try {
+      const { credentials, keystore } =
+        await RLNInstance.decryptCredentialsIfNeeded(options.credentials);
       const { signer, registryAddress } = await this.determineStartOptions(
-        options
+        options,
+        credentials
       );
 
+      if (keystore) {
+        this.keystore = keystore;
+      }
+
+      this._credentials = credentials;
       this._signer = signer!;
       this._contract = await RLNContract.init(this, {
         registryAddress: registryAddress!,
@@ -243,12 +255,9 @@ export class RLNInstance {
   }
 
   private async determineStartOptions(
-    options: StartRLNOptions
+    options: StartRLNOptions,
+    credentials: KeystoreEntity | undefined
   ): Promise<StartRLNOptions> {
-    const credentials = await this.decryptCredentialsIfNeeded(
-      options.credentials
-    );
-
     let chainId = credentials?.membership.chainId;
     const registryAddress =
       credentials?.membership.address ||
@@ -271,35 +280,35 @@ export class RLNInstance {
     return {
       signer,
       registryAddress,
-      credentials: options.credentials,
     };
   }
 
-  private async decryptCredentialsIfNeeded(
+  private static async decryptCredentialsIfNeeded(
     credentials?: EncryptedCredentials | DecryptedCredentials
-  ): Promise<undefined | DecryptedCredentials> {
+  ): Promise<{ credentials?: DecryptedCredentials; keystore?: Keystore }> {
     if (!credentials) {
-      return;
+      return {};
     }
 
     if ("identity" in credentials) {
-      this._credentials = credentials;
-      return credentials;
+      return { credentials };
     }
 
     const keystore = Keystore.fromString(credentials.keystore);
 
     if (!keystore) {
-      throw Error("Failed to start RLN: cannot read Keystore provided.");
+      return {};
     }
 
-    this.keystore = keystore;
-    this._credentials = await keystore.readCredential(
+    const decryptedCredentials = await keystore.readCredential(
       credentials.id,
       credentials.password
     );
 
-    return this._credentials;
+    return {
+      keystore,
+      credentials: decryptedCredentials,
+    };
   }
 
   public async registerMembership(
@@ -331,19 +340,54 @@ export class RLNInstance {
     this._credentials = await this.keystore?.readCredential(id, password);
   }
 
-  public createEncoder(options: WakuEncoderOptions): RLNEncoder {
-    if (!this._credentials) {
+  public async createEncoder(
+    options: WakuRLNEncoderOptions
+  ): Promise<RLNEncoder> {
+    const { credentials: decryptedCredentials } =
+      await RLNInstance.decryptCredentialsIfNeeded(options.credentials);
+    const credentials = decryptedCredentials || this._credentials;
+
+    if (!credentials) {
       throw Error(
         "Failed to create Encoder: missing RLN credentials. Use createRLNEncoder directly."
       );
     }
 
+    await this.verifyCredentialsAgainstContract(credentials);
+
     return createRLNEncoder({
       encoder: createEncoder(options),
       rlnInstance: this,
-      index: this._credentials.membership.treeIndex,
-      credential: this._credentials.identity,
+      index: credentials.membership.treeIndex,
+      credential: credentials.identity,
     });
+  }
+
+  private async verifyCredentialsAgainstContract(
+    credentials: KeystoreEntity
+  ): Promise<void> {
+    if (!this._contract) {
+      throw Error(
+        "Failed to verify chain coordinates: no contract initialized."
+      );
+    }
+
+    const registryAddress = credentials.membership.address;
+    const currentRegistryAddress = this._contract.registry.address;
+    if (registryAddress !== currentRegistryAddress) {
+      throw Error(
+        `Failed to verify chain coordinates: credentials contract address=${registryAddress} is not equal to registryContract address=${currentRegistryAddress}`
+      );
+    }
+
+    const chainId = credentials.membership.chainId;
+    const network = await this._contract.registry.getNetwork();
+    const currentChainId = network.chainId;
+    if (chainId !== currentChainId) {
+      throw Error(
+        `Failed to verify chain coordinates: credentials chainID=${chainId} is not equal to registryContract chainID=${currentChainId}`
+      );
+    }
   }
 
   public createDecoder(
