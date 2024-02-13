@@ -381,7 +381,7 @@ export class RLNInstance {
     }
 
     const chainId = credentials.membership.chainId;
-    const network = await this._contract.registry.getNetwork();
+    const network = await this._contract.registry.provider.getNetwork();
     const currentChainId = network.chainId;
     if (chainId !== currentChainId) {
       throw Error(
