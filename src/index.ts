@@ -7,12 +7,8 @@ import {
 import { RLNContract } from "./contract/index.js";
 import { createRLN } from "./create.js";
 import { Keystore } from "./keystore/index.js";
-import {
-  IdentityCredential,
-  Proof,
-  ProofMetadata,
-  RLNInstance,
-} from "./rln.js";
+import { Proof } from "./proof.js";
+import { IdentityCredential, RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 import { extractMetaMaskSigner } from "./utils/index.js";
 
@@ -22,7 +18,6 @@ export {
   RLNInstance,
   IdentityCredential,
   Proof,
-  ProofMetadata,
   RLNEncoder,
   RLNDecoder,
   MerkleRootTracker,
