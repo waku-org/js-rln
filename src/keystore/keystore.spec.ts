@@ -7,8 +7,8 @@ chai.use(chaiSubset);
 chai.use(deepEqualInAnyOrder);
 chai.use(chaiAsPromised);
 
-import { buildBigIntFromUint8Array } from "../byte_utils.js";
-import { IdentityCredential } from "../rln.js";
+import { IdentityCredential } from "../identity.js";
+import { buildBigIntFromUint8Array } from "../utils/bytes.js";
 
 import { Keystore } from "./keystore.js";
 import type { MembershipInfo } from "./types.js";

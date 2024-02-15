@@ -5,8 +5,8 @@ import type {
 } from "@waku/interfaces";
 import * as utils from "@waku/utils/bytes";
 
-import { epochBytesToInt } from "./epoch.js";
 import { RLNInstance } from "./rln.js";
+import { epochBytesToInt } from "./utils/index.js";
 
 export function toRLNSignal(contentTopic: string, msg: IMessage): Uint8Array {
   const contentTopicBytes = utils.utf8ToBytes(contentTopic ?? "");

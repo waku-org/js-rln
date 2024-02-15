@@ -2,7 +2,7 @@ import chai from "chai";
 import spies from "chai-spies";
 import * as ethers from "ethers";
 
-import * as rln from "./index.js";
+import * as rln from "../index.js";
 
 chai.use(spies);
 

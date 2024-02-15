@@ -3,12 +3,13 @@ import {
   RLN_REGISTRY_ABI,
   RLN_STORAGE_ABI,
   SEPOLIA_CONTRACT,
-} from "./constants.js";
+} from "./contract/index.js";
 import { RLNContract } from "./contract/index.js";
 import { createRLN } from "./create.js";
+import { IdentityCredential } from "./identity.js";
 import { Keystore } from "./keystore/index.js";
 import { Proof } from "./proof.js";
-import { IdentityCredential, RLNInstance } from "./rln.js";
+import { RLNInstance } from "./rln.js";
 import { MerkleRootTracker } from "./root_tracker.js";
 import { extractMetaMaskSigner } from "./utils/index.js";
 

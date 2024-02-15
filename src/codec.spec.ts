@@ -25,8 +25,8 @@ import {
   RLNDecoder,
   RLNEncoder,
 } from "./codec.js";
-import { epochBytesToInt } from "./epoch.js";
 import { RlnMessage } from "./message.js";
+import { epochBytesToInt } from "./utils/index.js";
 
 import * as rln from "./index.js";
 

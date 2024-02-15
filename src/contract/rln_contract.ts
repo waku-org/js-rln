@@ -1,12 +1,13 @@
 import { hexToBytes } from "@waku/utils/bytes";
 import { ethers } from "ethers";
 
+import type { IdentityCredential } from "../identity.js";
+import type { DecryptedCredentials } from "../keystore/index.js";
+import type { RLNInstance } from "../rln.js";
+import { MerkleRootTracker } from "../root_tracker.js";
 import { zeroPadLE } from "../utils/index.js";
 
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
-import type { DecryptedCredentials } from "./keystore/index.js";
-import { type IdentityCredential, RLNInstance } from "./rln.js";
-import { MerkleRootTracker } from "./root_tracker.js";
 
 type Member = {
   idCommitment: string;

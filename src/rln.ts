@@ -9,11 +9,14 @@ import init from "@waku/zerokit-rln-wasm";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 import { ethers } from "ethers";
 
-import type { RLNDecoder, RLNEncoder } from "./codec.js";
-import { createRLNDecoder, createRLNEncoder } from "./codec.js";
-import { SEPOLIA_CONTRACT } from "./constants.js";
-import { RLNContract } from "./contract/index.js";
-import { dateToEpoch, epochIntToBytes } from "./epoch.js";
+import {
+  createRLNDecoder,
+  createRLNEncoder,
+  type RLNDecoder,
+  type RLNEncoder,
+} from "./codec.js";
+import { RLNContract, SEPOLIA_CONTRACT } from "./contract/index.js";
+import { IdentityCredential } from "./identity.js";
 import { Keystore } from "./keystore/index.js";
 import type {
   DecryptedCredentials,
@@ -22,14 +25,15 @@ import type {
 import { KeystoreEntity, Password } from "./keystore/types.js";
 import { Proof, proofToBytes } from "./proof.js";
 import verificationKey from "./resources/verification_key.js";
+import * as wc from "./resources/witness_calculator.js";
+import { WitnessCalculator } from "./resources/witness_calculator.js";
 import {
-  buildBigIntFromUint8Array,
   concatenate,
+  dateToEpoch,
+  epochIntToBytes,
   extractMetaMaskSigner,
   writeUIntLE,
 } from "./utils/index.js";
-import * as wc from "./witness_calculator.js";
-import { WitnessCalculator } from "./witness_calculator.js";
 
 async function loadWitnessCalculator(): Promise<WitnessCalculator> {
   const url = new URL("./resources/rln.wasm", import.meta.url);
@@ -61,32 +65,6 @@ export async function create(): Promise<RLNInstance> {
   const zkRLN = zerokitRLN.newRLN(DEPTH, zkey, vkey);
 
   return new RLNInstance(zkRLN, witnessCalculator);
-}
-
-export class IdentityCredential {
-  constructor(
-    public readonly IDTrapdoor: Uint8Array,
-    public readonly IDNullifier: Uint8Array,
-    public readonly IDSecretHash: Uint8Array,
-    public readonly IDCommitment: Uint8Array,
-    public readonly IDCommitmentBigInt: bigint
-  ) {}
-
-  static fromBytes(memKeys: Uint8Array): IdentityCredential {
-    const idTrapdoor = memKeys.subarray(0, 32);
-    const idNullifier = memKeys.subarray(32, 64);
-    const idSecretHash = memKeys.subarray(64, 96);
-    const idCommitment = memKeys.subarray(96);
-    const idCommitmentBigInt = buildBigIntFromUint8Array(idCommitment);
-
-    return new IdentityCredential(
-      idTrapdoor,
-      idNullifier,
-      idSecretHash,
-      idCommitment,
-      idCommitmentBigInt
-    );
-  }
 }
 
 type StartRLNOptions = {
