@@ -1,7 +1,8 @@
 import { hexToBytes } from "@waku/utils/bytes";
 import { ethers } from "ethers";
 
-import { zeroPadLE } from "./byte_utils.js";
+import { zeroPadLE } from "../utils/index.js";
+
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
 import type { DecryptedCredentials } from "./keystore/index.js";
 import { type IdentityCredential, RLNInstance } from "./rln.js";

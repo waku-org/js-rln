@@ -9,7 +9,6 @@ import init from "@waku/zerokit-rln-wasm";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 import { ethers } from "ethers";
 
-import { buildBigIntFromUint8Array, writeUIntLE } from "./byte_utils.js";
 import type { RLNDecoder, RLNEncoder } from "./codec.js";
 import { createRLNDecoder, createRLNEncoder } from "./codec.js";
 import { SEPOLIA_CONTRACT } from "./constants.js";
@@ -22,6 +21,11 @@ import type {
 } from "./keystore/index.js";
 import { KeystoreEntity, Password } from "./keystore/types.js";
 import verificationKey from "./resources/verification_key.js";
+import {
+  buildBigIntFromUint8Array,
+  poseidonHash,
+  writeUIntLE,
+} from "./utils/index.js";
 import { concatenate, extractMetaMaskSigner } from "./utils/index.js";
 import * as wc from "./witness_calculator.js";
 import { WitnessCalculator } from "./witness_calculator.js";
@@ -145,18 +149,6 @@ export function proofToBytes(p: IRateLimitProof): Uint8Array {
     p.nullifier,
     p.rlnIdentifier
   );
-}
-
-export function poseidonHash(...input: Array<Uint8Array>): Uint8Array {
-  const inputLen = writeUIntLE(new Uint8Array(8), input.length, 0, 8);
-  const lenPrefixedData = concatenate(inputLen, ...input);
-  return zerokitRLN.poseidonHash(lenPrefixedData);
-}
-
-export function sha256(input: Uint8Array): Uint8Array {
-  const inputLen = writeUIntLE(new Uint8Array(8), input.length, 0, 8);
-  const lenPrefixedData = concatenate(inputLen, input);
-  return zerokitRLN.hash(lenPrefixedData);
 }
 
 type StartRLNOptions = {
