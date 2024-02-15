@@ -13,6 +13,7 @@ import { buildBigIntFromUint8Array, writeUIntLE } from "./byte_utils.js";
 import type { RLNDecoder, RLNEncoder } from "./codec.js";
 import { createRLNDecoder, createRLNEncoder } from "./codec.js";
 import { SEPOLIA_CONTRACT } from "./constants.js";
+import { RLNContract } from "./contract/index.js";
 import { dateToEpoch, epochIntToBytes } from "./epoch.js";
 import { Keystore } from "./keystore/index.js";
 import type {
@@ -20,34 +21,10 @@ import type {
   EncryptedCredentials,
 } from "./keystore/index.js";
 import { KeystoreEntity, Password } from "./keystore/types.js";
-import { extractMetaMaskSigner } from "./metamask.js";
 import verificationKey from "./resources/verification_key.js";
-import { RLNContract } from "./rln_contract.js";
+import { concatenate, extractMetaMaskSigner } from "./utils/index.js";
 import * as wc from "./witness_calculator.js";
 import { WitnessCalculator } from "./witness_calculator.js";
-
-/**
- * Concatenate Uint8Arrays
- * @param input
- * @returns concatenation of all Uint8Array received as input
- */
-function concatenate(...input: Uint8Array[]): Uint8Array {
-  let totalLength = 0;
-  for (const arr of input) {
-    totalLength += arr.length;
-  }
-  const result = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const arr of input) {
-    result.set(arr, offset);
-    offset += arr.length;
-  }
-  return result;
-}
-
-const stringEncoder = new TextEncoder();
-
-const DEPTH = 20;
 
 async function loadWitnessCalculator(): Promise<WitnessCalculator> {
   const url = new URL("./resources/rln.wasm", import.meta.url);
@@ -68,10 +45,16 @@ async function loadZkey(): Promise<Uint8Array> {
 export async function create(): Promise<RLNInstance> {
   await (init as any)?.();
   zerokitRLN.init_panic_hook();
+
   const witnessCalculator = await loadWitnessCalculator();
   const zkey = await loadZkey();
+
+  const stringEncoder = new TextEncoder();
   const vkey = stringEncoder.encode(JSON.stringify(verificationKey));
+
+  const DEPTH = 20;
   const zkRLN = zerokitRLN.newRLN(DEPTH, zkey, vkey);
+
   return new RLNInstance(zkRLN, witnessCalculator);
 }
 
@@ -405,6 +388,7 @@ export class RLNInstance {
   }
 
   generateSeededIdentityCredential(seed: string): IdentityCredential {
+    const stringEncoder = new TextEncoder();
     const seedBytes = stringEncoder.encode(seed);
     // TODO: rename this function in zerokit rln-wasm
     const memKeys = zerokitRLN.generateSeededExtendedMembershipKey(

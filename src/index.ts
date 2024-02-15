@@ -4,17 +4,17 @@ import {
   RLN_STORAGE_ABI,
   SEPOLIA_CONTRACT,
 } from "./constants.js";
+import { RLNContract } from "./contract/index.js";
 import { createRLN } from "./create.js";
 import { Keystore } from "./keystore/index.js";
-import { extractMetaMaskSigner } from "./metamask.js";
 import {
   IdentityCredential,
   Proof,
   ProofMetadata,
   RLNInstance,
 } from "./rln.js";
-import { RLNContract } from "./rln_contract.js";
 import { MerkleRootTracker } from "./root_tracker.js";
+import { extractMetaMaskSigner } from "./utils/index.js";
 
 export {
   createRLN,
