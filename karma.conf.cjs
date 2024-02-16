@@ -1,68 +1,49 @@
-process.env.CHROME_BIN = require("puppeteer").executablePath();
+const webpack = require("webpack");
+const playwright = require('playwright');
 
-const os = require("os");
-const path = require("path");
-const ResolveTypeScriptPlugin = require("resolve-typescript-plugin");
-
-const output = {
-  path:
-    path.join(os.tmpdir(), "_karma_webpack_") +
-    Math.floor(Math.random() * 1000000),
-};
+process.env.CHROME_BIN = playwright.chromium.executablePath();
+process.env.FIREFOX_BIN = playwright.firefox.executablePath();
 
 module.exports = function (config) {
   config.set({
     frameworks: ["webpack", "mocha"],
+    files: ["src/**/!(node).spec.ts"],
     preprocessors: {
-      "**/*.ts": ["webpack"],
+      "src/**/!(node).spec.ts": ["webpack"]
     },
-
-    files: [
-      "src/**/*.spec.ts",
-      "src/**/*.ts",
-      {
-        pattern: `${output.path}/**/*`,
-        watched: false,
-        included: false,
-        served: true,
-      },
-    ],
     envPreprocessor: ["CI"],
     reporters: ["progress"],
-    browsers: ["ChromeHeadless"],
-    pingTimeout: 60000,
+    browsers: ["ChromeHeadless", "FirefoxHeadless"],
     singleRun: true,
     client: {
       mocha: {
-        timeout: 60000, // Default is 2s
-      },
+        timeout: 6000 // Default is 2s
+      }
     },
     webpack: {
-      mode: "production",
-      resolve: {
-        // Add `.ts` and `.tsx` as a resolvable extension.
-        extensions: [".ts", ".tsx", ".js"],
-        plugins: [new ResolveTypeScriptPlugin()],
-      },
+      mode: "development",
       module: {
-        rules: [
-          {
-            test: /\.wasm$/,
-            type: "asset/resource",
-          },
-          {
-            test: /\.(js|tsx?)$/,
-            loader: "ts-loader",
-            exclude: /node_modules|\.d\.ts$/,
-            options: { configFile: "tsconfig.karma.json" },
-          },
-          {
-            test: /\.d\.ts$/,
-            loader: "ignore-loader",
-          },
-        ],
+        rules: [{ test: /\.([cm]?ts|tsx)$/, loader: "ts-loader" }]
       },
-      output,
-    },
+      plugins: [
+        new webpack.DefinePlugin({
+          "process.env.CI": process.env.CI || false,
+          "process.env.DISPLAY": "Browser",
+        }),
+        new webpack.ProvidePlugin({
+          process: "process/browser.js"
+        })
+      ],
+      resolve: {
+        extensions: [".ts", ".tsx", ".js"],
+        extensionAlias: {
+          ".js": [".js", ".ts"],
+          ".cjs": [".cjs", ".cts"],
+          ".mjs": [".mjs", ".mts"]
+        }
+      },
+      stats: { warnings: false },
+      devtool: "inline-source-map"
+    }
   });
 };
