@@ -8,8 +8,9 @@ import type {
 } from "@waku/interfaces";
 import debug from "debug";
 
+import type { IdentityCredential } from "./identity.js";
 import { RlnMessage, toRLNSignal } from "./message.js";
-import { IdentityCredential, RLNInstance } from "./rln.js";
+import { RLNInstance } from "./rln.js";
 
 const log = debug("waku:rln:encoder");
 
@@ -44,7 +45,7 @@ export class RLNEncoder implements IEncoder {
 
   private async generateProof(message: IMessage): Promise<IRateLimitProof> {
     const signal = toRLNSignal(this.contentTopic, message);
-    const proof = await this.rlnInstance.generateRLNProof(
+    const proof = await this.rlnInstance.zerokit.generateRLNProof(
       signal,
       this.index,
       message.timestamp,

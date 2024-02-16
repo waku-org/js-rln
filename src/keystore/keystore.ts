@@ -13,7 +13,7 @@ import {
 import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
 
-import { buildBigIntFromUint8Array } from "../byte_utils.js";
+import { buildBigIntFromUint8Array } from "../utils/bytes.js";
 
 import { decryptEipKeystore, keccak256Checksum } from "./cipher.js";
 import { isCredentialValid, isKeystoreValid } from "./schema_validator.js";

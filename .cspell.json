@@ -35,8 +35,8 @@
     "gen",
     "proto",
     "*.spec.ts",
-    "src/resources.ts",
-    "src/constants.ts"
+    "src/resources/*",
+    "src/contract/constants.ts"
   ],
   "patterns": [
     {

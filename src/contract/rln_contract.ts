@@ -1,11 +1,13 @@
 import { hexToBytes } from "@waku/utils/bytes";
 import { ethers } from "ethers";
 
-import { zeroPadLE } from "./byte_utils.js";
+import type { IdentityCredential } from "../identity.js";
+import type { DecryptedCredentials } from "../keystore/index.js";
+import type { RLNInstance } from "../rln.js";
+import { MerkleRootTracker } from "../root_tracker.js";
+import { zeroPadLE } from "../utils/index.js";
+
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
-import type { DecryptedCredentials } from "./keystore/index.js";
-import { type IdentityCredential, RLNInstance } from "./rln.js";
-import { MerkleRootTracker } from "./root_tracker.js";
 
 type Member = {
   idCommitment: string;
@@ -59,7 +61,7 @@ export class RLNContract {
     rlnInstance: RLNInstance,
     { registryAddress, signer }: RLNContractOptions
   ) {
-    const initialRoot = rlnInstance.getMerkleRoot();
+    const initialRoot = rlnInstance.zerokit.getMerkleRoot();
 
     this.registryContract = new ethers.Contract(
       registryAddress,
@@ -180,14 +182,14 @@ export class RLNContract {
         }
 
         const idCommitment = zeroPadLE(hexToBytes(_idCommitment?._hex), 32);
-        rlnInstance.insertMember(idCommitment);
+        rlnInstance.zerokit.insertMember(idCommitment);
         this._members.set(index.toNumber(), {
           index,
           idCommitment: _idCommitment?._hex,
         });
       });
 
-      const currentRoot = rlnInstance.getMerkleRoot();
+      const currentRoot = rlnInstance.zerokit.getMerkleRoot();
       this.merkleRootTracker.pushRoot(blockNumber, currentRoot);
     });
   }
@@ -202,7 +204,7 @@ export class RLNContract {
         if (this._members.has(index)) {
           this._members.delete(index);
         }
-        rlnInstance.deleteMember(index);
+        rlnInstance.zerokit.deleteMember(index);
       });
 
       this.merkleRootTracker.backFill(blockNumber);

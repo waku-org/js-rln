@@ -1,4 +1,4 @@
-import type { IdentityCredential } from "../rln.js";
+import type { IdentityCredential } from "../identity.js";
 
 export type MembershipHash = string;
 export type Sha256Hash = string;
