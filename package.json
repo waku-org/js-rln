@@ -133,9 +133,6 @@
   "lint-staged": {
     "*.ts": [
       "eslint --fix"
-    ],
-    "*.{ts,md,json,conf*.*js}": [
-      "prettier --write"
     ]
   },
   "dependencies": {
