@@ -14,7 +14,7 @@ describe("RLN Contract abstraction", () => {
     const rlnInstance = await createRLN();
 
     rlnInstance.zerokit.insertMember = () => undefined;
-    const insertMemberSpy = chai.spy.on(rlnInstance, "insertMember");
+    const insertMemberSpy = chai.spy.on(rlnInstance.zerokit, "insertMember");
 
     const voidSigner = new ethers.VoidSigner(SEPOLIA_CONTRACT.address);
     const rlnContract = new RLNContract(rlnInstance, {
@@ -57,7 +57,7 @@ describe("RLN Contract abstraction", () => {
     } as unknown as ethers.Contract;
     const contractSpy = chai.spy.on(
       rlnContract["registryContract"],
-      "register(uint16,uint256)"
+      "register(uint16,uint256)",
     );
 
     const identity =
