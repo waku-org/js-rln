@@ -57,7 +57,7 @@ describe("RLN Contract abstraction", () => {
     } as unknown as ethers.Contract;
     const contractSpy = chai.spy.on(
       rlnContract["registryContract"],
-      "register(uint16,uint256)",
+      "register(uint16,uint256)"
     );
 
     const identity =
