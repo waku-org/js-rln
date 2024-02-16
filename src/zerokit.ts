@@ -8,7 +8,7 @@ import {
   concatenate,
   dateToEpoch,
   epochIntToBytes,
-  writeUIntLE,
+  writeUIntLE
 } from "./utils/index.js";
 
 export class Zerokit {

@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 
 export const extractMetaMaskSigner = async (): Promise<ethers.Signer> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const ethereum = (window as any).ethereum;
 
   if (!ethereum) {

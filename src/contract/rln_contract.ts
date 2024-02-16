@@ -1,4 +1,5 @@
 import { hexToBytes } from "@waku/utils/bytes";
+import debug from "debug";
 import { ethers } from "ethers";
 
 import type { IdentityCredential } from "../identity.js";
@@ -8,6 +9,8 @@ import { MerkleRootTracker } from "../root_tracker.js";
 import { zeroPadLE } from "../utils/index.js";
 
 import { RLN_REGISTRY_ABI, RLN_STORAGE_ABI } from "./constants.js";
+
+const log = debug("waku:rln:contract");
 
 type Member = {
   idCommitment: string;
@@ -130,7 +133,7 @@ export class RLNContract {
     const registeredMemberEvents = await queryFilter(this.contract, {
       fromBlock: this.deployBlock,
       ...options,
-      membersFilter: this.membersFilter,
+      membersFilter: this.membersFilter
     });
     this.processEvents(rlnInstance, registeredMemberEvents);
   }
@@ -185,7 +188,7 @@ export class RLNContract {
         rlnInstance.zerokit.insertMember(idCommitment);
         this._members.set(index.toNumber(), {
           index,
-          idCommitment: _idCommitment?._hex,
+          idCommitment: _idCommitment?._hex
         });
       });
 
@@ -254,8 +257,8 @@ export class RLNContract {
       membership: {
         address,
         treeIndex: membershipId,
-        chainId: network.chainId,
-      },
+        chainId: network.chainId
+      }
     };
   }
 
@@ -280,7 +283,7 @@ async function queryFilter(
     fromBlock,
     membersFilter,
     fetchRange = BLOCK_RANGE,
-    fetchChunks = FETCH_CHUNK,
+    fetchChunks = FETCH_CHUNK
   } = options;
 
   if (!fromBlock) {
@@ -346,7 +349,7 @@ function* takeN<T>(array: T[], size: number): Iterable<T[]> {
 
 function ignoreErrors<T>(promise: Promise<T>, defaultValue: T): Promise<T> {
   return promise.catch((err) => {
-    console.error(`Ignoring an error during query: ${err?.message}`);
+    log(`Ignoring an error during query: ${err?.message}`);
     return defaultValue;
   });
 }

@@ -1,5 +1,8 @@
 class RootPerBlock {
-  constructor(public root: Uint8Array, public blockNumber: number) {}
+  constructor(
+    public root: Uint8Array,
+    public blockNumber: number
+  ) {}
 }
 
 const maxBufferSize = 20;

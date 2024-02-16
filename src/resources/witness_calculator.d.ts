@@ -4,5 +4,5 @@ export async function builder(
 ): Promise<WitnessCalculator>;
 
 export class WitnessCalculator {
-  calculateWitness(input, sanityCheck): Array<bigint>;
+  calculateWitness(input, sanityCheck): Promise<Array<bigint>>;
 }

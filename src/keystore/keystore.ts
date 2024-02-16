@@ -1,14 +1,15 @@
 import type {
   ICipherModule,
   IKeystore as IEipKeystore,
-  IPbkdf2KdfModule,
+  IPbkdf2KdfModule
 } from "@chainsafe/bls-keystore";
 import { create as createEipKeystore } from "@chainsafe/bls-keystore";
+import debug from "debug";
 import { sha256 } from "ethereum-cryptography/sha256";
 import {
   bytesToHex,
   bytesToUtf8,
-  utf8ToBytes,
+  utf8ToBytes
 } from "ethereum-cryptography/utils";
 import _ from "lodash";
 import { v4 as uuidV4 } from "uuid";
@@ -23,8 +24,10 @@ import type {
   MembershipHash,
   MembershipInfo,
   Password,
-  Sha256Hash,
+  Sha256Hash
 } from "./types.js";
+
+const log = debug("waku:rln:keystore");
 
 type NwakuCredential = {
   crypto: {
@@ -66,7 +69,7 @@ export class Keystore {
         application: "waku-rln-relay",
         appIdentifier: "01234567890abcdef",
         version: "0.2",
-        credentials: {},
+        credentials: {}
       },
       options
     );
@@ -88,7 +91,7 @@ export class Keystore {
 
       return new Keystore(obj);
     } catch (err) {
-      console.error("Cannot create Keystore from string:", err);
+      log("Cannot create Keystore from string:", err);
       return;
     }
   }
@@ -192,12 +195,12 @@ export class Keystore {
       kdf: {
         function: nwakuCrypto.kdf,
         params: nwakuCrypto.kdfparams,
-        message: "",
+        message: ""
       },
       cipher: {
         function: nwakuCrypto.cipher,
         params: nwakuCrypto.cipherparams,
-        message: nwakuCrypto.ciphertext,
+        message: nwakuCrypto.ciphertext
       },
       checksum: {
         // @chainsafe/bls-keystore supports only sha256
@@ -205,8 +208,8 @@ export class Keystore {
         // https://github.com/waku-org/nwaku/blob/25d6e52e3804d15f9b61bc4cc6dd448540c072a1/waku/waku_keystore/keyfile.nim#L367
         function: "sha256",
         params: {},
-        message: nwakuCrypto.mac,
-      },
+        message: nwakuCrypto.mac
+      }
     };
 
     return {
@@ -215,7 +218,7 @@ export class Keystore {
       description: undefined,
       path: "safe to ignore, not important for decrypt",
       pubkey: "safe to ignore, not important for decrypt",
-      crypto: eipCrypto,
+      crypto: eipCrypto
     };
   }
 
@@ -235,8 +238,8 @@ export class Keystore {
         // @chainsafe/bls-keystore generates only sha256
         // but nwaku uses keccak256
         // https://github.com/waku-org/nwaku/blob/25d6e52e3804d15f9b61bc4cc6dd448540c072a1/waku/waku_keystore/keyfile.nim#L367
-        mac: checksum,
-      },
+        mac: checksum
+      }
     };
   }
 
@@ -266,16 +269,16 @@ export class Keystore {
           ),
           IDSecretHash: Keystore.fromArraylikeToBytes(
             _.get(obj, "identityCredential.idSecretHash", [])
-          ),
+          )
         },
         membership: {
           treeIndex: _.get(obj, "treeIndex"),
           chainId: _.get(obj, "membershipContract.chainId"),
-          address: _.get(obj, "membershipContract.address"),
-        },
+          address: _.get(obj, "membershipContract.address")
+        }
       };
     } catch (err) {
-      console.error("Cannot parse bytes to Nwaku Credentials:", err);
+      log("Cannot parse bytes to Nwaku Credentials:", err);
       return;
     }
   }
@@ -315,12 +318,12 @@ export class Keystore {
           idCommitment: options.identity.IDCommitment,
           idNullifier: options.identity.IDNullifier,
           idSecretHash: options.identity.IDSecretHash,
-          idTrapdoor: options.identity.IDTrapdoor,
+          idTrapdoor: options.identity.IDTrapdoor
         },
         membershipContract: {
           chainId: options.membership.chainId,
-          address: options.membership.address,
-        },
+          address: options.membership.address
+        }
       })
     );
   }
