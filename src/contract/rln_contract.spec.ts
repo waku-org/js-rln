@@ -2,20 +2,23 @@ import chai from "chai";
 import spies from "chai-spies";
 import * as ethers from "ethers";
 
-import * as rln from "../index.js";
+import { createRLN } from "../create.js";
+
+import { SEPOLIA_CONTRACT } from "./constants.js";
+import { RLNContract } from "./rln_contract.js";
 
 chai.use(spies);
 
 describe("RLN Contract abstraction", () => {
   it("should be able to fetch members from events and store to rln instance", async () => {
-    const rlnInstance = await rln.createRLN();
+    const rlnInstance = await createRLN();
 
-    rlnInstance.insertMember = () => undefined;
+    rlnInstance.zerokit.insertMember = () => undefined;
     const insertMemberSpy = chai.spy.on(rlnInstance, "insertMember");
 
-    const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
-    const rlnContract = new rln.RLNContract(rlnInstance, {
-      registryAddress: rln.SEPOLIA_CONTRACT.address,
+    const voidSigner = new ethers.VoidSigner(SEPOLIA_CONTRACT.address);
+    const rlnContract = new RLNContract(rlnInstance, {
+      registryAddress: SEPOLIA_CONTRACT.address,
       signer: voidSigner,
     });
 
@@ -36,10 +39,10 @@ describe("RLN Contract abstraction", () => {
     const mockSignature =
       "0xdeb8a6b00a8e404deb1f52d3aa72ed7f60a2ff4484c737eedaef18a0aacb2dfb4d5d74ac39bb71fa358cf2eb390565a35b026cc6272f2010d4351e17670311c21c";
 
-    const rlnInstance = await rln.createRLN();
-    const voidSigner = new ethers.VoidSigner(rln.SEPOLIA_CONTRACT.address);
-    const rlnContract = new rln.RLNContract(rlnInstance, {
-      registryAddress: rln.SEPOLIA_CONTRACT.address,
+    const rlnInstance = await createRLN();
+    const voidSigner = new ethers.VoidSigner(SEPOLIA_CONTRACT.address);
+    const rlnContract = new RLNContract(rlnInstance, {
+      registryAddress: SEPOLIA_CONTRACT.address,
       signer: voidSigner,
     });
 
@@ -58,7 +61,7 @@ describe("RLN Contract abstraction", () => {
     );
 
     const identity =
-      rlnInstance.generateSeededIdentityCredential(mockSignature);
+      rlnInstance.zerokit.generateSeededIdentityCredential(mockSignature);
     await rlnContract.registerWithIdentity(identity);
 
     chai.expect(contractSpy).to.have.been.called();

@@ -61,7 +61,7 @@ export class RLNContract {
     rlnInstance: RLNInstance,
     { registryAddress, signer }: RLNContractOptions
   ) {
-    const initialRoot = rlnInstance.getMerkleRoot();
+    const initialRoot = rlnInstance.zerokit.getMerkleRoot();
 
     this.registryContract = new ethers.Contract(
       registryAddress,
@@ -182,14 +182,14 @@ export class RLNContract {
         }
 
         const idCommitment = zeroPadLE(hexToBytes(_idCommitment?._hex), 32);
-        rlnInstance.insertMember(idCommitment);
+        rlnInstance.zerokit.insertMember(idCommitment);
         this._members.set(index.toNumber(), {
           index,
           idCommitment: _idCommitment?._hex,
         });
       });
 
-      const currentRoot = rlnInstance.getMerkleRoot();
+      const currentRoot = rlnInstance.zerokit.getMerkleRoot();
       this.merkleRootTracker.pushRoot(blockNumber, currentRoot);
     });
   }
@@ -204,7 +204,7 @@ export class RLNContract {
         if (this._members.has(index)) {
           this._members.delete(index);
         }
-        rlnInstance.deleteMember(index);
+        rlnInstance.zerokit.deleteMember(index);
       });
 
       this.merkleRootTracker.backFill(blockNumber);

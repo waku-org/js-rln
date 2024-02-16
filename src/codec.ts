@@ -45,7 +45,7 @@ export class RLNEncoder implements IEncoder {
 
   private async generateProof(message: IMessage): Promise<IRateLimitProof> {
     const signal = toRLNSignal(this.contentTopic, message);
-    const proof = await this.rlnInstance.generateRLNProof(
+    const proof = await this.rlnInstance.zerokit.generateRLNProof(
       signal,
       this.index,
       message.timestamp,

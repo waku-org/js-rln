@@ -24,7 +24,7 @@ export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
 
   public verify(roots: Uint8Array[]): boolean | undefined {
     return this.rateLimitProof
-      ? this.rlnInstance.verifyWithRoots(
+      ? this.rlnInstance.zerokit.verifyWithRoots(
           this.rateLimitProof,
           toRLNSignal(this.msg.contentTopic, this.msg),
           ...roots
@@ -34,7 +34,7 @@ export class RlnMessage<T extends IDecodedMessage> implements IDecodedMessage {
 
   public verifyNoRoot(): boolean | undefined {
     return this.rateLimitProof
-      ? this.rlnInstance.verifyWithNoRoot(
+      ? this.rlnInstance.zerokit.verifyWithNoRoot(
           this.rateLimitProof,
           toRLNSignal(this.msg.contentTopic, this.msg)
         ) // this.rlnInstance.verifyRLNProof once issue status-im/nwaku#1248 is fixed
