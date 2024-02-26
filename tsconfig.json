@@ -41,8 +41,12 @@
 
     "lib": ["es2022", "dom"],
     "types": ["node", "mocha"],
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": ["node_modules/@types"],
+    "outDir": "dist/",
+    "rootDir": "src",
   },
+  "include": ["src"],
+  "exclude": ["src/**/*.spec.ts", "src/test_utils"],
   "compileOnSave": false,
   "ts-node": {
     "files": true
