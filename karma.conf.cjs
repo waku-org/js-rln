@@ -23,7 +23,10 @@ module.exports = function (config) {
     webpack: {
       mode: "development",
       module: {
-        rules: [{ test: /\.([cm]?ts|tsx)$/, loader: "ts-loader" }]
+        rules: [{
+          test: /\.wasm$/,
+          type: "asset/resource",
+        }, { test: /\.([cm]?ts|tsx)$/, loader: "ts-loader" }]
       },
       plugins: [
         new webpack.DefinePlugin({
