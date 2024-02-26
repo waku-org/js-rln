@@ -46,7 +46,6 @@
     "rootDir": "src",
   },
   "include": ["src"],
-  "exclude": ["src/**/*.spec.ts", "src/test_utils"],
   "compileOnSave": false,
   "ts-node": {
     "files": true
