@@ -15,7 +15,7 @@ module.exports = function (config) {
     files: [
       "src/**/!(node).spec.ts",
       {
-        pattern: `dist/**/*`,
+        pattern: `src/**/*`,
         watched: false,
         included: false,
         served: true,
