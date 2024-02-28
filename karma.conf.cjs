@@ -1,8 +1,13 @@
+const path = require("path");
 const webpack = require("webpack");
 const playwright = require('playwright');
 
 process.env.CHROME_BIN = playwright.chromium.executablePath();
 process.env.FIREFOX_BIN = playwright.firefox.executablePath();
+
+const output = {
+  path: path.join(__dirname, "dist"),
+};
 
 module.exports = function (config) {
   config.set({
@@ -15,7 +20,7 @@ module.exports = function (config) {
     files: [
       "src/**/!(node).spec.ts",
       {
-        pattern: `src/**/*`,
+        pattern: `${output.path}/**/*`,
         watched: false,
         included: false,
         served: true,
@@ -34,6 +39,7 @@ module.exports = function (config) {
       }
     },
     webpack: {
+      output,
       mode: "development",
       module: {
         rules: [{
