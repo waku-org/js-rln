@@ -1,16 +1,8 @@
 const webpack = require("webpack");
 const playwright = require('playwright');
-const os = require("os");
-const path = require("path");
 
 process.env.CHROME_BIN = playwright.chromium.executablePath();
 process.env.FIREFOX_BIN = playwright.firefox.executablePath();
-
-const output = {
-  path:
-    path.join(os.tmpdir(), "_karma_webpack_") +
-    Math.floor(Math.random() * 1000000),
-};
 
 module.exports = function (config) {
   config.set({
@@ -23,12 +15,11 @@ module.exports = function (config) {
     files: [
       "src/**/!(node).spec.ts",
       {
-        pattern: `${output.path}/**/*`,
+        pattern: `dist/**/*`,
         watched: false,
         included: false,
         served: true,
       },
-      { pattern: 'bundle/**/*.wasm', included: false, served: true, type: 'wasm' }
     ],
     preprocessors: {
       "src/**/!(node).spec.ts": ["webpack"]
@@ -48,9 +39,11 @@ module.exports = function (config) {
         rules: [{
           test: /\.wasm$/,
           type: "asset/resource",
-        }, { test: /\.([cm]?ts|tsx)$/, loader: "ts-loader" }]
+        }, {
+          test: /\.([cm]?ts|tsx)$/,
+          loader: "ts-loader"
+        }]
       },
-      output,
       plugins: [
         new webpack.DefinePlugin({
           "process.env.CI": process.env.CI || false,
