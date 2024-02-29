@@ -40,7 +40,7 @@ module.exports = function (config) {
     },
     webpack: {
       output,
-      mode: "development",
+      mode: "production",
       module: {
         rules: [{
           test: /\.wasm$/,
