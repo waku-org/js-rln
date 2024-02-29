@@ -107,7 +107,6 @@
     "p-timeout": "^4.1.0",
     "playwright": "^1.40.1",
     "process": "^0.11.10",
-    "resolve-typescript-plugin": "^1.2.0",
     "rollup": "^2.75.0",
     "rollup-plugin-copy": "^3.4.0",
     "size-limit": "^8.0.0",

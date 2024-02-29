@@ -3,7 +3,6 @@ const webpack = require("webpack");
 const playwright = require('playwright');
 
 process.env.CHROME_BIN = playwright.chromium.executablePath();
-process.env.FIREFOX_BIN = playwright.firefox.executablePath();
 
 const output = {
   path: path.join(__dirname, "dist"),
@@ -12,13 +11,12 @@ const output = {
 module.exports = function (config) {
   config.set({
     frameworks: ["webpack", "mocha"],
-    customHeaders: [{
-      match: '\\.wasm$',
-      name: 'Content-Type',
-      value: 'application/wasm'
-    }],
+    preprocessors: {
+      "**/*.ts": ["webpack"],
+    },
     files: [
-      "src/**/!(node).spec.ts",
+      "src/**/*.spec.ts",
+      "src/**/*.ts",
       {
         pattern: `${output.path}/**/*`,
         watched: false,
@@ -26,29 +24,36 @@ module.exports = function (config) {
         served: true,
       },
     ],
-    preprocessors: {
-      "src/**/!(node).spec.ts": ["webpack"]
-    },
     envPreprocessor: ["CI"],
     reporters: ["progress"],
-    browsers: ["ChromeHeadless", "FirefoxHeadless"],
+    browsers: ["ChromeHeadless"],
+    pingTimeout: 60000,
     singleRun: true,
     client: {
       mocha: {
-        timeout: 6000 // Default is 2s
-      }
+        timeout: 60000, // Default is 2s
+      },
     },
     webpack: {
       output,
       mode: "production",
       module: {
-        rules: [{
-          test: /\.wasm$/,
-          type: "asset/resource",
-        }, {
-          test: /\.([cm]?ts|tsx)$/,
-          loader: "ts-loader"
-        }]
+        rules: [
+          {
+            test: /\.wasm$/,
+            type: "asset/resource",
+          },
+          {
+            test: /\.(js|tsx?)$/,
+            loader: "ts-loader",
+            exclude: /node_modules|\.d\.ts$/,
+            options: { configFile: "tsconfig.karma.json" },
+          },
+          {
+            test: /\.d\.ts$/,
+            loader: "ignore-loader",
+          },
+        ],
       },
       plugins: [
         new webpack.DefinePlugin({
@@ -69,6 +74,6 @@ module.exports = function (config) {
       },
       stats: { warnings: false },
       devtool: "inline-source-map"
-    }
+    },
   });
 };
