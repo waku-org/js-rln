@@ -21,7 +21,6 @@ jobs:
           node-version: ${{ env.NODE_JS }}
       - uses: bahmutov/npm-install@v1
       - run: npm run test:lint
-      - run: npm run test:prettier
       - run: npm run test:spelling
       - run: npm run test:tsc
 
@@ -43,6 +42,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_JS }}
       - uses: bahmutov/npm-install@v1
+      - run: npx playwright install --with-deps
       - run: npm run test:browser
 
   release_next:

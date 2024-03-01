@@ -2,19 +2,10 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": "./tsconfig.dev.json"
+    "project": ["./tsconfig.json"]
   },
-  "env": {
-    "es6": true
-  },
-  "ignorePatterns": [
-    "node_modules",
-    "build",
-    "coverage",
-    "proto",
-    "*/**/credential_validation_generated.ts",
-    "*/**/keystore_validation_generated.ts"
-  ],
+  "env": { "es6": true },
+  "ignorePatterns": ["node_modules", "build", "coverage", "proto"],
   "plugins": ["import", "eslint-comments", "functional"],
   "extends": [
     "eslint:recommended",
@@ -23,18 +14,15 @@
     "plugin:import/typescript",
     "plugin:prettier/recommended"
   ],
-  "globals": {
-    "BigInt": true,
-    "console": true,
-    "WebAssembly": true
-  },
+  "globals": { "BigInt": true, "console": true, "WebAssembly": true },
   "rules": {
-    "@typescript-eslint/explicit-function-return-type": [
+    "prettier/prettier": [
       "error",
       {
-        "allowExpressions": true
+        "trailingComma": "none"
       }
     ],
+    "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "eslint-comments/disable-enable-pair": [
       "error",
@@ -52,25 +40,62 @@
         }
       }
     ],
-    "no-constant-condition": [
+    "no-constant-condition": ["error", { "checkLoops": false }],
+    "import/no-extraneous-dependencies": [
       "error",
       {
-        "checkLoops": false
+        "devDependencies": [
+          "**/*.test.ts",
+          "**/*.spec.ts",
+          "**/tests/**",
+          "**/rollup.config.js",
+          "**/playwright.config.ts",
+          "**/.eslintrc.cjs",
+          "**/karma.conf.cjs"
+        ]
       }
     ],
     "sort-imports": [
       "error",
-      {
-        "ignoreDeclarationSort": true,
-        "ignoreCase": true
-      }
-    ]
+      { "ignoreDeclarationSort": true, "ignoreCase": true }
+    ],
+    "no-console": "error",
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/await-thenable": "error",
+    "@typescript-eslint/no-misused-promises": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "id-match": ["error", "^(?!.*[pP]ubSub)"]
   },
   "overrides": [
     {
-      "files": ["*.spec.ts", "**/test_utils/*.ts"],
+      "files": ["*.spec.ts", "**/test_utils/*.ts", "*.js", "*.cjs"],
       "rules": {
-        "@typescript-eslint/no-non-null-assertion": "off"
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "no-console": "off",
+        "import/no-extraneous-dependencies": [
+          "error",
+          {
+            "devDependencies": true
+          }
+        ]
+      }
+    },
+    {
+      "files": ["*.ts", "*.mts", "*.cts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": [
+          "error",
+          {
+            "allowExpressions": true
+          }
+        ]
+      }
+    },
+    {
+      "files": ["**/ci/*.js"],
+      "rules": {
+        "no-undef": "off"
       }
     }
   ]

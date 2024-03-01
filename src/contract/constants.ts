@@ -26,7 +26,7 @@ export const RLN_REGISTRY_ABI = [
   "function transferOwnership(address newOwner)",
   "function upgradeTo(address newImplementation)",
   "function upgradeToAndCall(address newImplementation, bytes data) payable",
-  "function usingStorageIndex() view returns (uint16)",
+  "function usingStorageIndex() view returns (uint16)"
 ];
 
 // ref https://github.com/waku-org/waku-rln-contract/blob/19fded82bca07e7b535b429dc507cfb83f10dfcf/deployments/sepolia/WakuRlnStorage_0.json#L3
@@ -58,11 +58,11 @@ export const RLN_STORAGE_ABI = [
   "function transferOwnership(address newOwner)",
   "function verifier() view returns (address)",
   "function withdraw() pure",
-  "function withdrawalBalance(address) view returns (uint256)",
+  "function withdrawalBalance(address) view returns (uint256)"
 ];
 
 export const SEPOLIA_CONTRACT = {
   chainId: 11155111,
   address: "0xF471d71E9b1455bBF4b85d475afb9BB0954A29c4",
-  abi: RLN_REGISTRY_ABI,
+  abi: RLN_REGISTRY_ABI
 };

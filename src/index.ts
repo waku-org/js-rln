@@ -2,7 +2,7 @@ import { RLNDecoder, RLNEncoder } from "./codec.js";
 import {
   RLN_REGISTRY_ABI,
   RLN_STORAGE_ABI,
-  SEPOLIA_CONTRACT,
+  SEPOLIA_CONTRACT
 } from "./contract/index.js";
 import { RLNContract } from "./contract/index.js";
 import { createRLN } from "./create.js";
@@ -26,5 +26,5 @@ export {
   RLN_STORAGE_ABI,
   RLN_REGISTRY_ABI,
   SEPOLIA_CONTRACT,
-  extractMetaMaskSigner,
+  extractMetaMaskSigner
 };

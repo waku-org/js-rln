@@ -4,7 +4,7 @@ import type {
   IEncoder,
   IMessage,
   IProtoMessage,
-  IRateLimitProof,
+  IRateLimitProof
 } from "@waku/interfaces";
 import debug from "debug";
 
@@ -86,7 +86,10 @@ export const createRLNEncoder = (options: RLNEncoderOptions): RLNEncoder => {
 export class RLNDecoder<T extends IDecodedMessage>
   implements IDecoder<RlnMessage<T>>
 {
-  constructor(private rlnInstance: RLNInstance, private decoder: IDecoder<T>) {}
+  constructor(
+    private rlnInstance: RLNInstance,
+    private decoder: IDecoder<T>
+  ) {}
 
   get pubsubTopic(): string {
     return this.decoder.pubsubTopic;

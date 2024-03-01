@@ -1,21 +1,21 @@
 import {
   createDecoder,
   createEncoder,
-  DecodedMessage,
+  DecodedMessage
 } from "@waku/core/lib/message/version_0";
 import type { IProtoMessage } from "@waku/interfaces";
 import {
   generatePrivateKey,
   generateSymmetricKey,
-  getPublicKey,
+  getPublicKey
 } from "@waku/message-encryption";
 import {
   createDecoder as createAsymDecoder,
-  createEncoder as createAsymEncoder,
+  createEncoder as createAsymEncoder
 } from "@waku/message-encryption/ecies";
 import {
   createDecoder as createSymDecoder,
-  createEncoder as createSymEncoder,
+  createEncoder as createSymEncoder
 } from "@waku/message-encryption/symmetric";
 import { expect } from "chai";
 
@@ -23,7 +23,7 @@ import {
   createRLNDecoder,
   createRLNEncoder,
   RLNDecoder,
-  RLNEncoder,
+  RLNEncoder
 } from "./codec.js";
 import { createRLN } from "./create.js";
 import { RlnMessage } from "./message.js";
@@ -38,7 +38,7 @@ const EMPTY_PROTO_MESSAGE = {
   ephemeral: undefined,
   meta: undefined,
   rateLimitProof: undefined,
-  version: undefined,
+  version: undefined
 };
 
 describe("RLN codec with version 0", () => {
@@ -54,11 +54,11 @@ describe("RLN codec with version 0", () => {
       encoder: createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
-      credential,
+      credential
     });
     const rlnDecoder = createRLNDecoder({
       rlnInstance,
-      decoder: createDecoder(TestContentTopic),
+      decoder: createDecoder(TestContentTopic)
     });
 
     const bytes = await rlnEncoder.toWire({ payload });
@@ -139,7 +139,7 @@ describe("RLN codec with version 1", () => {
     const rlnEncoder = new RLNEncoder(
       createSymEncoder({
         contentTopic: TestContentTopic,
-        symKey,
+        symKey
       }),
       rlnInstance,
       index,
@@ -186,7 +186,7 @@ describe("RLN codec with version 1", () => {
     const rlnEncoder = new RLNEncoder(
       createSymEncoder({
         contentTopic: TestContentTopic,
-        symKey,
+        symKey
       }),
       rlnInstance,
       index,
@@ -233,7 +233,7 @@ describe("RLN codec with version 1", () => {
     const rlnEncoder = new RLNEncoder(
       createAsymEncoder({
         contentTopic: TestContentTopic,
-        publicKey,
+        publicKey
       }),
       rlnInstance,
       index,
@@ -281,7 +281,7 @@ describe("RLN codec with version 1", () => {
     const rlnEncoder = new RLNEncoder(
       createAsymEncoder({
         contentTopic: TestContentTopic,
-        publicKey,
+        publicKey
       }),
       rlnInstance,
       index,
@@ -384,11 +384,11 @@ describe("RLN codec with version 0 and meta setter", () => {
       encoder: createEncoder({ contentTopic: TestContentTopic, metaSetter }),
       rlnInstance,
       index,
-      credential,
+      credential
     });
     const rlnDecoder = createRLNDecoder({
       rlnInstance,
-      decoder: createDecoder(TestContentTopic),
+      decoder: createDecoder(TestContentTopic)
     });
 
     const bytes = await rlnEncoder.toWire({ payload });
@@ -403,7 +403,7 @@ describe("RLN codec with version 0 and meta setter", () => {
 
     const expectedMeta = metaSetter({
       ...EMPTY_PROTO_MESSAGE,
-      payload: protoResult!.payload,
+      payload: protoResult!.payload
     });
 
     expect(msg!.meta).to.deep.eq(expectedMeta);
@@ -449,7 +449,7 @@ describe("RLN codec with version 0 and meta setter", () => {
 
     const expectedMeta = metaSetter({
       ...EMPTY_PROTO_MESSAGE,
-      payload: msg!.payload,
+      payload: msg!.payload
     });
 
     expect(msg!.meta).to.deep.eq(expectedMeta);

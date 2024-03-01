@@ -6,7 +6,7 @@ import { keccak256 } from "ethereum-cryptography/keccak";
 import {
   bytesToHex,
   concatBytes,
-  hexToBytes,
+  hexToBytes
 } from "ethereum-cryptography/utils";
 
 import type { Keccak256Hash, Password } from "./types.js";

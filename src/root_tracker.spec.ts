@@ -23,7 +23,7 @@ describe("js-rln", () => {
     assert.sameDeepMembers(tracker.roots(), [
       new Uint8Array([0, 0, 0, 30]),
       new Uint8Array([0, 0, 0, 29]),
-      new Uint8Array([0, 0, 0, 28]),
+      new Uint8Array([0, 0, 0, 28])
     ]);
 
     // Buffer should keep track of 20 blocks previous to the current valid merkle root window
@@ -35,7 +35,7 @@ describe("js-rln", () => {
     assert.sameDeepMembers(tracker.roots(), [
       new Uint8Array([0, 0, 0, 28]),
       new Uint8Array([0, 0, 0, 27]),
-      new Uint8Array([0, 0, 0, 26]),
+      new Uint8Array([0, 0, 0, 26])
     ]);
 
     expect(tracker.buffer()).to.have.length(18);
@@ -47,7 +47,7 @@ describe("js-rln", () => {
     assert.sameDeepMembers(tracker.roots(), [
       new Uint8Array([0, 0, 0, 14]),
       new Uint8Array([0, 0, 0, 13]),
-      new Uint8Array([0, 0, 0, 12]),
+      new Uint8Array([0, 0, 0, 12])
     ]);
     expect(tracker.buffer()).to.have.length(4);
     expect(tracker.buffer()[0]).to.be.eql(new Uint8Array([0, 0, 0, 8]));

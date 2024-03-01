@@ -1,7 +1,7 @@
 import type {
   IDecodedMessage,
   IMessage,
-  IRateLimitProof,
+  IRateLimitProof
 } from "@waku/interfaces";
 import * as utils from "@waku/utils/bytes";
 

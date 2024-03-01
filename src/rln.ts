@@ -2,7 +2,7 @@ import { createDecoder, createEncoder } from "@waku/core";
 import type {
   ContentTopic,
   IDecodedMessage,
-  EncoderOptions as WakuEncoderOptions,
+  EncoderOptions as WakuEncoderOptions
 } from "@waku/interfaces";
 import init from "@waku/zerokit-rln-wasm";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
@@ -12,14 +12,14 @@ import {
   createRLNDecoder,
   createRLNEncoder,
   type RLNDecoder,
-  type RLNEncoder,
+  type RLNEncoder
 } from "./codec.js";
 import { RLNContract, SEPOLIA_CONTRACT } from "./contract/index.js";
 import { IdentityCredential } from "./identity.js";
 import { Keystore } from "./keystore/index.js";
 import type {
   DecryptedCredentials,
-  EncryptedCredentials,
+  EncryptedCredentials
 } from "./keystore/index.js";
 import { KeystoreEntity, Password } from "./keystore/types.js";
 import verificationKey from "./resources/verification_key.js";
@@ -45,6 +45,7 @@ async function loadZkey(): Promise<Uint8Array> {
  * @returns RLNInstance
  */
 export async function create(): Promise<RLNInstance> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (init as any)?.();
   zerokitRLN.init_panic_hook();
 
@@ -128,7 +129,7 @@ export class RLNInstance {
       this._signer = signer!;
       this._contract = await RLNContract.init(this, {
         registryAddress: registryAddress!,
-        signer: signer!,
+        signer: signer!
       });
       this.started = true;
     } finally {
@@ -161,7 +162,7 @@ export class RLNInstance {
 
     return {
       signer,
-      registryAddress,
+      registryAddress
     };
   }
 
@@ -189,7 +190,7 @@ export class RLNInstance {
 
     return {
       keystore,
-      credentials: decryptedCredentials,
+      credentials: decryptedCredentials
     };
   }
 
@@ -203,7 +204,7 @@ export class RLNInstance {
     let identity = "identity" in options && options.identity;
 
     if ("signature" in options) {
-      identity = await this.zerokit.generateSeededIdentityCredential(
+      identity = this.zerokit.generateSeededIdentityCredential(
         options.signature
       );
     }
@@ -243,7 +244,7 @@ export class RLNInstance {
       encoder: createEncoder(options),
       rlnInstance: this,
       index: credentials.membership.treeIndex,
-      credential: credentials.identity,
+      credential: credentials.identity
     });
   }
 
@@ -279,7 +280,7 @@ export class RLNInstance {
   ): RLNDecoder<IDecodedMessage> {
     return createRLNDecoder({
       rlnInstance: this,
-      decoder: createDecoder(contentTopic),
+      decoder: createDecoder(contentTopic)
     });
   }
 }

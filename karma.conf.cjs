@@ -1,13 +1,11 @@
-process.env.CHROME_BIN = require("puppeteer").executablePath();
-
-const os = require("os");
 const path = require("path");
-const ResolveTypeScriptPlugin = require("resolve-typescript-plugin");
+const webpack = require("webpack");
+const playwright = require('playwright');
+
+process.env.CHROME_BIN = playwright.chromium.executablePath();
 
 const output = {
-  path:
-    path.join(os.tmpdir(), "_karma_webpack_") +
-    Math.floor(Math.random() * 1000000),
+  path: path.join(__dirname, "dist"),
 };
 
 module.exports = function (config) {
@@ -16,7 +14,6 @@ module.exports = function (config) {
     preprocessors: {
       "**/*.ts": ["webpack"],
     },
-
     files: [
       "src/**/*.spec.ts",
       "src/**/*.ts",
@@ -38,12 +35,8 @@ module.exports = function (config) {
       },
     },
     webpack: {
+      output,
       mode: "production",
-      resolve: {
-        // Add `.ts` and `.tsx` as a resolvable extension.
-        extensions: [".ts", ".tsx", ".js"],
-        plugins: [new ResolveTypeScriptPlugin()],
-      },
       module: {
         rules: [
           {
@@ -62,7 +55,25 @@ module.exports = function (config) {
           },
         ],
       },
-      output,
+      plugins: [
+        new webpack.DefinePlugin({
+          "process.env.CI": process.env.CI || false,
+          "process.env.DISPLAY": "Browser",
+        }),
+        new webpack.ProvidePlugin({
+          process: "process/browser.js"
+        })
+      ],
+      resolve: {
+        extensions: [".ts", ".tsx", ".js"],
+        extensionAlias: {
+          ".js": [".js", ".ts"],
+          ".cjs": [".cjs", ".cts"],
+          ".mjs": [".mjs", ".mts"]
+        }
+      },
+      stats: { warnings: false },
+      devtool: "inline-source-map"
     },
   });
 };
