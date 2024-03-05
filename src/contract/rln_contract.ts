@@ -206,8 +206,8 @@ export class RLNContract {
       indexes.forEach((index) => {
         if (this._members.has(index)) {
           this._members.delete(index);
+          rlnInstance.zerokit.deleteMember(index);
         }
-        rlnInstance.zerokit.deleteMember(index);
       });
 
       this.merkleRootTracker.backFill(blockNumber);
@@ -335,15 +335,13 @@ function splitToChunks(
 
 function* takeN<T>(array: T[], size: number): Iterable<T[]> {
   let start = 0;
-  let skip = size;
 
-  while (skip < array.length) {
-    const portion = array.slice(start, skip);
+  while (start < array.length) {
+    const portion = array.slice(start, start + size);
 
     yield portion;
 
-    start = skip;
-    skip += size;
+    start += size;
   }
 }
 
