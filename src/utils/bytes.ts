@@ -61,9 +61,12 @@ export function writeUIntLE(
  * @param array: Uint8Array
  * @returns BigInt
  */
-export function buildBigIntFromUint8Array(array: Uint8Array): bigint {
+export function buildBigIntFromUint8Array(
+  array: Uint8Array,
+  byteOffset: number = 0
+): bigint {
   const dataView = new DataView(array.buffer);
-  return dataView.getBigUint64(0, true);
+  return dataView.getBigUint64(byteOffset, true);
 }
 
 /**
