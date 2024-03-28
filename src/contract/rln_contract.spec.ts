@@ -19,7 +19,8 @@ describe("RLN Contract abstraction", () => {
     const voidSigner = new ethers.VoidSigner(SEPOLIA_CONTRACT.address);
     const rlnContract = new RLNContract(rlnInstance, {
       registryAddress: SEPOLIA_CONTRACT.address,
-      signer: voidSigner
+      signer: voidSigner,
+      fetchMembersFromService: false
     });
 
     rlnContract["storageContract"] = {
@@ -43,7 +44,8 @@ describe("RLN Contract abstraction", () => {
     const voidSigner = new ethers.VoidSigner(SEPOLIA_CONTRACT.address);
     const rlnContract = new RLNContract(rlnInstance, {
       registryAddress: SEPOLIA_CONTRACT.address,
-      signer: voidSigner
+      signer: voidSigner,
+      fetchMembersFromService: false
     });
 
     rlnContract["storageIndex"] = 1;

@@ -54,7 +54,8 @@ describe("RLN codec with version 0", () => {
       encoder: createEncoder({ contentTopic: TestContentTopic }),
       rlnInstance,
       index,
-      credential
+      credential,
+      fetchMembersFromService: false
     });
     const rlnDecoder = createRLNDecoder({
       rlnInstance,
@@ -384,7 +385,8 @@ describe("RLN codec with version 0 and meta setter", () => {
       encoder: createEncoder({ contentTopic: TestContentTopic, metaSetter }),
       rlnInstance,
       index,
-      credential
+      credential,
+      fetchMembersFromService: false
     });
     const rlnDecoder = createRLNDecoder({
       rlnInstance,
