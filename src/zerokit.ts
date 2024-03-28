@@ -1,9 +1,11 @@
+import { hexToBytes } from "@noble/curves/abstract/utils";
 import type { IRateLimitProof } from "@waku/interfaces";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 
 import { IdentityCredential } from "./identity.js";
 import { Proof, proofToBytes } from "./proof.js";
 import { WitnessCalculator } from "./resources/witness_calculator.js";
+import { hashToBN254 } from "./utils/hash.js";
 import {
   concatenate,
   dateToEpoch,
@@ -78,7 +80,9 @@ export class Zerokit {
     msg: Uint8Array,
     index: number,
     epoch: Uint8Array | Date | undefined,
-    idSecretHash: Uint8Array
+    idSecretHash: Uint8Array,
+    idCommitment?: bigint,
+    fetchMembersFromService: boolean = false
   ): Promise<IRateLimitProof> {
     if (epoch == undefined) {
       epoch = epochIntToBytes(dateToEpoch(new Date()));
@@ -96,10 +100,39 @@ export class Zerokit {
       epoch,
       idSecretHash
     );
-    const rlnWitness = zerokitRLN.getSerializedRLNWitness(
-      this.zkRLN,
-      serialized_msg
-    );
+
+    let rlnWitness;
+    if (!fetchMembersFromService) {
+      rlnWitness = zerokitRLN.getSerializedRLNWitness(
+        this.zkRLN,
+        serialized_msg
+      );
+    } else {
+      if (!idCommitment) {
+        throw new Error(
+          "Must provide ID commitment if using service to get proof"
+        );
+      }
+
+      const fetchUrl = `http://localhost:8645/debug/v1/merkleProof/${idCommitment}`;
+      const response = await fetch(fetchUrl);
+
+      const proofData = await response.json();
+      const pathElementsBytes: Uint8Array[] =
+        proofData.pathElements.map(hexToBytes);
+      const RLN_IDENTIFIER: Uint8Array = new TextEncoder().encode(
+        "zerokit/rln/010203040506070809"
+      );
+
+      rlnWitness = new Uint8Array([
+        ...idSecretHash,
+        ...pathElementsBytes,
+        ...proofData.pathIndexes.map((n: string) => parseInt(n, 10)),
+        ...hashToBN254(serialized_msg),
+        ...epoch,
+        ...RLN_IDENTIFIER
+      ]);
+    }
     const inputs = zerokitRLN.RLNWitnessToJson(this.zkRLN, rlnWitness);
     const calculatedWitness = await this.witnessCalculator.calculateWitness(
       inputs,

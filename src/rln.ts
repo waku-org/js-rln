@@ -76,6 +76,7 @@ type StartRLNOptions = {
    * If provided used for validating the network chainId and connecting to registry contract.
    */
   credentials?: EncryptedCredentials | DecryptedCredentials;
+  fetchMembersFromService?: boolean;
 };
 
 type RegisterMembershipOptions =
@@ -84,6 +85,7 @@ type RegisterMembershipOptions =
 
 type WakuRLNEncoderOptions = WakuEncoderOptions & {
   credentials: EncryptedCredentials | DecryptedCredentials;
+  fetchMembersFromService: boolean;
 };
 
 export class RLNInstance {
@@ -129,7 +131,8 @@ export class RLNInstance {
       this._signer = signer!;
       this._contract = await RLNContract.init(this, {
         registryAddress: registryAddress!,
-        signer: signer!
+        signer: signer!,
+        fetchMembersFromService: options.fetchMembersFromService ?? false
       });
       this.started = true;
     } finally {
@@ -244,7 +247,8 @@ export class RLNInstance {
       encoder: createEncoder(options),
       rlnInstance: this,
       index: credentials.membership.treeIndex,
-      credential: credentials.identity
+      credential: credentials.identity,
+      fetchMembersFromService: options.fetchMembersFromService
     });
   }
 
