@@ -16,15 +16,18 @@ const log = debug("waku:rln:encoder");
 
 export class RLNEncoder implements IEncoder {
   private readonly idSecretHash: Uint8Array;
+  private readonly idCommitment: bigint;
 
   constructor(
     private encoder: IEncoder,
     private rlnInstance: RLNInstance,
     private index: number,
-    identityCredential: IdentityCredential
+    identityCredential: IdentityCredential,
+    private readonly fetchMembersFromService: boolean = false
   ) {
     if (index < 0) throw "invalid membership index";
     this.idSecretHash = identityCredential.IDSecretHash;
+    this.idCommitment = identityCredential.IDCommitmentBigInt;
   }
 
   async toWire(message: IMessage): Promise<Uint8Array | undefined> {
@@ -49,7 +52,9 @@ export class RLNEncoder implements IEncoder {
       signal,
       this.index,
       message.timestamp,
-      this.idSecretHash
+      this.idSecretHash,
+      this.idCommitment,
+      this.fetchMembersFromService
     );
     return proof;
   }
@@ -72,6 +77,7 @@ type RLNEncoderOptions = {
   rlnInstance: RLNInstance;
   index: number;
   credential: IdentityCredential;
+  fetchMembersFromService: boolean;
 };
 
 export const createRLNEncoder = (options: RLNEncoderOptions): RLNEncoder => {
@@ -79,7 +85,8 @@ export const createRLNEncoder = (options: RLNEncoderOptions): RLNEncoder => {
     options.encoder,
     options.rlnInstance,
     options.index,
-    options.credential
+    options.credential,
+    options.fetchMembersFromService
   );
 };
 

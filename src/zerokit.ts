@@ -1,9 +1,11 @@
+import { concatBytes, hexToBytes } from "@noble/curves/abstract/utils";
 import type { IRateLimitProof } from "@waku/interfaces";
 import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 
 import { IdentityCredential } from "./identity.js";
 import { Proof, proofToBytes } from "./proof.js";
 import { WitnessCalculator } from "./resources/witness_calculator.js";
+import { hashToBN254 } from "./utils/hash.js";
 import {
   concatenate,
   dateToEpoch,
@@ -78,7 +80,9 @@ export class Zerokit {
     msg: Uint8Array,
     index: number,
     epoch: Uint8Array | Date | undefined,
-    idSecretHash: Uint8Array
+    idSecretHash: Uint8Array,
+    idCommitment?: bigint,
+    fetchMembersFromService: boolean = false
   ): Promise<IRateLimitProof> {
     if (epoch == undefined) {
       epoch = epochIntToBytes(dateToEpoch(new Date()));
@@ -96,10 +100,61 @@ export class Zerokit {
       epoch,
       idSecretHash
     );
-    const rlnWitness = zerokitRLN.getSerializedRLNWitness(
-      this.zkRLN,
-      serialized_msg
-    );
+
+    let rlnWitness;
+    if (!fetchMembersFromService) {
+      // Assumes merkle tree is maintained locally
+      rlnWitness = zerokitRLN.getSerializedRLNWitness(
+        this.zkRLN,
+        serialized_msg
+      );
+    } else {
+      // Fetch merkle data from a service provider
+      if (!idCommitment) {
+        throw new Error(
+          "Must provide ID commitment if using service to get proof"
+        );
+      }
+      const RLN_IDENTIFIER: Uint8Array = new TextEncoder().encode(
+        "zerokit/rln/010203040506070809"
+      );
+
+      const fetchUrl = `${process.env.MERKLE_PROOF_SERVICE_URL || "http://localhost:8645/debug/v1/merkleProof"}/${idCommitment}`;
+      const response = await fetch(fetchUrl);
+
+      const proofData = await response.json();
+      const pathElements: Uint8Array[] = proofData.pathElements.map(hexToBytes);
+
+      // Serialize number of path lements and each hash in path elements to a single Uint8Array
+      const pathElementsBytes = new Uint8Array(8 + pathElements.length * 32);
+      writeUIntLE(pathElementsBytes, pathElements.length, 0, 8);
+      for (let i = 0; i < pathElements.length; i++) {
+        pathElementsBytes.set(pathElements[i], 8 + i * 32);
+      }
+      // Serialize number of path indexes and the indexes themselves to a single Uint8Array
+      const pathIndexesBytes = new Uint8Array(8 + proofData.pathIndexes.length);
+      writeUIntLE(pathIndexesBytes, proofData.pathIndexes.length, 0, 8);
+      for (let i = 0; i < proofData.pathIndexes.length; i++) {
+        writeUIntLE(
+          pathIndexesBytes,
+          parseInt(proofData.pathIndexes[i], 10),
+          8 + i,
+          1
+        );
+      }
+
+      const hashToFieldMsg = hashToBN254(serialized_msg);
+      const hashToFieldRLNIdentifier = hashToBN254(RLN_IDENTIFIER);
+      // Append all Uint8Array elements to a single Uint8Array
+      rlnWitness = concatBytes(
+        idSecretHash,
+        pathElementsBytes,
+        pathIndexesBytes,
+        hashToFieldMsg,
+        epoch,
+        hashToFieldRLNIdentifier
+      );
+    }
     const inputs = zerokitRLN.RLNWitnessToJson(this.zkRLN, rlnWitness);
     const calculatedWitness = await this.witnessCalculator.calculateWitness(
       inputs,

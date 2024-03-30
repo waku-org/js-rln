@@ -22,6 +22,7 @@ type Signer = ethers.Signer;
 type RLNContractOptions = {
   signer: Signer;
   registryAddress: string;
+  fetchMembersFromService: boolean;
 };
 
 type RLNStorageOptions = {
@@ -54,7 +55,9 @@ export class RLNContract {
     const rlnContract = new RLNContract(rlnInstance, options);
 
     await rlnContract.initStorageContract(options.signer);
-    await rlnContract.fetchMembers(rlnInstance);
+    if (!options.fetchMembersFromService) {
+      await rlnContract.fetchMembers(rlnInstance);
+    }
     rlnContract.subscribeToMembers(rlnInstance);
 
     return rlnContract;
@@ -80,8 +83,9 @@ export class RLNContract {
   ): Promise<void> {
     const storageIndex = options?.storageIndex
       ? options.storageIndex
-      : await this.registryContract.usingStorageIndex();
-    const storageAddress = await this.registryContract.storages(storageIndex);
+      : await this.registryContract.callStatic.usingStorageIndex();
+    const storageAddress =
+      await this.registryContract.callStatic.storages(storageIndex);
 
     if (!storageAddress || storageAddress === ethers.constants.AddressZero) {
       throw Error("No RLN Storage initialized on registry contract.");
@@ -95,7 +99,8 @@ export class RLNContract {
     );
     this._membersFilter = this.storageContract.filters.MemberRegistered();
 
-    this.deployBlock = await this.storageContract.deployedBlockNumber();
+    this.deployBlock =
+      await this.storageContract.callStatic.deployedBlockNumber();
   }
 
   public get registry(): ethers.Contract {
