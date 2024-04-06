@@ -119,7 +119,7 @@ export class Zerokit {
         "zerokit/rln/010203040506070809"
       );
 
-      const fetchUrl = `${process.env.MERKLE_PROOF_SERVICE_URL || "http://localhost:8645/debug/v1/merkleProof"}/${idCommitment}`;
+      const fetchUrl = `http://localhost:8645/debug/v1/merkleProof/${idCommitment}`;
       const response = await fetch(fetchUrl);
 
       const proofData = await response.json();

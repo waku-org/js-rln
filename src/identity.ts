@@ -1,4 +1,4 @@
-import { buildBigIntFromUint8Array } from "./utils/index.js";
+import { uint256FromBytes } from "./utils/bytes.js";
 
 export class IdentityCredential {
   constructor(
@@ -14,7 +14,7 @@ export class IdentityCredential {
     const idNullifier = memKeys.subarray(32, 64);
     const idSecretHash = memKeys.subarray(64, 96);
     const idCommitment = memKeys.subarray(96);
-    const idCommitmentBigInt = buildBigIntFromUint8Array(idCommitment, 96);
+    const idCommitmentBigInt = uint256FromBytes(idCommitment);
 
     return new IdentityCredential(
       idTrapdoor,

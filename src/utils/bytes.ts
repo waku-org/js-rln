@@ -69,6 +69,19 @@ export function buildBigIntFromUint8Array(
   return dataView.getBigUint64(byteOffset, true);
 }
 
+export function uint256FromBytes(bytes: Uint8Array): bigint {
+  if (bytes.length !== 32) {
+    throw new Error("Invalid uint256 byte length");
+  }
+
+  let value = BigInt(0);
+  for (let i = 0; i < 32; i++) {
+    value |= BigInt(bytes[i]) << BigInt(i * 8);
+  }
+
+  return value as bigint;
+}
+
 /**
  * Fills with zeros to set length
  * @param array little endian Uint8Array
