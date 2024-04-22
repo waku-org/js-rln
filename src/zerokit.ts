@@ -5,7 +5,6 @@ import * as zerokitRLN from "@waku/zerokit-rln-wasm";
 import { IdentityCredential } from "./identity.js";
 import { Proof, proofToBytes } from "./proof.js";
 import { WitnessCalculator } from "./resources/witness_calculator.js";
-import { hashToBN254 } from "./utils/hash.js";
 import {
   concatenate,
   dateToEpoch,
@@ -125,7 +124,7 @@ export class Zerokit {
       const proofData = await response.json();
       const pathElements: Uint8Array[] = proofData.pathElements.map(hexToBytes);
 
-      // Serialize number of path lements and each hash in path elements to a single Uint8Array
+      // Serialize number of path elements and each hash in path elements to a single Uint8Array
       const pathElementsBytes = new Uint8Array(8 + pathElements.length * 32);
       writeUIntLE(pathElementsBytes, pathElements.length, 0, 8);
       for (let i = 0; i < pathElements.length; i++) {
@@ -143,8 +142,8 @@ export class Zerokit {
         );
       }
 
-      const hashToFieldMsg = hashToBN254(serialized_msg);
-      const hashToFieldRLNIdentifier = hashToBN254(RLN_IDENTIFIER);
+      const hashToFieldMsg = zerokitRLN.hash(serialized_msg);
+      const hashToFieldRLNIdentifier = zerokitRLN.hash(RLN_IDENTIFIER);
       // Append all Uint8Array elements to a single Uint8Array
       rlnWitness = concatBytes(
         idSecretHash,

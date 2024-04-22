@@ -30,7 +30,7 @@ export class Proof implements IRateLimitProof {
 
   constructor(proofBytes: Uint8Array) {
     if (proofBytes.length < rlnIdentifierOffset) throw "invalid proof";
-    // parse the proof as proof<128> | share_y<32> | nullifier<32> | root<32> | epoch<32> | share_x<32> | rln_identifier<32>
+    // parse the proof as proof<128> | root<32> | epoch<32> | share_x<32> | share_y<32> | nullifier<32> | rln_identifier<32>
     this.proof = proofBytes.subarray(0, proofOffset);
     this.merkleRoot = proofBytes.subarray(proofOffset, rootOffset);
     this.epoch = proofBytes.subarray(rootOffset, epochOffset);
